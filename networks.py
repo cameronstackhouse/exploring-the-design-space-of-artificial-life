@@ -1,3 +1,7 @@
+#CHECK WHAT ACTIVATION FUNCTIONS USED IN PAPER
+
+#from utilities.activation_functions import sigmoid, symmetric, periodic, identity, gaussian, tanh, arctan, relu, sinusoid, sinc #Imports all defined activiation functions
+
 """
 Module defining components for the creation of functioning
 compositional pattern-producing networks
@@ -24,4 +28,14 @@ class CPPN:
         """
         
         """
-        pass
+        self.activation_functions = []
+
+
+if __name__ == "__main__":
+    """
+    ******************
+    DELETE FOR RELEASE
+    TESTING ZONE
+    ******************
+    """
+    
