@@ -1,4 +1,4 @@
-# Exploring the design space of artificial life
+# Exploring the Design Space of Artificial Life
 
 ## Author
 [Cameron Stackhouse](https://github.com/cameronstackhouse)

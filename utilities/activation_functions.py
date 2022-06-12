@@ -1,5 +1,4 @@
 import numpy as np
-from math import pi
 
 """
 Module containing various different activation functions
@@ -15,17 +14,6 @@ def sigmoid(x: float) -> float:
     """
     return 1/(1+np.exp(-x)) #Sigmoid function applied to x
 
-def mReLU(x: float) -> float:
-    """
-
-    """
-    if x <= 0 and x > -1:
-        return abs(x)
-    elif x > 0 and x < 1:
-        return 1 - x
-    else:
-        return 0 
-
 def periodic(x: float) -> float:
     """
     Returns the value of the periodic function applied on x
@@ -34,7 +22,7 @@ def periodic(x: float) -> float:
     :rtype: float
     :return: periodic function value of x
     """
-    return (x+pi) % (2*pi) - pi
+    return np.sin(x) #Periodic sin function applied to x
 
 def identity(x: float) -> float:
     """
@@ -56,38 +44,47 @@ def gaussian(x: float) -> float:
     """
     return np.exp((-x)**2)
 
-def tanh(x: float) -> float:
+def repeat_asym(x: float) -> float:
     """
-    
-    """
-    return (np.exp(x) - np.exp(-x))/(np.exp(x) + np.exp(-x))
+    PLACEHOLDER
 
-def arctan(x: float) -> float:
+    :param x: number to be passed into function
+    :rtype: float
+    :return: 
     """
-    
-    """
-    return np.arctan(x)
+    return x % 1
 
-def relu(x: float) -> float:
+def absolute(x: float) -> float:
     """
-    
+    Returns the absolute value of x
+
+    :param x: number to be passed into function
+    :rtype: float
+    :return: absolute value of x
     """
-    if x < 0:
+    return abs(x)
+
+def inverse(x: float) -> float:
+    """
+    Returns the inverse value of x
+
+    :param x: number to be passed into function
+    :rtype: float
+    :return: inverse value of x
+    """
+    return -x
+
+def symmetric(x: float) -> float:
+    """
+    Returns the value of x when a symmetric function is applied on it
+
+    :param x: number to be passed into function
+    :rtype: float
+    :return: symmetric function value when applied with x
+    """
+    if x > 1 or x < -1: #If x is out of range then return 0
         return 0
-    else:
-        return x
-
-def sinusoid(x: float) -> float:
-    """
-    
-    """
-    return np.sin(x)
-
-def sinc(x: float) -> float:
-    """
-    
-    """
-    if x == 0:
-        return 1
-    else:
-        return (np.sin(x))/x
+    elif x <= 0: #If x is less than 0 and in range then return the absolute value of x
+        return abs(x)
+    else: #Else if x is in range and less than or equal to 1 then return 1 - x
+        return 1 - x
