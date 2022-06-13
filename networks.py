@@ -39,15 +39,31 @@ class CPPN:
         pass
     
     def run(self, x, y, z) -> float:
+        """
+        Method to run the CPPN with given input paramaters
+
+        :param x: x coordinate 
+        :param y: y coordinate
+        :param z: z coordinate
+        """
+
+        #Passes the input values into each input node in the network
         for node in self.nodes:
             if node.type == NodeType.INPUT:
                 node.add_input(x)
                 node.add_input(y)
                 node.add_input(z)
-                node.activate()
+                node.activate() #Activates each input node in the network after passing input paramaters
+        
+        #TODO activate nodes level by level until output produced
 
     def add_node(self, node) -> None:
-        self.nodes.put(node)
+        """
+        Method to add a node to the CPPN
+
+        :param node: node to be added to the CPPN
+        """
+        self.nodes.put(node) #Adds node to the list of nodes in the CPPN
     
     def reset(self) -> None:
         """
@@ -62,6 +78,10 @@ class CPPN:
         """
         Method to create a connection between two nodes
         with a given weight
+
+        :param out:
+        :param input:
+        :param weight:
         """
         new_connection = self.Connection(out, input, weight, self.innovation_counter) #Creates a new connection
         self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
@@ -72,6 +92,9 @@ class CPPN:
         Class defining a node in a compositional pattern-producing network
         """
         def __init__(self, activation_function, type, level, outer_cppn) -> None:
+            """
+            
+            """
             self.inputs = [] #Input values passed into the node
             self.activation_function = activation_function #Activation function of the node
             self.type = type #Type of node (Input, Hidden, Output)
@@ -83,6 +106,7 @@ class CPPN:
             """
             Function to set the activation function of a node
 
+            :param activation_function: activation function for the node to use
             """
             self.activation_function = activation_function
     
@@ -90,8 +114,9 @@ class CPPN:
             """
             Function to add a value to the input values into a node
 
+            :param value: input value
             """
-            self.inputs.append(value)
+            self.inputs.append(value) #Input value added to the list of inputs to the node
     
         def activate(self) -> None:
             """
@@ -111,7 +136,7 @@ class CPPN:
         
         def __lt__(self, other):
             """
-        
+
             """
             return self.level < other.level
 
@@ -146,10 +171,16 @@ if __name__ == "__main__":
     x = a.Node(symmetric, NodeType.INPUT, 0, a)
     c = a.Node(symmetric, NodeType.OUTPUT, 1, a)
     d = a.Node(identity, NodeType.OUTPUT, 1, a)
+    i = a.Node(gaussian, NodeType.INPUT, 0, a)
 
     a.create_connection(b, c, 0.5)
     a.create_connection(b, d, 0.5)
     a.create_connection(x, c, 0.29139)
+
+    i.add_input(0.1312)
+    i.activate()
+
+    print(i.output)
 
     b.add_input(1)
     x.add_input(-0.3)
@@ -163,3 +194,4 @@ if __name__ == "__main__":
     d.activate()
     print(c.output)
     print(d.output)
+    
