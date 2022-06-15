@@ -22,7 +22,7 @@ class Node:
     """
     Class defining a node in a compositional pattern-producing network
     """
-    def __init__(self, activation_function, type, level, outer_cppn) -> None:
+    def __init__(self, activation_function, type, level, outer_cppn, layer) -> None:
         """
             
         """
@@ -32,7 +32,8 @@ class Node:
         self.output = 0 #Initilises the node output to 0
         self.level = level #Level the node is on in the network
         self.outer = outer_cppn
-        outer_cppn.add_node(self) #Adds the node to the CPPNs list of nodes
+        outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
+        #TODO Add comments
     
     def set_activation_function(self, activation_function) -> None:
         """
@@ -60,20 +61,26 @@ class Node:
             total += value #Sums the input values
         
         self.output = self.activation_function(total) #Sets the output value to the activation function applied on the summation of input values
+        
+        if self.type == NodeType.MATERIAL_OUTPUT:
+            self.outer.material = self.output
+        
+        if self.type == NodeType.PRESENCE_OUTPUT:
+            self.outer.presence = self.output
 
         #Check for connections to other nodes and feed (output * weight) to that node
         for connection in self.outer.connections:
             if connection.out is self and connection.enabled:
                 connection.input.add_input(self.output * connection.weight)
+        #TODO Add comments
+        #TODO If node is output node then send to CNN output
 
 class Layer:
     """
     Layer in a neural network
     """
-    #TODO Design class + change code
-
     def __init__(self) -> None:
-        nodes = []
+        self.nodes = []
 
     def add(self, node):
         self.nodes.append(node)
@@ -91,18 +98,35 @@ class CPPN:
         
         """
         self.activation_functions = [sigmoid, periodic, identity, gaussian, repeat_asym, absolute, inverse, symmetric] #List of possible activation functions for each node in the network
-        self.nodes = [] #List of nodes in the network
+        self.layers = [] #List of layers of nodes in the network
         self.connections = [] #List of connections between nodes in the network
         self.innovation_counter = 0 #Innovation counter for adding new connections to the network
-        self.material = None #Output indicating what type of material is present at a given location
-        self.presence = None #Output indicating if material is present at a given location
+        self.material = 0 #Output indicating what type of material is present at a given location
+        self.presence = 0 #Output indicating if material is present at a given location
     
     def set_initial_graph(self):
         #TODO Set initial graph state
         #Select random activation function for use for an input node
         #Select 2 random activation functions for each output nodes
         #Connect the input function with the two output nodes
-        pass
+        layer_zero = Layer()
+        layer_one = Layer()
+
+    
+    def add_layer(self):
+        """
+        
+        """
+        #TODO Add description
+        self.layers.append(Layer())
+
+    def add_node(self, node, layer):
+        """
+        
+        """
+
+        #TODO Add description
+        self.layers[layer].nodes.append(node)
     
     def run(self, inputs) -> float:
         """
@@ -112,35 +136,32 @@ class CPPN:
         :rtype: float
         :return: 
         """
+        #TODO Change input method??
 
-        #Passes the input values into each input node in the network
-        for node in self.nodes:
-            if node.type == NodeType.INPUT:
-                for input in inputs:
-                    node.add_input(input)
-                node.activate() #Activates each input node in the network after passing input paramaters
+        #Passes the input values into each input node in the network (Layer 0)
+        for node in self.layers[0].nodes:
+            for input in inputs:
+                node.add_input(input)
+            node.activate()
         
-        #TODO activate nodes level by level until output produced
+        #Activates nodes level by level until all nodes have been activated produced
+        for i in range(1, len(self.layers)): #Loops through all non input layers
+            for node in self.layers[i].nodes: #Iterates through nodes in a given layer
+                node.activate() #Activates the node
 
-        #TODO activate output nodes and pass to presence or material type output param
-
-    def add_node(self, node) -> None:
-        """
-        Method to add a node to the CPPN
-
-        :param node: node to be added to the CPPN
-        """
-        self.nodes.append(node) #Adds node to the list of nodes in the CPPN
     
     def reset(self) -> None:
         """
         Clears input and output values of each node in the network
         """
-        for node in self.nodes: #Clears individual nodes I/O
-            node.inputs = []
-            node.output = 0
-        self.output = 0 #Clears CPPN output value
-    
+        for layer in self.layers:
+            for node in layer.nodes:
+                node.inputs = []
+                node.output = 0
+        
+        self.presence = None
+        self.material = None
+        
     def create_connection(self, out, input, weight) -> None:
         """
         Method to create a connection between two nodes
@@ -150,7 +171,7 @@ class CPPN:
         :param input:
         :param weight:
         """
-        #TODO Change to only add connection if on different layers
+        #TODO Change to only add connection if on different layers and don't already have connection
         new_connection = self.Connection(out, input, weight, self.innovation_counter) #Creates a new connection
         self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
         self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
@@ -192,6 +213,7 @@ class CPPN:
         :return: boolean indicating if the CPPN topology is valid
         """
         #Checks if the nodes are valid
+        #TODO Change code to be valid with layers
         num_inputs = 0
         num_mat_out = 0
         num_presence_out = 0
@@ -223,18 +245,21 @@ class CPPN:
             self.weight = weight
             self.historical_marking = innov
             self.enabled = True
+            #TODO Add description
         
         def set_enabled(self, option) -> None:
             """
             
             """
             self.enabled = option
+            #TODO Add description
         
         def set_weight(self, value) -> None:
             """
             
             """
             self.weight = value
+            #TODO Add description
     
 if __name__ == "__main__":
     """
@@ -245,33 +270,38 @@ if __name__ == "__main__":
     """
     a = CPPN()
 
-    b = Node(sigmoid, NodeType.INPUT, 0, a)
-    x = Node(symmetric, NodeType.INPUT, 0, a)
-    c = Node(symmetric, NodeType.PRESENCE_OUTPUT, 1, a)
-    d = Node(identity, NodeType.MATERIAL_OUTPUT, 1, a)
-    i = Node(gaussian, NodeType.INPUT, 0, a)
+    a.add_layer()
+    a.add_layer()
+
+    b = Node(sigmoid, NodeType.INPUT, 0, a, 0)
+    x = Node(symmetric, NodeType.INPUT, 0, a, 0)
+    c = Node(symmetric, NodeType.PRESENCE_OUTPUT, 1, a, 1)
+    d = Node(identity, NodeType.MATERIAL_OUTPUT, 1, a, 1)
+    i = Node(gaussian, NodeType.INPUT, 0, a, 0)
   
     a.create_connection(b, c, 0.5)
-    a.create_connection(b, d, 0.5)
     a.create_connection(x, c, 0.29139)
+    a.create_connection(x, d, 1)
 
-    i.add_input(0.1312)
-    i.activate()
-
-    print(i.output)
-
+    i.add_input(1)
     b.add_input(1)
-    x.add_input(-0.3)
+    x.add_input(1)
 
+    i.activate()
     b.activate()
     x.activate()
 
-    print(x.output)
-
     c.activate()
     d.activate()
-    print(c.output)
-    print(d.output)
+    print(f"Presence: {c.output}")
+    print(f"Material: {d.output}")
 
-    print(a.valid())
+    a.reset()
+
+    a.run([1])
+
+    print("GAP")
+
+    print(a.material)
+    print(a.presence)
     
