@@ -101,13 +101,13 @@ class CPPN:
         self.activation_functions = [sigmoid, periodic, identity, gaussian, repeat_asym, absolute, inverse, symmetric] #List of possible activation functions for each node in the network
         self.nodes = [] #List of nodes in the network
         self.connections = [] #List of connections between nodes in the network
-        self.innovation_counter = 0 #Innovation counter for adding new connections to the network
+        self.innovation_counter = 0 #Innovation counter for adding new connections to the network using NEAT
         self.material = None #Output indicating what type of material is present at a given location
         self.presence = None #Output indicating if material is present at a given location
     
     def set_initial_graph(self):
         #TODO Set initial graph state
-        #4 Input nodes
+        #Multiple Input nodes
         #Select 2 random activation functions for each output nodes
         #Connect the input function with the two output nodes 
         pass
@@ -120,7 +120,8 @@ class CPPN:
         :rtype: float
         :return: 
         """
-
+        #TODO Add description
+        #TODO Change inputs to be i, j, k, d
         #Passes the input values into each input node in the network
         for node in self.nodes:
             if node.type is NodeType.INPUT:
@@ -128,6 +129,7 @@ class CPPN:
                     node.add_input(input)
                 node.activate() #Activates each input node in the network after passing input paramaters
         
+        #TODO Add comments
         for node in self.nodes:
             if node.type is not NodeType.INPUT:
                 node.activate()
@@ -148,8 +150,9 @@ class CPPN:
         for node in self.nodes: #Clears individual nodes I/O
             node.inputs = []
             node.output = None
-        self.material = None #Clears CPPN output values
-        self.presence = None
+        #Clears CPPN output values
+        self.material = None
+        self.presence = None 
     
     def create_connection(self, out, input, weight) -> None:
         """
@@ -172,6 +175,7 @@ class CPPN:
         indicates if there is material at that point and, if so, what
         type of material it is (skin cell or cardiac cell)
         """
+        #TODO Add comments
         results = np.zeros((8, 8, 7))
         for i in range(8):
             for j in range(8):
@@ -191,6 +195,10 @@ class CPPN:
         """
         #TODO
         pass
+
+    def has_cycles(self) -> bool:
+        #TODO
+        pass
     
     def valid(self) -> bool:
         """
@@ -201,6 +209,7 @@ class CPPN:
         :rtype: bool
         :return: boolean indicating if the CPPN topology is valid
         """
+        #TODO Add comments
         #Checks if the nodes are valid
         num_inputs = 0
         num_mat_out = 0
@@ -218,6 +227,10 @@ class CPPN:
         
         #Check if connections between nodes are valid
         #TODO
+
+        if self.has_cycles():
+            return False
+        
         return True
 
     class Connection:
@@ -228,6 +241,7 @@ class CPPN:
             """
             
             """
+            #TODO Add description
             self.out = out
             self.input = input
             self.weight = weight
@@ -238,12 +252,14 @@ class CPPN:
             """
             
             """
+            #TODO Add description
             self.enabled = option
         
         def set_weight(self, value) -> None:
             """
             
             """
+            #TODO Add description
             self.weight = value
     
 if __name__ == "__main__":
