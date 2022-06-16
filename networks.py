@@ -113,7 +113,7 @@ class CPPN:
         #Connect the input function with the two output nodes 
         pass
     
-    def run(self, inputs) -> None:
+    def run(self, i, j, k) -> None:
         """
         Method to run the CPPN with given input paramaters
 
@@ -121,14 +121,15 @@ class CPPN:
         :rtype: float
         :return: 
         """
-        #TODO Parallelize
         #TODO Add description
-        #TODO Change inputs to be i, j, k, d
+        #TODO Calculate d
+        #TODO Change the bit bellow, need multiple input nodes w different inputs
         #Passes the input values into each input node in the network
         for node in self.nodes:
             if node.type is NodeType.INPUT:
-                for input in inputs:
-                    node.add_input(input)
+                node.add_input(i)
+                node.add_input(j)
+                node.add_input(k)
                 node.activate() #Activates each input node in the network after passing input paramaters
         
         #TODO Add comments
@@ -177,14 +178,20 @@ class CPPN:
         indicates if there is material at that point and, if so, what
         type of material it is (skin cell or cardiac cell)
         """
-        #TODO Add comments
-        results = np.zeros((8, 8, 7))
+        #TODO Add ability to change the size of the 3D coordinate space (Use JSON settings file)
+        results = np.zeros((8, 8, 7)) #Empty numpy array to store material results at each point
         
-        #TODO Pass in d (distance from middle)
         #TODO Ensure this actually works with parallel processing
-        pool = mp.Pool(mp.cpu_count()) #Initilises multiprocessing pool
-        #Produces a 3D numpy array modelling the 3D microorganism, with an integer at each point indicating material type/presence
-        results = [pool.apply(self.material_produced(self.run), args=([i,j,k])) for i in range(8) for j in range(8) for k in range(7)]
+        try:
+            pool = mp.Pool(mp.cpu_count()) #Initilises multiprocessing pool
+
+            #Passes in every point in the 3D design space into the run function for the CPPN and then uses that data to determine what material is in each location
+            #Produces a 3D numpy array modelling the 3D microorganism, with an integer at each point in the design space indicating material type/presence
+            results = [pool.apply(self.material_produced(self.run), args=(i, j, k)) for i in range(8) for j in range(8) for k in range(7)]
+        finally:
+            #Closes multiprocessing pool
+            pool.close()
+            pool.join()
 
         return results
     
@@ -211,6 +218,7 @@ class CPPN:
         :return: boolean indicating if the CPPN topology is valid
         """
         #TODO Add comments
+        #TODO change input validation, should be 4 input nodes
         #Checks if the nodes are valid
         num_inputs = 0
         num_mat_out = 0
