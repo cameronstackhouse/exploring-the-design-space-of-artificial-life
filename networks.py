@@ -26,10 +26,11 @@ class Node:
         """
             
         """
+        #TODO ADD NAME TO NODE
         self.inputs = [] #Input values passed into the node
         self.activation_function = activation_function #Activation function of the node
         self.type = type #Type of node (Input, Hidden, Output)
-        self.output = 0 #Initilises the node output to 0
+        self.output = None #Initilises the node output to none
         self.level = level #Level the node is on in the network
         self.outer = outer_cppn
         outer_cppn.add_node(self) #Adds the node to the CPPNs list of nodes
@@ -55,7 +56,22 @@ class Node:
         Function to sum the input values into the node and 
         pass the total into the nodes activation function
         """
+        #TODO ONLY CALCULATE OUTPUT IF ALL REQUIRED INPUTS ARE THERE
         total = 0
+        num_connections_in = 0 #Number of enabled connections into the node
+
+        #Iterates through the list of connections checking for connections into the node
+        for connection in self.outer.connections:
+            if self is connection.input and connection.enabled:
+                num_connections_in+=1 #If the connection is a connection into the node, the number of connections counter is incremented
+        
+        #Checks if the number of conections into the node is the same as the number of inputs the node currently has
+        if num_connections_in != len(self.inputs):
+            for conection in self.outer.connections:
+                #Activates the output node that has not been evaluated yet to provide the current node its input
+                if self is conection.input and connection.enabled and connection.out.output is None:
+                    conection.out.activate()
+
         for value in self.inputs:
             total += value #Sums the input values
         
@@ -65,6 +81,14 @@ class Node:
         for connection in self.outer.connections:
             if connection.out is self and connection.enabled:
                 connection.input.add_input(self.output * connection.weight)
+        
+        #If the node is a presence output node then update the CPPN presence output value
+        if self.type == NodeType.PRESENCE_OUTPUT:
+            self.outer.presence = self.output
+        
+        #If the node is a material output node then update the CPPN material output value
+        if self.type == NodeType.MATERIAL_OUTPUT:
+            self.outer.material = self.output
 
 class CPPN:
     """
@@ -84,12 +108,12 @@ class CPPN:
     
     def set_initial_graph(self):
         #TODO Set initial graph state
-        #Select random activation function for use for an input node
+        #4 Input nodes
         #Select 2 random activation functions for each output nodes
-        #Connect the input function with the two output nodes
+        #Connect the input function with the two output nodes 
         pass
     
-    def run(self, inputs) -> float:
+    def run(self, inputs) -> None:
         """
         Method to run the CPPN with given input paramaters
 
@@ -105,9 +129,9 @@ class CPPN:
                     node.add_input(input)
                 node.activate() #Activates each input node in the network after passing input paramaters
         
-        #TODO activate nodes level by level until output produced
+        for node in self.nodes:
+            node.activate()
 
-        #TODO activate output nodes and pass to presence or material type output param
 
     def add_node(self, node) -> None:
         """
@@ -240,13 +264,13 @@ if __name__ == "__main__":
     a.create_connection(b, d, 0.5)
     a.create_connection(x, c, 0.29139)
 
-    i.add_input(0.1312)
+    i.add_input(1)
     i.activate()
 
     print(i.output)
 
     b.add_input(1)
-    x.add_input(-0.3)
+    x.add_input(1)
 
     b.activate()
     x.activate()
@@ -259,4 +283,6 @@ if __name__ == "__main__":
     print(d.output)
 
     print(a.valid())
+
+    a.run([1])
     
