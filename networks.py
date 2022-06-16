@@ -56,8 +56,7 @@ class Node:
         Function to sum the input values into the node and 
         pass the total into the nodes activation function
         """
-        #TODO ONLY CALCULATE OUTPUT IF ALL REQUIRED INPUTS ARE THERE
-        total = 0
+        total = 0 #Summation of input values
         num_connections_in = 0 #Number of enabled connections into the node
 
         #Iterates through the list of connections checking for connections into the node
@@ -70,7 +69,7 @@ class Node:
             for conection in self.outer.connections:
                 #Activates the output node that has not been evaluated yet to provide the current node its input
                 if self is conection.input and connection.enabled and connection.out.output is None:
-                    conection.out.activate()
+                    conection.out.activate() #Activates the node that hasn't been activated yet
 
         for value in self.inputs:
             total += value #Sums the input values
@@ -124,13 +123,14 @@ class CPPN:
 
         #Passes the input values into each input node in the network
         for node in self.nodes:
-            if node.type == NodeType.INPUT:
+            if node.type is NodeType.INPUT:
                 for input in inputs:
                     node.add_input(input)
                 node.activate() #Activates each input node in the network after passing input paramaters
         
         for node in self.nodes:
-            node.activate()
+            if node.type is not NodeType.INPUT:
+                node.activate()
 
 
     def add_node(self, node) -> None:
@@ -147,8 +147,9 @@ class CPPN:
         """
         for node in self.nodes: #Clears individual nodes I/O
             node.inputs = []
-            node.output = 0
-        self.output = 0 #Clears CPPN output value
+            node.output = None
+        self.material = None #Clears CPPN output values
+        self.presence = None
     
     def create_connection(self, out, input, weight) -> None:
         """
@@ -258,24 +259,16 @@ if __name__ == "__main__":
     x = Node(symmetric, NodeType.INPUT, 0, a)
     c = Node(symmetric, NodeType.PRESENCE_OUTPUT, 1, a)
     d = Node(identity, NodeType.MATERIAL_OUTPUT, 1, a)
-    i = Node(gaussian, NodeType.INPUT, 0, a)
   
     a.create_connection(b, c, 0.5)
     a.create_connection(b, d, 0.5)
     a.create_connection(x, c, 0.29139)
-
-    i.add_input(1)
-    i.activate()
-
-    print(i.output)
 
     b.add_input(1)
     x.add_input(1)
 
     b.activate()
     x.activate()
-
-    print(x.output)
 
     c.activate()
     d.activate()
@@ -284,5 +277,12 @@ if __name__ == "__main__":
 
     print(a.valid())
 
+    a.reset()
+
     a.run([1])
-    
+
+    for node in a.nodes:
+        print(len(node.inputs))
+
+    print(a.material)
+    print(a.presence)
