@@ -66,21 +66,6 @@ class Node:
             if connection.out is self and connection.enabled:
                 connection.input.add_input(self.output * connection.weight)
 
-class Layer:
-    """
-    Layer in a neural network
-    """
-    #TODO Design class + change code
-
-    def __init__(self) -> None:
-        nodes = []
-
-    def add(self, node):
-        self.nodes.append(node)
-    
-    def remove(self, index):
-        self.nodes.remove(index)
-
 class CPPN:
     """
     Class defining a compositional pattern-producing network made of
