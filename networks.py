@@ -1,6 +1,7 @@
 from typing import Callable
 from random import choice
 from enum import Enum
+import multiprocessing as mp
 import numpy as np
 from utilities.activation_functions import sigmoid, periodic, identity, gaussian, repeat_asym, absolute, inverse, symmetric #Imports all activation functions
 
@@ -120,6 +121,7 @@ class CPPN:
         :rtype: float
         :return: 
         """
+        #TODO Parallelize
         #TODO Add description
         #TODO Change inputs to be i, j, k, d
         #Passes the input values into each input node in the network
@@ -177,13 +179,12 @@ class CPPN:
         """
         #TODO Add comments
         results = np.zeros((8, 8, 7))
-        for i in range(8):
-            for j in range(8):
-                for k in range(7):
-                    #TODO Pass in d (distance from middle)
-                    cppn_result = self.run([i, j, k]) 
-                    material = self.material_produced(cppn_result)
-                    results[i,j,k] = material
+        
+        #TODO Pass in d (distance from middle)
+        #TODO Ensure this actually works with parallel processing
+        pool = mp.Pool(mp.cpu_count()) #Initilises multiprocessing pool
+        #Produces a 3D numpy array modelling the 3D microorganism, with an integer at each point indicating material type/presence
+        results = [pool.apply(self.material_produced(self.run), args=([i,j,k])) for i in range(8) for j in range(8) for k in range(7)]
 
         return results
     
