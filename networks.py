@@ -1,9 +1,9 @@
 from typing import Callable
-from random import choice
+from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp
 import numpy as np
-from utilities.activation_functions import sigmoid, periodic, identity, gaussian, repeat_asym, absolute, inverse, symmetric #Imports all activation functions
+from utilities.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs #Imports all activation functions
 
 """
 Module defining components for the creation of functioning
@@ -18,21 +18,24 @@ class NodeType(Enum):
     HIDDEN = 2
     MATERIAL_OUTPUT = 3
     PRESENCE_OUTPUT = 4
+    INPUT_I = 5
+    INPUT_J = 6
+    INPUT_K = 7
+    INPUT_D = 8
 
 class Node:
     """
     Class defining a node in a compositional pattern-producing network
     """
-    def __init__(self, activation_function, type, level, outer_cppn) -> None:
+    def __init__(self, activation_function, type, outer_cppn) -> None:
         """
             
         """
-        #TODO ADD NAME TO NODE
+        #TODO Add description
         self.inputs = [] #Input values passed into the node
         self.activation_function = activation_function #Activation function of the node
         self.type = type #Type of node (Input, Hidden, Output)
         self.output = None #Initilises the node output to none
-        self.level = level #Level the node is on in the network
         self.outer = outer_cppn
         outer_cppn.add_node(self) #Adds the node to the CPPNs list of nodes
     
@@ -52,6 +55,12 @@ class Node:
         """
         self.inputs.append(value) #Input value added to the list of inputs to the node
     
+    def set_inputs(self, inputs) -> None:
+        """
+        
+        """
+        self.inputs = inputs
+    
     def activate(self) -> None:
         """
         Function to sum the input values into the node and 
@@ -65,6 +74,8 @@ class Node:
             if self is connection.input and connection.enabled:
                 num_connections_in+=1 #If the connection is a connection into the node, the number of connections counter is incremented
         
+
+        #TODO FIX THIS! EXCEEDS RECURSION DEPTH (MAYBE???) (DYNAMIC PROGRAMMING?)
         #Checks if the number of conections into the node is the same as the number of inputs the node currently has
         if num_connections_in != len(self.inputs):
             for conection in self.outer.connections:
@@ -95,23 +106,52 @@ class CPPN:
     Class defining a compositional pattern-producing network made of
     interconnected nodes with varying activation functions
     """
-    def __init__(self) -> None:
+    def __init__(self, xyz_size) -> None:
         """
-        
+        Function to initilise an empty CPPN
         """
-        self.activation_functions = [sigmoid, periodic, identity, gaussian, repeat_asym, absolute, inverse, symmetric] #List of possible activation functions for each node in the network
+        self.activation_functions = [np.sin, np.abs, neg_abs, np.square, neg_square, sqrt_abs, neg_sqrt_abs] #List of possible activation functions for each node in the network
         self.nodes = [] #List of nodes in the network
         self.connections = [] #List of connections between nodes in the network
         self.innovation_counter = 0 #Innovation counter for adding new connections to the network using NEAT
         self.material = None #Output indicating what type of material is present at a given location
         self.presence = None #Output indicating if material is present at a given location
+        self.x_inputs = []
+        self.y_inputs = []
+        self.z_inputs = []
+        self.d_inputs = []
+        self.b_inputs = []
+        self.set_initial_graph(xyz_size) #Sets the initial graph
     
-    def set_initial_graph(self):
-        #TODO Set initial graph state
-        #Multiple Input nodes
-        #Select 2 random activation functions for each output nodes
-        #Connect the input function with the two output nodes 
-        pass
+    def set_initial_graph(self, xyz_size):
+        """
+        Function to set the initial graph of the CPPN
+        with the correct input and output nodes for each 
+        paramater in a 3D coordinate space (i, j, k, and distance from middle)
+
+        Also sets the two output nodes, one to indicate the presence of material
+        at a given coordinate and one to indicate the material of that node
+        """
+
+
+        #TODO NORMALIZE INPUTS TO NN (Make between 0 and 1). SET THESE IN THE MINIMAL GRAPH
+        #TODO Calculate d (distance from centre)
+        #TODO Add b as an input value
+        #Creates an input node for each paramater: i, j, k, and d
+        for type in [NodeType.INPUT_I, NodeType.INPUT_J, NodeType.INPUT_K, NodeType.INPUT_D]:
+            activation_function = choice(self.activation_functions) #Chooses a random activation function
+            Node(activation_function, type, self) #Creates the new node, automatically adding it to the CPPN
+
+        #Creates an output node for material and presence
+        material = Node(sigmoid, NodeType.MATERIAL_OUTPUT, self)
+        presence = Node(sigmoid, NodeType.PRESENCE_OUTPUT, self)
+
+        #Connects the input functions with the two output nodes 
+        for node in self.nodes:
+            if node.type is not NodeType.MATERIAL_OUTPUT and node.type is not NodeType.PRESENCE_OUTPUT: #If the node isn't an output node
+                #Connect the node to the two output nodes
+                self.create_connection(node, material, uniform(0,1))
+                self.create_connection(node, presence, uniform(0,1))
     
     def run(self, i, j, k) -> None:
         """
@@ -122,19 +162,28 @@ class CPPN:
         :return: 
         """
         #TODO Add description
-        #TODO Calculate d
-        #TODO Change the bit bellow, need multiple input nodes w different inputs
+        #TODO Change to provid single input (1 to 8*8*7)
+        #TODO ADD b
+        d=0
+
         #Passes the input values into each input node in the network
         for node in self.nodes:
-            if node.type is NodeType.INPUT:
+            if node.type is NodeType.INPUT_I:
                 node.add_input(i)
+                node.activate() #Activates the node
+            elif node.type is NodeType.INPUT_J:
                 node.add_input(j)
+                node.activate() #Activates the node
+            elif node.type is NodeType.INPUT_K:
                 node.add_input(k)
-                node.activate() #Activates each input node in the network after passing input paramaters
+                node.activate() #Activates the node
+            elif node.type is NodeType.INPUT_D:
+                node.add_input(d)
+                node.activate() #Activates the node
         
         #TODO Add comments
         for node in self.nodes:
-            if node.type is not NodeType.INPUT:
+            if node.type is not (NodeType.INPUT_J or NodeType.INPUT_I or NodeType.INPUT_K or NodeType.INPUT_D):
                 node.activate()
 
 
@@ -146,10 +195,16 @@ class CPPN:
         """
         self.nodes.append(node) #Adds node to the list of nodes in the CPPN
     
+    def add_node_between(self, connection) -> bool:
+        #TODO
+        #Check if new topology is valid
+        pass
+    
     def reset(self) -> None:
         """
         Clears input and output values of each node in the network
         """
+        #TODO After normalized inputs DO NOT clear input nodes inputs
         for node in self.nodes: #Clears individual nodes I/O
             node.inputs = []
             node.output = None
@@ -162,11 +217,11 @@ class CPPN:
         Method to create a connection between two nodes
         with a given weight
 
-        :param out:
+        :param out: 
         :param input:
         :param weight:
         """
-        #TODO Change to only add connection if on different layers
+        #TODO Description
         new_connection = self.Connection(out, input, weight, self.innovation_counter) #Creates a new connection
         self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
         self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
@@ -187,7 +242,7 @@ class CPPN:
 
             #Passes in every point in the 3D design space into the run function for the CPPN and then uses that data to determine what material is in each location
             #Produces a 3D numpy array modelling the 3D microorganism, with an integer at each point in the design space indicating material type/presence
-            results = [pool.apply(self.material_produced(self.run), args=(i, j, k)) for i in range(8) for j in range(8) for k in range(7)]
+            results = [pool.apply(self.material_produced(self.run), args=[i, j, k]) for i in range(8) for j in range(8) for k in range(7)]
         finally:
             #Closes multiprocessing pool
             pool.close()
@@ -219,6 +274,7 @@ class CPPN:
         """
         #TODO Add comments
         #TODO change input validation, should be 4 input nodes
+        #TODO CHECK FOR 1 OF EACH INPUT NODE (I, J, K, D)
         #Checks if the nodes are valid
         num_inputs = 0
         num_mat_out = 0
@@ -231,7 +287,7 @@ class CPPN:
             elif node.type is NodeType.PRESENCE_OUTPUT:
                 num_presence_out+=1
         
-        if num_inputs <= 0 or num_mat_out != 1 or num_presence_out != 1 or (num_presence_out + num_mat_out != 2):
+        if num_inputs != 4 or num_mat_out != 1 or num_presence_out != 1 or (num_presence_out + num_mat_out != 2):
             return False
         
         #Check if connections between nodes are valid
@@ -270,6 +326,13 @@ class CPPN:
             """
             #TODO Add description
             self.weight = value
+
+def normalize(x):
+    """
+    
+    """
+    #TODO Add description
+    return ((x - np.min(x)) / (np.max(x) - np.min(x)))
     
 if __name__ == "__main__":
     """
@@ -278,36 +341,41 @@ if __name__ == "__main__":
     TESTING ZONE
     ******************
     """
-    a = CPPN()
+    a = CPPN(8*8*7)
 
-    b = Node(sigmoid, NodeType.INPUT, 0, a)
-    x = Node(symmetric, NodeType.INPUT, 0, a)
-    c = Node(symmetric, NodeType.PRESENCE_OUTPUT, 1, a)
-    d = Node(identity, NodeType.MATERIAL_OUTPUT, 1, a)
+    # b = Node(sigmoid, NodeType.INPUT, a)
+    # x = Node(symmetric, NodeType.INPUT, a)
+    # c = Node(symmetric, NodeType.PRESENCE_OUTPUT, a)
+    # d = Node(identity, NodeType.MATERIAL_OUTPUT, a)
   
-    a.create_connection(b, c, 0.5)
-    a.create_connection(b, d, 0.5)
-    a.create_connection(x, c, 0.29139)
+    # a.create_connection(b, c, 0.5)
+    # a.create_connection(b, d, 0.5)
+    # a.create_connection(x, c, 0.29139)
 
-    b.add_input(1)
-    x.add_input(1)
+    # b.add_input(1)
+    # x.add_input(1)
 
-    b.activate()
-    x.activate()
+    # b.activate()
+    # x.activate()
 
-    c.activate()
-    d.activate()
-    print(c.output)
-    print(d.output)
+    # c.activate()
+    # d.activate()
+    # print(c.output)
+    # print(d.output)
 
-    print(a.valid())
+    # print(a.valid())
 
-    a.reset()
+    # a.reset()
+    
 
-    a.run([1])
+    a.run(20, 3, 1)
 
     for node in a.nodes:
         print(len(node.inputs))
 
-    print(a.material)
-    print(a.presence)
+    print(f"Material: {a.material}")
+    print(f"Presence: {a.presence}")
+
+    for connection in a.connections:
+    
+        print(f"Out: {connection.out.activation_function} ({connection.out.type}) Into: {connection.input.activation_function} ({connection.input.type})")
