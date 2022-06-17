@@ -212,6 +212,7 @@ class CPPN:
                 node.add_input(self.b_inputs[pixel])
                 node.activate() #Activates the node
         
+        #TODO
         #TODO Add comments
         for node in self.nodes:
             if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D or NodeType.INPUT_B):
