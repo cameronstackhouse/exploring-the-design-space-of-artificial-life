@@ -3,6 +3,7 @@ from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp
 import numpy as np
+from matplotlib import pyplot as plt
 from utilities.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs #Imports all activation functions
 
 """
@@ -285,7 +286,7 @@ class CPPN:
             #Passes in every point in the 3D design space into the run function for the CPPN and then uses that data to determine what material is in each location
             #Produces a 3D numpy array modelling the 3D microorganism, with an integer at each point in the design space indicating material type/presence
             #TODO NEEDS TO RESET AFTER EVERY RUN
-            results = [pool.apply(self.run, args=[i]) for i in range(size)]
+            results = np.array([pool.apply(self.run, args=[i]) for i in range(size)])
         finally:
             #Closes multiprocessing pool
             pool.close()
@@ -302,7 +303,7 @@ class CPPN:
         #TODO VASTLY NEEDS IMPROVING
         presence = self.presence
         material = self.material
-        if presence < 0.5:
+        if presence < 0.25 or presence > 0.75:
             return 0
         elif material < 0.5:
             return 1
@@ -323,28 +324,28 @@ class CPPN:
         :return: boolean indicating if the CPPN topology is valid
         """
         #TODO Add comments
-        #TODO change input validation, should be 4 input nodes
-        #TODO CHECK FOR 1 OF EACH INPUT NODE (I, J, K, D)
+        #TODO change input validation, should be 5 input nodes
+        #TODO CHECK FOR 1 OF EACH INPUT NODE (I, J, K, D, B)
         #Checks if the nodes are valid
         num_inputs = 0
         num_mat_out = 0
         num_presence_out = 0
         for node in self.nodes:
-            if node.type is NodeType.INPUT:
+            if node.type is NodeType.INPUT_X or node.type is NodeType.INPUT_Y or node.type is NodeType.INPUT_Z or node.type is NodeType.INPUT_D or node.type is NodeType.INPUT_B:
                 num_inputs+=1
             elif node.type is NodeType.MATERIAL_OUTPUT:
                 num_mat_out+=1
             elif node.type is NodeType.PRESENCE_OUTPUT:
                 num_presence_out+=1
         
-        if num_inputs != 4 or num_mat_out != 1 or num_presence_out != 1 or (num_presence_out + num_mat_out != 2):
+        if num_inputs != 5 or num_mat_out != 1 or num_presence_out != 1 or (num_presence_out + num_mat_out != 2):
             return False
         
         #Check if connections between nodes are valid
         #TODO
 
-        if self.has_cycles():
-            return False
+        #if self.has_cycles():
+            #return False
         
         return True
 
@@ -407,4 +408,15 @@ if __name__ == "__main__":
     
     b = a.to_phenotype()
 
-    print(b)
+    newarr = b.reshape(8,8,7)
+
+    print(newarr)
+    print(a.valid())
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    data = newarr
+    z,x,y = data.nonzero()
+
+    ax.scatter(x, y, z, c=z, alpha=1)
+    plt.show()
