@@ -27,7 +27,6 @@ class Node:
     """
     Class defining a node in a compositional pattern-producing network
     """
-    
     def __init__(self, activation_function, type, outer_cppn) -> None:
         """
             
@@ -38,8 +37,7 @@ class Node:
         self.type = type #Type of node (Input, Hidden, Output)
         self.output = None #Initilises the node output to none
         self.outer = outer_cppn
-        outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
-        #TODO Add comments
+        outer_cppn.add_node(self) #Adds the node to the CPPNs list of nodes
     
     def set_activation_function(self, activation_function) -> None:
         """
@@ -89,12 +87,6 @@ class Node:
             total += value #Sums the input values
         
         self.output = self.activation_function(total) #Sets the output value to the activation function applied on the summation of input values
-        
-        if self.type == NodeType.MATERIAL_OUTPUT:
-            self.outer.material = self.output
-        
-        if self.type == NodeType.PRESENCE_OUTPUT:
-            self.outer.presence = self.output
 
         #Check for connections to other nodes and feed (output * weight) to that node
         for connection in self.outer.connections:
@@ -118,7 +110,6 @@ class CPPN:
         """
         Function to initilise a basic CPPN
         """
-
         #TODO Add ability to change the size of the 3D coordinate space (Use JSON settings file)
         self.activation_functions = [np.sin, np.abs, neg_abs, np.square, neg_square, sqrt_abs, neg_sqrt_abs] #List of possible activation functions for each node in the network
         self.nodes = [] #List of nodes in the network
@@ -173,7 +164,6 @@ class CPPN:
         Also sets the two output nodes, one to indicate the presence of material
         at a given coordinate and one to indicate the material of that node
         """
-        #TODO Change input method??
 
         self.set_input_states()
         #Creates an input node for each paramater: i, j, k, d, and b
@@ -224,9 +214,17 @@ class CPPN:
         
         #TODO Add comments
         for node in self.nodes:
-            if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D):
+            if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D or NodeType.INPUT_B):
                 node.activate()
 
+
+    def add_node(self, node) -> None:
+        """
+        Method to add a node to the CPPN
+
+        :param node: node to be added to the CPPN
+        """
+        self.nodes.append(node) #Adds node to the list of nodes in the CPPN
     
     def add_node_between(self, connection) -> bool:
         #TODO
@@ -237,7 +235,6 @@ class CPPN:
         """
         Clears input and output values of each node in the network
         """
-        
         for node in self.nodes: #Clears individual nodes I/O
             node.inputs = []
             node.output = None
@@ -254,7 +251,6 @@ class CPPN:
         :param input:
         :param weight:
         """
-
         #TODO Description
         new_connection = self.Connection(out, input, weight, self.innovation_counter) #Creates a new connection
         self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
@@ -315,7 +311,6 @@ class CPPN:
         #TODO change input validation, should be 4 input nodes
         #TODO CHECK FOR 1 OF EACH INPUT NODE (I, J, K, D)
         #Checks if the nodes are valid
-        #TODO Change code to be valid with layers
         num_inputs = 0
         num_mat_out = 0
         num_presence_out = 0
@@ -352,7 +347,6 @@ class CPPN:
             self.weight = weight
             self.historical_marking = innov
             self.enabled = True
-            #TODO Add description
         
         def set_enabled(self, option) -> None:
             """
@@ -360,7 +354,6 @@ class CPPN:
             """
             #TODO Add description
             self.enabled = option
-            #TODO Add description
         
         def set_weight(self, value) -> None:
             """
@@ -388,7 +381,6 @@ if __name__ == "__main__":
     TESTING ZONE
     ******************
     """
-
     a = CPPN([8,8,7])
     
     for i in range(8*8*7):
