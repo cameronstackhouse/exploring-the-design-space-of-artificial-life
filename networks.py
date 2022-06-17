@@ -14,15 +14,14 @@ class NodeType(Enum):
     """
     Class defining the three different node types in a CPPN - Input, Hidden, and Output
     """
-    INPUT = 1
-    HIDDEN = 2
-    MATERIAL_OUTPUT = 3
-    PRESENCE_OUTPUT = 4
-    INPUT_I = 5
-    INPUT_J = 6
-    INPUT_K = 7
-    INPUT_D = 8
-    INPUT_B = 9
+    HIDDEN = 1
+    MATERIAL_OUTPUT = 2
+    PRESENCE_OUTPUT = 3
+    INPUT_I = 4
+    INPUT_J = 5
+    INPUT_K = 6
+    INPUT_D = 7
+    INPUT_B = 8
 
 class Node:
     """
@@ -147,11 +146,12 @@ class CPPN:
         d_inputs = normalize(np.power(np.power(x_inputs, 2) + np.power(y_inputs, 2) + np.power(z_inputs, 2), 0.5))
         b_inputs = np.ones(self.xyz_size)
 
-        self.x_inputs = x_inputs
-        self.y_inputs = y_inputs
-        self.z_inputs = z_inputs
-        self.d_inputs = d_inputs
-        self.b_inputs = b_inputs
+        #TODO Maybe change
+        self.x_inputs = x_inputs.flatten()
+        self.y_inputs = y_inputs.flatten()
+        self.z_inputs = z_inputs.flatten()
+        self.d_inputs = d_inputs.flatten()
+        self.b_inputs = b_inputs.flatten()
     
     def set_initial_graph(self):
         """
@@ -190,24 +190,25 @@ class CPPN:
         """
         #TODO Add description
         #TODO Change INPUT_I... to INPUT_X, Y, Z
-        #TODO Fix pixel indexing, DOES NOT WORK!! Max 8 at each axis
+
+        self.reset() #Clears already existing values in CPPN
 
         #Passes the input values into each input node in the network
         for node in self.nodes:
             if node.type is NodeType.INPUT_I:
-                node.add_input(self.x_inputs[pixel][pixel][pixel])
+                node.add_input(self.x_inputs[pixel])
                 node.activate() #Activates the node
             elif node.type is NodeType.INPUT_J:
-                node.add_input(self.y_inputs[pixel][pixel][pixel])
+                node.add_input(self.y_inputs[pixel])
                 node.activate() #Activates the node
             elif node.type is NodeType.INPUT_K:
-                node.add_input(self.z_inputs[pixel][pixel][pixel])
+                node.add_input(self.z_inputs[pixel])
                 node.activate() #Activates the node
             elif node.type is NodeType.INPUT_D:
-                node.add_input(self.d_inputs[pixel][pixel][pixel])
+                node.add_input(self.d_inputs[pixel])
                 node.activate() #Activates the node
             elif node.type is NodeType.INPUT_B:
-                node.add_input(self.b_inputs[pixel][pixel][pixel])
+                node.add_input(self.b_inputs[pixel])
                 node.activate() #Activates the node
         
         #TODO Add comments
@@ -270,6 +271,7 @@ class CPPN:
 
             #Passes in every point in the 3D design space into the run function for the CPPN and then uses that data to determine what material is in each location
             #Produces a 3D numpy array modelling the 3D microorganism, with an integer at each point in the design space indicating material type/presence
+            #TODO NEEDS TO RESET AFTER EVERY RUN
             results = [pool.apply(self.material_produced(self.run), args=[i]) for i in range(8*8*7)]
         finally:
             #Closes multiprocessing pool
@@ -401,7 +403,8 @@ if __name__ == "__main__":
     # a.reset()
     
 
-    a.run(3)
-
-    print(f"Material: {a.material}")
-    print(f"Presence: {a.presence}")
+    for i in range(8*8*7):
+        a.run(i)
+        print(f"Material: {a.material}")
+        print(f"Presence: {a.presence}")
+        print("--------------")
