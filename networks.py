@@ -214,7 +214,7 @@ class CPPN:
         
         #TODO Add comments
         for node in self.nodes:
-            if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D):
+            if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D or NodeType.INPUT_B):
                 node.activate()
 
 
