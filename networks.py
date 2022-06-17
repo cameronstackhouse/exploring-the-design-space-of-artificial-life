@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Tuple
 from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp
@@ -12,7 +12,7 @@ compositional pattern-producing networks
 
 class NodeType(Enum):
     """
-    Class defining the three different node types in a CPPN - Input, Hidden, and Output
+    Class defining the possible node types in the CPPN
     """
     HIDDEN = 1
     MATERIAL_OUTPUT = 2
@@ -29,7 +29,10 @@ class Node:
     """
     def __init__(self, activation_function, type, outer_cppn) -> None:
         """
-            
+        
+        :param activation_function:
+        :param type:
+        :param outer_cppn:
         """
         #TODO Add description
         self.inputs = [] #Input values passed into the node
@@ -59,6 +62,7 @@ class Node:
         """
         
         """
+        #TODO Add description
         self.inputs = inputs
     
     def activate(self) -> None:
@@ -109,7 +113,10 @@ class CPPN:
     def __init__(self, xyz_size) -> None:
         """
         Function to initilise a basic CPPN
+
+        :param xyz_size: 
         """
+        #TODO Add description
         #TODO Add ability to change the size of the 3D coordinate space (Use JSON settings file)
         self.activation_functions = [np.sin, np.abs, neg_abs, np.square, neg_square, sqrt_abs, neg_sqrt_abs] #List of possible activation functions for each node in the network
         self.nodes = [] #List of nodes in the network
@@ -182,7 +189,7 @@ class CPPN:
                 self.create_connection(node, material, uniform(0,1))
                 self.create_connection(node, presence, uniform(0,1))
     
-    def run(self, pixel) -> None:
+    def run(self, pixel):
         """
         Method to run the CPPN with given input paramaters,
         updating the CPPN with two output values, one indicating
@@ -212,12 +219,12 @@ class CPPN:
                 node.add_input(self.b_inputs[pixel])
                 node.activate() #Activates the node
         
-        #TODO
         #TODO Add comments
         for node in self.nodes:
             if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D or NodeType.INPUT_B):
                 node.activate()
-
+        
+        return self.material_produced()
 
     def add_node(self, node) -> None:
         """
@@ -278,7 +285,7 @@ class CPPN:
             #Passes in every point in the 3D design space into the run function for the CPPN and then uses that data to determine what material is in each location
             #Produces a 3D numpy array modelling the 3D microorganism, with an integer at each point in the design space indicating material type/presence
             #TODO NEEDS TO RESET AFTER EVERY RUN
-            results = [pool.apply(self.material_produced(self.run), args=[i]) for i in range(size)]
+            results = [pool.apply(self.run, args=[i]) for i in range(size)]
         finally:
             #Closes multiprocessing pool
             pool.close()
@@ -286,14 +293,21 @@ class CPPN:
 
         return results
     
-    def material_produced(result) -> int:
+    def material_produced(self) -> int:
         """
         Function to convert a tuple result (produced from a CPPN
         when a coordinate point is passed into it) into an integer
         indicating what type of material exists at that location
         """
-        #TODO
-        pass
+        #TODO VASTLY NEEDS IMPROVING
+        presence = self.presence
+        material = self.material
+        if presence < 0.5:
+            return 0
+        elif material < 0.5:
+            return 1
+        else:
+            return 2
 
     def has_cycles(self) -> bool:
         #TODO
@@ -363,9 +377,10 @@ class CPPN:
             #TODO Add description
             self.weight = value
 
-def normalize(x):
+def normalize(x: float) -> float:
     """
     
+    :param x: 
     """
     #TODO Add description
     x -= np.min(x)
@@ -384,8 +399,12 @@ if __name__ == "__main__":
     """
     a = CPPN([8,8,7])
     
-    for i in range(8*8*7):
-        a.run(i)
-        print(f"Material: {a.material}")
-        print(f"Presence: {a.presence}")
-        print("--------------")
+    #for i in range(8*8*7):
+        #a.run(i)
+        #print(f"Material: {a.material}")
+        #print(f"Presence: {a.presence}")
+        #print("--------------")
+    
+    b = a.to_phenotype()
+
+    print(b)
