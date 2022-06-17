@@ -12,16 +12,16 @@ def sigmoid(x: float) -> float:
     :rtype: float
     :return: sigmoid function value of x
     """
-    return 1/(1+np.exp(-x)) #Sigmoid function applied to x
+    return np.nan_to_num(1/(1+np.exp(-x))) #Sigmoid function applied to x
 
 def neg_abs(x: float) -> float:
-    return -(np.abs(x))
+    return np.nan_to_num(-(np.abs(x)))
 
 def neg_square(x: float) -> float:
-    return -(np.square(x))
+    return np.nan_to_num(-(np.square(x)))
 
 def sqrt_abs(x: float) -> float:
-    return np.abs(np.sqrt(x))
+    return np.nan_to_num(np.sqrt(np.abs(x)))
 
 def neg_sqrt_abs(x: float) -> float:
-    return -(sqrt_abs(x))
+    return np.nan_to_num(-(sqrt_abs(x)))

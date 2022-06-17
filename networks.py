@@ -22,6 +22,7 @@ class NodeType(Enum):
     INPUT_J = 6
     INPUT_K = 7
     INPUT_D = 8
+    INPUT_B = 9
 
 class Node:
     """
@@ -121,9 +122,38 @@ class CPPN:
         self.z_inputs = []
         self.d_inputs = []
         self.b_inputs = []
-        self.set_initial_graph(xyz_size) #Sets the initial graph
+        self.xyz_size = xyz_size
+        self.set_initial_graph() #Sets the initial graph
     
-    def set_initial_graph(self, xyz_size):
+    def set_input_states(self):
+        """
+        
+        """
+        #TODO Comments + Description
+        x_inputs = np.zeros(self.xyz_size)
+        y_inputs = np.zeros(self.xyz_size)
+        z_inputs = np.zeros(self.xyz_size)
+
+        for x in range(self.xyz_size[0]):
+            for y in range(self.xyz_size[1]):
+                for z in range(self.xyz_size[2]):
+                    x_inputs[x, y, z] = x
+                    y_inputs[x, y, z] = y
+                    z_inputs[x, y, z] = z
+        
+        x_inputs = normalize(x_inputs)
+        y_inputs = normalize(y_inputs)
+        z_inputs = normalize(z_inputs)
+        d_inputs = normalize(np.power(np.power(x_inputs, 2) + np.power(y_inputs, 2) + np.power(z_inputs, 2), 0.5))
+        b_inputs = np.ones(self.xyz_size)
+
+        self.x_inputs = x_inputs
+        self.y_inputs = y_inputs
+        self.z_inputs = z_inputs
+        self.d_inputs = d_inputs
+        self.b_inputs = b_inputs
+    
+    def set_initial_graph(self):
         """
         Function to set the initial graph of the CPPN
         with the correct input and output nodes for each 
@@ -133,12 +163,9 @@ class CPPN:
         at a given coordinate and one to indicate the material of that node
         """
 
-
-        #TODO NORMALIZE INPUTS TO NN (Make between 0 and 1). SET THESE IN THE MINIMAL GRAPH
-        #TODO Calculate d (distance from centre)
-        #TODO Add b as an input value
-        #Creates an input node for each paramater: i, j, k, and d
-        for type in [NodeType.INPUT_I, NodeType.INPUT_J, NodeType.INPUT_K, NodeType.INPUT_D]:
+        self.set_input_states()
+        #Creates an input node for each paramater: i, j, k, d, and b
+        for type in [NodeType.INPUT_I, NodeType.INPUT_J, NodeType.INPUT_K, NodeType.INPUT_D, NodeType.INPUT_B]:
             activation_function = choice(self.activation_functions) #Chooses a random activation function
             Node(activation_function, type, self) #Creates the new node, automatically adding it to the CPPN
 
@@ -153,7 +180,7 @@ class CPPN:
                 self.create_connection(node, material, uniform(0,1))
                 self.create_connection(node, presence, uniform(0,1))
     
-    def run(self, i, j, k) -> None:
+    def run(self, pixel) -> None:
         """
         Method to run the CPPN with given input paramaters
 
@@ -162,23 +189,25 @@ class CPPN:
         :return: 
         """
         #TODO Add description
-        #TODO Change to provid single input (1 to 8*8*7)
-        #TODO ADD b
-        d=0
+        #TODO Change INPUT_I... to INPUT_X, Y, Z
+        #TODO Fix pixel indexing, DOES NOT WORK!! Max 8 at each axis
 
         #Passes the input values into each input node in the network
         for node in self.nodes:
             if node.type is NodeType.INPUT_I:
-                node.add_input(i)
+                node.add_input(self.x_inputs[pixel][pixel][pixel])
                 node.activate() #Activates the node
             elif node.type is NodeType.INPUT_J:
-                node.add_input(j)
+                node.add_input(self.y_inputs[pixel][pixel][pixel])
                 node.activate() #Activates the node
             elif node.type is NodeType.INPUT_K:
-                node.add_input(k)
+                node.add_input(self.z_inputs[pixel][pixel][pixel])
                 node.activate() #Activates the node
             elif node.type is NodeType.INPUT_D:
-                node.add_input(d)
+                node.add_input(self.d_inputs[pixel][pixel][pixel])
+                node.activate() #Activates the node
+            elif node.type is NodeType.INPUT_B:
+                node.add_input(self.b_inputs[pixel][pixel][pixel])
                 node.activate() #Activates the node
         
         #TODO Add comments
@@ -204,7 +233,6 @@ class CPPN:
         """
         Clears input and output values of each node in the network
         """
-        #TODO After normalized inputs DO NOT clear input nodes inputs
         for node in self.nodes: #Clears individual nodes I/O
             node.inputs = []
             node.output = None
@@ -242,7 +270,7 @@ class CPPN:
 
             #Passes in every point in the 3D design space into the run function for the CPPN and then uses that data to determine what material is in each location
             #Produces a 3D numpy array modelling the 3D microorganism, with an integer at each point in the design space indicating material type/presence
-            results = [pool.apply(self.material_produced(self.run), args=[i, j, k]) for i in range(8) for j in range(8) for k in range(7)]
+            results = [pool.apply(self.material_produced(self.run), args=[i]) for i in range(8*8*7)]
         finally:
             #Closes multiprocessing pool
             pool.close()
@@ -332,7 +360,12 @@ def normalize(x):
     
     """
     #TODO Add description
-    return ((x - np.min(x)) / (np.max(x) - np.min(x)))
+    x -= np.min(x)
+    x /= np.max(x)
+    x = np.nan_to_num(x)
+    x *= 2
+    x -= 1
+    return x
     
 if __name__ == "__main__":
     """
@@ -341,7 +374,7 @@ if __name__ == "__main__":
     TESTING ZONE
     ******************
     """
-    a = CPPN(8*8*7)
+    a = CPPN([8,8,7])
 
     # b = Node(sigmoid, NodeType.INPUT, a)
     # x = Node(symmetric, NodeType.INPUT, a)
@@ -368,14 +401,7 @@ if __name__ == "__main__":
     # a.reset()
     
 
-    a.run(20, 3, 1)
-
-    for node in a.nodes:
-        print(len(node.inputs))
+    a.run(3)
 
     print(f"Material: {a.material}")
     print(f"Presence: {a.presence}")
-
-    for connection in a.connections:
-    
-        print(f"Out: {connection.out.activation_function} ({connection.out.type}) Into: {connection.input.activation_function} ({connection.input.type})")
