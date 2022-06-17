@@ -17,9 +17,9 @@ class NodeType(Enum):
     HIDDEN = 1
     MATERIAL_OUTPUT = 2
     PRESENCE_OUTPUT = 3
-    INPUT_I = 4
-    INPUT_J = 5
-    INPUT_K = 6
+    INPUT_X = 4
+    INPUT_Y = 5
+    INPUT_Z = 6
     INPUT_D = 7
     INPUT_B = 8
 
@@ -108,25 +108,28 @@ class CPPN:
     """
     def __init__(self, xyz_size) -> None:
         """
-        Function to initilise an empty CPPN
+        Function to initilise a basic CPPN
         """
+        #TODO Add ability to change the size of the 3D coordinate space (Use JSON settings file)
         self.activation_functions = [np.sin, np.abs, neg_abs, np.square, neg_square, sqrt_abs, neg_sqrt_abs] #List of possible activation functions for each node in the network
         self.nodes = [] #List of nodes in the network
         self.connections = [] #List of connections between nodes in the network
         self.innovation_counter = 0 #Innovation counter for adding new connections to the network using NEAT
         self.material = None #Output indicating what type of material is present at a given location
         self.presence = None #Output indicating if material is present at a given location
+        #Lists of inputs for each input node
         self.x_inputs = []
         self.y_inputs = []
         self.z_inputs = []
         self.d_inputs = []
         self.b_inputs = []
-        self.xyz_size = xyz_size
+        self.xyz_size = xyz_size #Dimentions of the design space
         self.set_initial_graph() #Sets the initial graph
     
-    def set_input_states(self):
+    def set_input_states(self) -> None:
         """
-        
+        Function to set the input states of the CPPN given the
+        dimentions of the design space
         """
         #TODO Comments + Description
         x_inputs = np.zeros(self.xyz_size)
@@ -146,14 +149,13 @@ class CPPN:
         d_inputs = normalize(np.power(np.power(x_inputs, 2) + np.power(y_inputs, 2) + np.power(z_inputs, 2), 0.5))
         b_inputs = np.ones(self.xyz_size)
 
-        #TODO Maybe change
         self.x_inputs = x_inputs.flatten()
         self.y_inputs = y_inputs.flatten()
         self.z_inputs = z_inputs.flatten()
         self.d_inputs = d_inputs.flatten()
         self.b_inputs = b_inputs.flatten()
     
-    def set_initial_graph(self):
+    def set_initial_graph(self) -> None:
         """
         Function to set the initial graph of the CPPN
         with the correct input and output nodes for each 
@@ -165,7 +167,7 @@ class CPPN:
 
         self.set_input_states()
         #Creates an input node for each paramater: i, j, k, d, and b
-        for type in [NodeType.INPUT_I, NodeType.INPUT_J, NodeType.INPUT_K, NodeType.INPUT_D, NodeType.INPUT_B]:
+        for type in [NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z, NodeType.INPUT_D, NodeType.INPUT_B]:
             activation_function = choice(self.activation_functions) #Chooses a random activation function
             Node(activation_function, type, self) #Creates the new node, automatically adding it to the CPPN
 
@@ -182,26 +184,25 @@ class CPPN:
     
     def run(self, pixel) -> None:
         """
-        Method to run the CPPN with given input paramaters
+        Method to run the CPPN with given input paramaters,
+        updating the CPPN with two output values, one indicating
+        if material exists at a given voxel and one indicating
+        what that material at that voxel is
 
-        :param inputs: list of inputs passed into the CPPN
-        :rtype: float
-        :return: 
+        :param pixel: the number voxel to be computed
         """
-        #TODO Add description
-        #TODO Change INPUT_I... to INPUT_X, Y, Z
 
         self.reset() #Clears already existing values in CPPN
 
-        #Passes the input values into each input node in the network
+        #Passes the correct input values into each input node in the network at the given point
         for node in self.nodes:
-            if node.type is NodeType.INPUT_I:
+            if node.type is NodeType.INPUT_X:
                 node.add_input(self.x_inputs[pixel])
                 node.activate() #Activates the node
-            elif node.type is NodeType.INPUT_J:
+            elif node.type is NodeType.INPUT_Y:
                 node.add_input(self.y_inputs[pixel])
                 node.activate() #Activates the node
-            elif node.type is NodeType.INPUT_K:
+            elif node.type is NodeType.INPUT_Z:
                 node.add_input(self.z_inputs[pixel])
                 node.activate() #Activates the node
             elif node.type is NodeType.INPUT_D:
@@ -213,7 +214,7 @@ class CPPN:
         
         #TODO Add comments
         for node in self.nodes:
-            if node.type is not (NodeType.INPUT_J or NodeType.INPUT_I or NodeType.INPUT_K or NodeType.INPUT_D):
+            if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D):
                 node.activate()
 
 
@@ -262,17 +263,21 @@ class CPPN:
         indicates if there is material at that point and, if so, what
         type of material it is (skin cell or cardiac cell)
         """
-        #TODO Add ability to change the size of the 3D coordinate space (Use JSON settings file)
-        results = np.zeros((8, 8, 7)) #Empty numpy array to store material results at each point
+        results = np.zeros(self.xyz_size) #Empty numpy array to store material results at each point
         
         #TODO Ensure this actually works with parallel processing
         try:
+            #Gets the volume of the coordinate space
+            size = 1
+            for number in self.xyz_size:
+                size*=number
+
             pool = mp.Pool(mp.cpu_count()) #Initilises multiprocessing pool
 
             #Passes in every point in the 3D design space into the run function for the CPPN and then uses that data to determine what material is in each location
             #Produces a 3D numpy array modelling the 3D microorganism, with an integer at each point in the design space indicating material type/presence
             #TODO NEEDS TO RESET AFTER EVERY RUN
-            results = [pool.apply(self.material_produced(self.run), args=[i]) for i in range(8*8*7)]
+            results = [pool.apply(self.material_produced(self.run), args=[i]) for i in range(size)]
         finally:
             #Closes multiprocessing pool
             pool.close()
@@ -377,32 +382,7 @@ if __name__ == "__main__":
     ******************
     """
     a = CPPN([8,8,7])
-
-    # b = Node(sigmoid, NodeType.INPUT, a)
-    # x = Node(symmetric, NodeType.INPUT, a)
-    # c = Node(symmetric, NodeType.PRESENCE_OUTPUT, a)
-    # d = Node(identity, NodeType.MATERIAL_OUTPUT, a)
-  
-    # a.create_connection(b, c, 0.5)
-    # a.create_connection(b, d, 0.5)
-    # a.create_connection(x, c, 0.29139)
-
-    # b.add_input(1)
-    # x.add_input(1)
-
-    # b.activate()
-    # x.activate()
-
-    # c.activate()
-    # d.activate()
-    # print(c.output)
-    # print(d.output)
-
-    # print(a.valid())
-
-    # a.reset()
     
-
     for i in range(8*8*7):
         a.run(i)
         print(f"Material: {a.material}")

@@ -15,13 +15,46 @@ def sigmoid(x: float) -> float:
     return np.nan_to_num(1/(1+np.exp(-x))) #Sigmoid function applied to x
 
 def neg_abs(x: float) -> float:
+    """
+    Returns the negative absolute value of the value
+    passed into the function
+
+    :param x:
+    :rtype: float
+    :return: negative absolute value of x
+    """
     return np.nan_to_num(-(np.abs(x)))
 
 def neg_square(x: float) -> float:
+    """
+    Returns the negative square root of the value
+    passed into the function
+
+    :param x:
+    :rtype: float
+    :return: negative square root of x
+    """
     return np.nan_to_num(-(np.square(x)))
 
 def sqrt_abs(x: float) -> float:
+    """
+    Returns the square root of the absolute value
+    of the value passed into the function
+
+    :param x:
+    :rtype: float
+    :return: square root of the absolute value of x
+    """
     return np.nan_to_num(np.sqrt(np.abs(x)))
 
 def neg_sqrt_abs(x: float) -> float:
+    """
+    Returns the value of the negative of the 
+    square root of the absoulte value of the balue passed
+    into the function
+
+    :param x:
+    :rtype: float
+    :return: negative square root of the absolute value of x
+    """
     return np.nan_to_num(-(sqrt_abs(x)))
