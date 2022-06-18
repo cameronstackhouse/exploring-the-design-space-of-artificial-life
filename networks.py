@@ -1,10 +1,9 @@
-from typing import Callable, Tuple
 from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp
 import numpy as np
 from matplotlib import pyplot as plt
-from utilities.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs #Imports all activation functions
+from utilities.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs, normalize #Imports all activation functions
 
 """
 Module defining components for the creation of functioning
@@ -30,12 +29,12 @@ class Node:
     """
     def __init__(self, activation_function, type, outer_cppn) -> None:
         """
-        
-        :param activation_function:
-        :param type:
-        :param outer_cppn:
+        Initilization method for creating a CPPN node
+
+        :param activation_function: activation function used by the node
+        :param type: type of node (INPUT, HIDDEN, OUTPUT)
+        :param outer_cppn: CPPN which the node belongs to
         """
-        #TODO Add description
         self.inputs = [] #Input values passed into the node
         self.activation_function = activation_function #Activation function of the node
         self.type = type #Type of node (Input, Hidden, Output)
@@ -59,13 +58,6 @@ class Node:
         """
         self.inputs.append(value) #Input value added to the list of inputs to the node
     
-    def set_inputs(self, inputs) -> None:
-        """
-        
-        """
-        #TODO Add description
-        self.inputs = inputs
-    
     def activate(self) -> None:
         """
         Function to sum the input values into the node and 
@@ -79,8 +71,6 @@ class Node:
             if self is connection.input and connection.enabled:
                 num_connections_in+=1 #If the connection is a connection into the node, the number of connections counter is incremented
         
-
-        #TODO FIX THIS! EXCEEDS RECURSION DEPTH (MAYBE???) (DYNAMIC PROGRAMMING?)
         #Checks if the number of conections into the node is the same as the number of inputs the node currently has
         if num_connections_in != len(self.inputs):
             for conection in self.outer.connections:
@@ -109,15 +99,18 @@ class Node:
 class CPPN:
     """
     Class defining a compositional pattern-producing network made of
-    interconnected nodes with varying activation functions
+    interconnected nodes with varying activation functions for use in the
+    design of reconfigurable organisms
     """
     def __init__(self, xyz_size) -> None:
         """
-        Function to initilise a basic CPPN
+        Function to initilise a basic CPPN for designing reconfigurable organsims,
+        setting an initial graph (5 input nodes fully connected to 2 output nodes)
+        and setting the x, y, z, d, and b inputs needed for the CPPN to fully generate
+        a design
 
-        :param xyz_size: 
+        :param xyz_size: volume of the coordinate space for design
         """
-        #TODO Add description
         #TODO Add ability to change the size of the 3D coordinate space (Use JSON settings file)
         self.activation_functions = [np.sin, np.abs, neg_abs, np.square, neg_square, sqrt_abs, neg_sqrt_abs] #List of possible activation functions for each node in the network
         self.nodes = [] #List of nodes in the network
@@ -137,13 +130,14 @@ class CPPN:
     def set_input_states(self) -> None:
         """
         Function to set the input states of the CPPN given the
-        dimentions of the design space
+        dimensions of the design space
         """
-        #TODO Comments + Description
+        #Creates empty numpy arrays for each x, y, and z inputs, each the size of the volume of the design space
         x_inputs = np.zeros(self.xyz_size)
         y_inputs = np.zeros(self.xyz_size)
         z_inputs = np.zeros(self.xyz_size)
 
+        #Populates each coordinate input array with the correct values
         for x in range(self.xyz_size[0]):
             for y in range(self.xyz_size[1]):
                 for z in range(self.xyz_size[2]):
@@ -151,12 +145,18 @@ class CPPN:
                     y_inputs[x, y, z] = y
                     z_inputs[x, y, z] = z
         
+        #Normalizes the inputs to make them all between -1 and 1
         x_inputs = normalize(x_inputs)
         y_inputs = normalize(y_inputs)
         z_inputs = normalize(z_inputs)
+
+        #Creates the d input array, calculating the distance each point is away from the centre
         d_inputs = normalize(np.power(np.power(x_inputs, 2) + np.power(y_inputs, 2) + np.power(z_inputs, 2), 0.5))
+
+        #Creates the b input array, which is just a numpy array of ones
         b_inputs = np.ones(self.xyz_size)
 
+        #Sets all inputs and flattens them into 1D arrays
         self.x_inputs = x_inputs.flatten()
         self.y_inputs = y_inputs.flatten()
         self.z_inputs = z_inputs.flatten()
@@ -190,14 +190,14 @@ class CPPN:
                 self.create_connection(node, material, uniform(0,1))
                 self.create_connection(node, presence, uniform(0,1))
     
-    def run(self, pixel):
+    def run(self, pixel: int) -> int:
         """
         Method to run the CPPN with given input paramaters,
         updating the CPPN with two output values, one indicating
         if material exists at a given voxel and one indicating
         what that material at that voxel is
 
-        :param pixel: the number voxel to be computed
+        :param pixel: the voxel number to be computed
         """
 
         self.reset() #Clears already existing values in CPPN
@@ -220,12 +220,11 @@ class CPPN:
                 node.add_input(self.b_inputs[pixel])
                 node.activate() #Activates the node
         
-        #TODO Add comments
-        for node in self.nodes:
+        for node in self.nodes: #Iterates through all nodes and activates all non input nodes (as they have already been activated)
             if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D or NodeType.INPUT_B):
                 node.activate()
         
-        return self.material_produced()
+        return self.material_produced() #Returns an integer indicating the material at that voxel
 
     def add_node(self, node) -> None:
         """
@@ -236,6 +235,9 @@ class CPPN:
         self.nodes.append(node) #Adds node to the list of nodes in the CPPN
     
     def add_node_between(self, connection) -> bool:
+        """
+        
+        """
         #TODO
         #Check if new topology is valid
         pass
@@ -256,11 +258,10 @@ class CPPN:
         Method to create a connection between two nodes
         with a given weight
 
-        :param out: 
-        :param input:
-        :param weight:
+        :param out: output node
+        :param input: input node
+        :param weight: weight associated with the connection
         """
-        #TODO Description
         new_connection = self.Connection(out, input, weight, self.innovation_counter) #Creates a new connection
         self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
         self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
@@ -274,7 +275,6 @@ class CPPN:
         """
         results = np.zeros(self.xyz_size) #Empty numpy array to store material results at each point
         
-        #TODO Ensure this actually works with parallel processing
         try:
             #Gets the volume of the coordinate space
             size = 1
@@ -285,7 +285,6 @@ class CPPN:
 
             #Passes in every point in the 3D design space into the run function for the CPPN and then uses that data to determine what material is in each location
             #Produces a 3D numpy array modelling the 3D microorganism, with an integer at each point in the design space indicating material type/presence
-            #TODO NEEDS TO RESET AFTER EVERY RUN
             results = np.array([pool.apply(self.run, args=[i]) for i in range(size)])
         finally:
             #Closes multiprocessing pool
@@ -311,6 +310,9 @@ class CPPN:
             return 2
 
     def has_cycles(self) -> bool:
+        """
+        Method to determine if a given CPPN has cycles
+        """
         #TODO
         pass
     
@@ -324,7 +326,6 @@ class CPPN:
         :return: boolean indicating if the CPPN topology is valid
         """
         #TODO Add comments
-        #TODO change input validation, should be 5 input nodes
         #TODO CHECK FOR 1 OF EACH INPUT NODE (I, J, K, D, B)
         #Checks if the nodes are valid
         num_inputs = 0
@@ -344,8 +345,8 @@ class CPPN:
         #Check if connections between nodes are valid
         #TODO
 
-        #if self.has_cycles():
-            #return False
+        if self.has_cycles():
+            return False
         
         return True
 
@@ -353,43 +354,38 @@ class CPPN:
         """
         Class defining a connection between two nodes in a CPPN network
         """
-        def __init__(self, out, input, weight, innov) -> None:
+        def __init__(self, out: Node, input: Node, weight: float, innov: int) -> None:
             """
-            
+            Initilization method to create a basic connection
+            between two nodes
+
+            :param out: output node
+            :param input: input node
+            :param weight: weight associated with the connection
+            :param innov: historical marking for the connection
             """
-            #TODO Add description
-            self.out = out
+            self.out = out 
             self.input = input
             self.weight = weight
             self.historical_marking = innov
-            self.enabled = True
+            self.enabled = True #Automatically enables the connection
         
-        def set_enabled(self, option) -> None:
+        def set_enabled(self, option: bool) -> None:
             """
-            
+            Method to set if a connection is enabled
+
+            :param option: boolean value indicating if the connection is enabled or disabled
             """
-            #TODO Add description
             self.enabled = option
         
-        def set_weight(self, value) -> None:
+        def set_weight(self, value: float) -> None:
             """
-            
+            Method to set the weight associated with a connection
+
+            :param value: weight of the connection
             """
-            #TODO Add description
             self.weight = value
 
-def normalize(x: float) -> float:
-    """
-    
-    :param x: 
-    """
-    #TODO Add description
-    x -= np.min(x)
-    x /= np.max(x)
-    x = np.nan_to_num(x)
-    x *= 2
-    x -= 1
-    return x
     
 if __name__ == "__main__":
     """

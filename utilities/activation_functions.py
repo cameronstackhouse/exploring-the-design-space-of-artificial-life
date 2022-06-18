@@ -58,3 +58,16 @@ def neg_sqrt_abs(x: float) -> float:
     :return: negative square root of the absolute value of x
     """
     return np.nan_to_num(-(sqrt_abs(x)))
+
+def normalize(x: float) -> float:
+    """
+    
+    :param x: 
+    """
+    #TODO Add description
+    x -= np.min(x)
+    x /= np.max(x)
+    x = np.nan_to_num(x)
+    x *= 2
+    x -= 1
+    return x
