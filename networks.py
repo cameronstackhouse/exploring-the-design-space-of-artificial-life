@@ -302,9 +302,9 @@ class CPPN:
         #TODO VASTLY NEEDS IMPROVING
         presence = self.presence
         material = self.material
-        if presence < 0.25 or presence > 0.75:
+        if presence < 0.3:
             return 0
-        elif material < 0.5:
+        elif material < 0.7:
             return 1
         else:
             return 2
@@ -414,5 +414,5 @@ if __name__ == "__main__":
     data = newarr
     z,x,y = data.nonzero()
 
-    ax.scatter(x, y, z, c=z, alpha=1)
+    ax.scatter(x, y, z, cmap='coolwarm', alpha=1)
     plt.show()
