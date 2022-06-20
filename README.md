@@ -7,6 +7,8 @@
 
 ## How to use
 
+### Compiling and installing VoxCAD
+
 ## Further Readings
 
 ## License
