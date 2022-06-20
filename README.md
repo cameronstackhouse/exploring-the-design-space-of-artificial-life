@@ -7,6 +7,8 @@
 
 ## How to use
 
+Must be run on a Linux device for simulation to work
+
 ### Compiling and installing VoxCAD
 
 ## Further Readings
