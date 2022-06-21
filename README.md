@@ -7,7 +7,11 @@
 
 ## How to use
 
-### Compiling and installing VoxCAD
+Must be run on a Linux device for simulation to work.
+
+### Compiling and installing voxcraft-sim and voxcraft-viz
+
+  ddd
 
 ## Further Readings
 
