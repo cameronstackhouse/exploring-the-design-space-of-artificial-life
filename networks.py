@@ -234,13 +234,21 @@ class CPPN:
         """
         self.nodes.append(node) #Adds node to the list of nodes in the CPPN
     
-    def add_node_between(self, connection) -> bool:
+    def add_random_new_node(self) -> None:
         """
         
         """
-        #TODO
-        #Check if new topology is valid
-        pass
+        activation_function = choice(self.activation_functions)
+        new = Node(activation_function, NodeType.HIDDEN, self)
+        self.add_node(new)
+        valid = False
+        while not valid:
+            #TODO REPEAT UNTIL NOT CYCLE TOO
+            out = choice(self.nodes)
+            if out.type == NodeType.MATERIAL_OUTPUT or out.type == NodeType.PRESENCE_OUTPUT or out is new:
+                pass
+            else:
+                valid = self.create_connection(out, new, uniform(0,1))
     
     def reset(self) -> None:
         """
@@ -253,7 +261,7 @@ class CPPN:
         self.material = None
         self.presence = None 
     
-    def create_connection(self, out, input, weight) -> None:
+    def create_connection(self, out, input, weight) -> bool:
         """
         Method to create a connection between two nodes
         with a given weight
@@ -262,9 +270,11 @@ class CPPN:
         :param input: input node
         :param weight: weight associated with the connection
         """
+        #TODO CHECK FOR CYCLES, FALSE IF CYCLES
         new_connection = self.Connection(out, input, weight, self.innovation_counter) #Creates a new connection
         self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
         self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
+        return True
     
     def to_phenotype(self):
         """
@@ -395,6 +405,10 @@ if __name__ == "__main__":
     ******************
     """
     a = CPPN([8,8,7])
+    
+    print("----------")
+
+    a.add_random_new_node()
     
     #for i in range(8*8*7):
         #a.run(i)
