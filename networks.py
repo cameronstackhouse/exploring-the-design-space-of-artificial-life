@@ -324,6 +324,7 @@ class CPPN:
         Method to determine if a given CPPN has cycles
         """
         #TODO
+        
         pass
     
     def valid(self) -> bool:
@@ -336,12 +337,27 @@ class CPPN:
         :return: boolean indicating if the CPPN topology is valid
         """
         #TODO Add comments
-        #TODO CHECK FOR 1 OF EACH INPUT NODE (I, J, K, D, B)
         #Checks if the nodes are valid
+        num_in_x = 0
+        num_in_y = 0
+        num_in_z = 0
+        num_in_d = 0
+        num_in_b = 0
         num_inputs = 0
         num_mat_out = 0
         num_presence_out = 0
         for node in self.nodes:
+            if node.type is NodeType.INPUT_X:
+                num_in_x+=1
+            elif node.type is NodeType.INPUT_Y:
+                num_in_y+=1
+            elif node.type is NodeType.INPUT_Z:
+                num_in_z+=1
+            elif node.type is NodeType.INPUT_D:
+                num_in_d+=1
+            elif node.type is NodeType.INPUT_B:
+                num_in_b+=1
+            
             if node.type is NodeType.INPUT_X or node.type is NodeType.INPUT_Y or node.type is NodeType.INPUT_Z or node.type is NodeType.INPUT_D or node.type is NodeType.INPUT_B:
                 num_inputs+=1
             elif node.type is NodeType.MATERIAL_OUTPUT:
@@ -352,9 +368,9 @@ class CPPN:
         if num_inputs != 5 or num_mat_out != 1 or num_presence_out != 1 or (num_presence_out + num_mat_out != 2):
             return False
         
-        #Check if connections between nodes are valid
-        #TODO
-
+        if num_in_x != 1 or num_in_y != 1 or num_in_z != 1 or num_in_d != 1 or num_in_b != 1:
+            return False
+        
         if self.has_cycles():
             return False
         
@@ -406,8 +422,6 @@ if __name__ == "__main__":
     """
     a = CPPN([8,8,7])
     
-    print("----------")
-
     a.add_random_new_node()
     
     #for i in range(8*8*7):
@@ -430,3 +444,4 @@ if __name__ == "__main__":
 
     ax.scatter(x, y, z, cmap='coolwarm', alpha=1)
     plt.show()
+    
