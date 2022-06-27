@@ -124,6 +124,7 @@ class CPPN:
         self.z_inputs = []
         self.d_inputs = []
         self.b_inputs = []
+        self.fitness = None
         self.xyz_size = xyz_size #Dimentions of the design space
         self.set_initial_graph() #Sets the initial graph
     
@@ -234,21 +235,6 @@ class CPPN:
         """
         self.nodes.append(node) #Adds node to the list of nodes in the CPPN
     
-    def add_random_new_node(self) -> None:
-        """
-        
-        """
-        activation_function = choice(self.activation_functions)
-        new = Node(activation_function, NodeType.HIDDEN, self)
-        self.add_node(new)
-        valid = False
-        while not valid:
-            #TODO REPEAT UNTIL NOT CYCLE TOO
-            out = choice(self.nodes)
-            if out.type == NodeType.MATERIAL_OUTPUT or out.type == NodeType.PRESENCE_OUTPUT or out is new:
-                pass
-            else:
-                valid = self.create_connection(out, new, uniform(0,1))
     
     def reset(self) -> None:
         """
@@ -319,63 +305,6 @@ class CPPN:
         else:
             return 2
 
-    def has_cycles(self) -> bool:
-        """
-        Method to determine if a given CPPN has cycles
-        """
-        #TODO
-        
-        pass
-    
-    def valid(self) -> bool:
-        """
-        Method to determine if nodes and connections in a CPPN topology are valid
-        (At least one input node and two output nodes, one for 
-        indicating presence of material and one for type of material)
-
-        :rtype: bool
-        :return: boolean indicating if the CPPN topology is valid
-        """
-        #TODO Add comments
-        #Checks if the nodes are valid
-        num_in_x = 0
-        num_in_y = 0
-        num_in_z = 0
-        num_in_d = 0
-        num_in_b = 0
-        num_inputs = 0
-        num_mat_out = 0
-        num_presence_out = 0
-        for node in self.nodes:
-            if node.type is NodeType.INPUT_X:
-                num_in_x+=1
-            elif node.type is NodeType.INPUT_Y:
-                num_in_y+=1
-            elif node.type is NodeType.INPUT_Z:
-                num_in_z+=1
-            elif node.type is NodeType.INPUT_D:
-                num_in_d+=1
-            elif node.type is NodeType.INPUT_B:
-                num_in_b+=1
-            
-            if node.type is NodeType.INPUT_X or node.type is NodeType.INPUT_Y or node.type is NodeType.INPUT_Z or node.type is NodeType.INPUT_D or node.type is NodeType.INPUT_B:
-                num_inputs+=1
-            elif node.type is NodeType.MATERIAL_OUTPUT:
-                num_mat_out+=1
-            elif node.type is NodeType.PRESENCE_OUTPUT:
-                num_presence_out+=1
-        
-        if num_inputs != 5 or num_mat_out != 1 or num_presence_out != 1 or (num_presence_out + num_mat_out != 2):
-            return False
-        
-        if num_in_x != 1 or num_in_y != 1 or num_in_z != 1 or num_in_d != 1 or num_in_b != 1:
-            return False
-        
-        if self.has_cycles():
-            return False
-        
-        return True
-
     class Connection:
         """
         Class defining a connection between two nodes in a CPPN network
@@ -423,19 +352,12 @@ if __name__ == "__main__":
     a = CPPN([8,8,7])
     
     a.add_random_new_node()
-    
-    #for i in range(8*8*7):
-        #a.run(i)
-        #print(f"Material: {a.material}")
-        #print(f"Presence: {a.presence}")
-        #print("--------------")
-    
+   
     b = a.to_phenotype()
 
     newarr = b.reshape(8,8,7)
 
     print(newarr)
-    print(a.valid())
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
