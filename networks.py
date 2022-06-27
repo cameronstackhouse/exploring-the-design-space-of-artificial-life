@@ -3,7 +3,7 @@ from enum import Enum
 import multiprocessing as mp
 import numpy as np
 from matplotlib import pyplot as plt
-from utilities.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs, normalize #Imports all activation functions
+from tools.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs, normalize #Imports all activation functions
 
 """
 Module defining components for the creation of functioning

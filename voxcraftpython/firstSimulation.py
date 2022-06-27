@@ -3,7 +3,8 @@ import numpy as np
 from VoxcraftVXA import VXA
 from VoxcraftVXD import VXD
 
-#TODO Use this to generate VXD files for patterns!
+#TODO Use this to generate VXD files for patterns during simulations!
+#THE VXD FILES GENERATED FROM HERE ARE USED IN voxcraft-sim
 
 # Generate a Base VXA file
 # See here for list of vxa tags: https://gpuvoxels.readthedocs.io/en/docs/
@@ -19,8 +20,8 @@ vxa.write("base.vxa")
 
 # Create random body array between 0 and maximum material ID
 
-#TODO THIS IS WHERE THE NP RANDOM
-body = np.random.randint(0,mat2+1,size=(5,5,5))
+#TODO THIS IS WHERE THE NUMPY ARRAY OF VALUES IS PLACED
+body = np.random.randint(0,mat2+1,size=(8,8,7))
 
 # Generate a VXD file
 vxd = VXD()
