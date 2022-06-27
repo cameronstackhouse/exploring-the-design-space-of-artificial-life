@@ -14,6 +14,7 @@ def evolve(population_size, mutation_rate, truncation_rate, generations, run_dir
     #TODO Write description
     """
     
+    
     """
     population = [] #List containing the population
     fittest = None #Fittest individual

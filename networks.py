@@ -264,7 +264,7 @@ class CPPN:
     
     def to_phenotype(self):
         """
-        Function to pass each point in a 8x8x7 3D design space into the
+        Function to pass each point in an 3D design space into the
         CPPN to be mapped to a phenotype. The output at each point
         indicates if there is material at that point and, if so, what
         type of material it is (skin cell or cardiac cell)
