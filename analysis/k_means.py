@@ -4,33 +4,56 @@
 
 from random import randint
 from math import sqrt
-from secrets import choice
 import numpy as np
 from matplotlib import pyplot as plt
 
 class Centroid:
+    """
+    Class to represent a centroid in the k-means
+    algorithm
+    """
     #TODO Add description
     def __init__(self, coordinate_size, volume):
+        """
+        
+        """
         #Sets the initial centroid position at a random coordinate
         self.coords = np.zeros(coordinate_size)
         for i in range(len(self.coords)):
             self.coords[i] = randint(0, volume)
     
     def set_coords(self, coordinates):
+        """
+        
+        """
         self.coords = coordinates
 
 class Vector:
+    """
+    
+    """
     #TODO Add description
     def __init__(self, coordinates):
         self.coords = coordinates
         self.belongs_to = None
     
     def set_belongs_to(self, centroid):
+        """
+        
+        """
         self.belongs_to = centroid
         
 def k_means(vectors, volume, num_centroids):
     """
-    
+    Function to find centroid positions given a list of vectors,
+    a coordinate space, and a given number of centroids using 
+    the k-means algorithm
+
+    :param vectors:
+    :param volume:
+    :param num_centroids:
+    :rtype:
+    :return:
     """
     #TODO Add description and comments
     vector_size = len(vectors[0])
@@ -73,18 +96,34 @@ def k_means(vectors, volume, num_centroids):
     return centroids, vector_objects
         
 
-def find_distance(a, b):
-    #TODO Add description
-    if len(a) != len(b):
+def find_distance(a: np.array, b: np.array) -> int:
+    """
+    Function to find the euclidian distance between two vectors
+
+    :param a: vector a
+    :param b: vector b
+    :rtype: int
+    :return: euclidian distance between the two vectors
+    """
+
+    if len(a) != len(b): #Checks to ensure the vectors are of the same length
         return "ERROR"
     else:
         total = 0
+        #Iterates through points in the data, calculating difference at each point
         for i in range(len(a)):
             total += (a[i] - b[i])**2
         
         return sqrt(total)
 
-def plot(centroids, vectors, three_dimensional = False):
+def plot(centroids, vectors, three_dimensional: bool = False) -> None:
+    """
+    Function to plot centroids and vectors using matplotlib
+
+    :param centroids:
+    :param vectors:
+    :param three_dimensional:
+    """
     #TODO Add comments and description
     fig = plt.figure()
     if three_dimensional:
@@ -115,8 +154,6 @@ def plot(centroids, vectors, three_dimensional = False):
     plt.show()
 
 if __name__ == "__main__":
-    #DELETE FOR RELEASE
-    vectors = np.array([np.array([randint(0, 8*8*7), randint(0, 8*8*7)]) for _ in range(150)])
-    centroids, vectors = k_means(vectors, 8*8*7, 10)
-
+    vectors = np.array([np.array([randint(0, 8*8*7), randint(0, 8*8*7)]) for _ in range(5000)])
+    centroids, vectors = k_means(vectors, 8*8*7, 5)
     plot(centroids, vectors)

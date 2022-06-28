@@ -9,8 +9,8 @@ from tools.evaluate import evaluate_pop
 
 #TODO Evolve CPPNs using modified NEAT
 
-def evolve(population_size, mutation_rate, truncation_rate, generations, run_directory,
-            size_params):
+def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, 
+    remove_edge_rate, truncation_rate, generations, run_directory, size_params):
     #TODO Write description
     """
     
@@ -26,14 +26,17 @@ def evolve(population_size, mutation_rate, truncation_rate, generations, run_dir
     while generations_complete < generations:
         for cppn in population:
             #TODO Check for validity after each mutation
-            #TODO Change so different number of each mutation
+            for node in cppn.nodes:
+                pass
+                #TODO Add node
+                #TODO Mutate node 
+                #TODO Remove node
             
-            #TODO Add node
-            #TODO Mutate node 
-            #TODO Remove node
-            #TODO Mutate edge
-            #TODO Remove edge
-            #TODO Add edge
+            for connection in cppn.connections:
+                pass
+                #TODO Mutate edge
+                #TODO Remove edge
+                #TODO Add edge
 
             pass
         population = evaluate_pop(population, run_directory, 
