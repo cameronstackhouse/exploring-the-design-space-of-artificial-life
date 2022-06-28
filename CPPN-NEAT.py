@@ -1,13 +1,13 @@
+"""
+Module to simulate CPPN-NEAT evolution on a population of
+CPPNs
+"""
+
 from random import uniform, choice, randint
 from networks import CPPN, NodeType
 from tools.evaluate import evaluate_pop
 
 #TODO Evolve CPPNs using modified NEAT
-
-"""
-Module to simulate CPPN-NEAT evolution on a population of
-CPPNs
-"""
 
 def evolve(population_size, mutation_rate, truncation_rate, generations, run_directory,
             size_params):
@@ -26,13 +26,16 @@ def evolve(population_size, mutation_rate, truncation_rate, generations, run_dir
     while generations_complete < generations:
         for cppn in population:
             #TODO Check for validity after each mutation
+            #TODO Change so different number of each mutation
+            
+            #TODO Add node
             #TODO Mutate node 
             #TODO Remove node
             #TODO Mutate edge
             #TODO Remove edge
-            pass
+            #TODO Add edge
 
-        #TODO Change run directory name
+            pass
         population = evaluate_pop(population, run_directory, 
                     generations_complete, truncation_rate)
         
@@ -57,3 +60,11 @@ def mutate_node(node):
 
 def mutate_connection(connection):
     connection.weight = uniform(0,1)
+
+def disable_connection(connection):
+    #TODO
+    pass
+
+def prune(cppn):
+    #TODO
+    pass

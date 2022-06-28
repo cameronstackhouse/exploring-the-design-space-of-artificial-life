@@ -1,8 +1,8 @@
-import numpy as np
-
 """
 Module containing various different activation functions
 """
+
+import numpy as np
 
 def sigmoid(x: float) -> float:
     """

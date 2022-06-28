@@ -1,14 +1,14 @@
+"""
+Module defining components for the creation of functioning
+compositional pattern-producing networks
+"""
+
 from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp
 import numpy as np
 from matplotlib import pyplot as plt
 from tools.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs, normalize #Imports all activation functions
-
-"""
-Module defining components for the creation of functioning
-compositional pattern-producing networks
-"""
 
 class NodeType(Enum):
     """
@@ -118,6 +118,7 @@ class CPPN:
         self.innovation_counter = 0 #Innovation counter for adding new connections to the network using NEAT
         self.material = None #Output indicating what type of material is present at a given location
         self.presence = None #Output indicating if material is present at a given location
+        self.phenotype = None
         #Lists of inputs for each input node
         self.x_inputs = []
         self.y_inputs = []
@@ -286,6 +287,8 @@ class CPPN:
             #Closes multiprocessing pool
             pool.close()
             pool.join()
+        
+        self.phenotype = results
 
         return results
     
@@ -304,6 +307,44 @@ class CPPN:
             return 1
         else:
             return 2
+        
+    def has_cycles(self) -> bool:
+        #TODO
+        pass
+
+    def num_activation_functions(self):
+        #TODO Add description
+        functions = dict()
+        for node in self.nodes:
+            if node.activation_function in functions:
+                functions[node.activation_function] = functions[node.activation_function]+1
+            else:
+                functions[node.activation_function] = 1
+        
+        return functions
+
+    def num_cells(self):
+        #TODO Add description
+        none = 0
+        skin = 0
+        muscle = 0
+        for cell in self.phenotype:
+            if cell == 0:
+                none+=1
+            elif cell == 1:
+                skin+=1
+            elif cell == 2:
+                muscle+=1
+        
+        return {"none": none, "skin": skin, "muscle": muscle}
+    
+    def num_cells_at_location(self):
+        #TODO maybe count of cells within top left, top right... 
+        pass
+
+    def phenotype_symmetry(self):
+        #TODO Determines the "symmetry" of the phenotype on each axis
+        pass
 
     class Connection:
         """
@@ -350,8 +391,6 @@ if __name__ == "__main__":
     ******************
     """
     a = CPPN([8,8,7])
-    
-    a.add_random_new_node()
    
     b = a.to_phenotype()
 
@@ -366,4 +405,13 @@ if __name__ == "__main__":
 
     ax.scatter(x, y, z, cmap='coolwarm', alpha=1)
     plt.show()
+
+    nc = a.num_cells()
+    na = a.num_activation_functions()
+
+    for x in nc:
+        print(f"{x}: {nc[x]}")
+    
+    for x in na:
+        print(f"{x}: {na[x]}")
     
