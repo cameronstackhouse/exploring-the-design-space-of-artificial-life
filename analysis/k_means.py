@@ -4,6 +4,7 @@
 
 from random import randint
 from math import sqrt
+from secrets import choice
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -69,7 +70,7 @@ def k_means(vectors, volume, num_centroids):
         
         print(dif)
     
-    return centroids
+    return centroids, vector_objects
         
 
 def find_distance(a, b):
@@ -82,22 +83,40 @@ def find_distance(a, b):
             total += (a[i] - b[i])**2
         
         return sqrt(total)
-            
-if __name__ == "__main__":
-    vectors = np.array([np.array([randint(0, 8*8*7), randint(0, 8*8*7), randint(0, 8*8*7)]) for _ in range(100)])
-    centroids = k_means(vectors, 8*8*7, 3)
 
+def plot(centroids, vectors, three_dimensional = False):
+    #TODO Add comments and description
     fig = plt.figure()
-    x = [item[0] for item in vectors]
-    y = [item[1] for item in vectors]
-    z = [item[2] for item in vectors]
-
-    x_centroid = [item.coords[0] for item in centroids]
-    y_centroid = [item.coords[1] for item in centroids]
-    z_centroid = [item.coords[2] for item in centroids]
-
-    ax = fig.add_subplot(111, projection="3d")
-
-    ax.scatter(x, y, z)
-    ax.scatter(x_centroid, y_centroid, z_centroid)
+    if three_dimensional:
+        ax = fig.add_subplot(projection="3d")
+    else:
+        ax = fig.add_subplot()
+    for i in range(len(centroids)):
+        if three_dimensional:
+            x = [item.coords[0] for item in vectors if item.belongs_to == centroids[i]]
+            y = [item.coords[1] for item in vectors if item.belongs_to == centroids[i]]
+            z = [item.coords[2] for item in vectors if item.belongs_to == centroids[i]]
+            ax.scatter(x, y, z)
+        else:
+            x = [item.coords[0] for item in vectors if item.belongs_to == centroids[i]]
+            y = [item.coords[1] for item in vectors if item.belongs_to == centroids[i]]
+            ax.scatter(x, y)
+    
+    if three_dimensional:
+        x_centroid = [item.coords[0] for item in centroids]
+        y_centroid = [item.coords[1] for item in centroids]
+        z_centroid = [item.coords[2] for item in centroids]
+        ax.scatter(x_centroid, y_centroid, z_centroid, color=['black'])
+    else:
+        x_centroid = [item.coords[0] for item in centroids]
+        y_centroid = [item.coords[1] for item in centroids]
+        ax.scatter(x_centroid, y_centroid, color=['black'])
+    
     plt.show()
+
+if __name__ == "__main__":
+    #DELETE FOR RELEASE
+    vectors = np.array([np.array([randint(0, 8*8*7), randint(0, 8*8*7)]) for _ in range(150)])
+    centroids, vectors = k_means(vectors, 8*8*7, 10)
+
+    plot(centroids, vectors)
