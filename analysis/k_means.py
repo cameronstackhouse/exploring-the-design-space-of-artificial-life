@@ -154,6 +154,6 @@ def plot(centroids, vectors, three_dimensional: bool = False) -> None:
     plt.show()
 
 if __name__ == "__main__":
-    vectors = np.array([np.array([randint(0, 8*8*7), randint(0, 8*8*7)]) for _ in range(5000)])
-    centroids, vectors = k_means(vectors, 8*8*7, 5)
+    vectors = np.array([np.array([randint(0, 8*8*7), randint(0, 8*8*7)]) for _ in range(500)])
+    centroids, vectors = k_means(vectors, 8*8*7, 3)
     plot(centroids, vectors)
