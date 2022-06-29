@@ -312,6 +312,10 @@ class CPPN:
         #TODO
         pass
 
+    def prune(self) -> None:
+        #TODO
+        pass
+
     def num_activation_functions(self):
         #TODO Add description
         functions = dict()

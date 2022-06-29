@@ -25,31 +25,42 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
     
     generations_complete = 0 #Counter of number of completed generations
     while generations_complete < generations:
-        #TODO Add speciation (Different groups of populations, run these with run_pop)
+        #TODO Add speciation (Different groups of populations, use historical markings)
         for cppn in population:
             #TODO Check for validity after each mutation
+            #TODO Check if rand needs to be manually seeded
 
             #TODO Add node
-            add = uniform(0,1)
-            if add >= add_node_rate:
+            if add_node_rate >= uniform(0,1):
                 add_node_rand_connection(cppn)
 
             for node in cppn.nodes:
                 #TODO Mutate node 
-                mutate = uniform(0,1)
-                if mutate_node_rate >= mutate:
-                    pass
+                if mutate_node_rate >= uniform(0,1):
+                    result = mutate_node(node)
+
 
                 #TODO Remove node
+                if remove_node_rate >= uniform(0,1):
+                    pass
             
             #TODO Add edge
+            if add_edge_rate >= uniform(0,1):
+                pass
             
             for connection in cppn.connections:
-                pass
                 #TODO Mutate edge
+                if mutate_edge_rate >= uniform(0,1):
+                    pass
+
                 #TODO Remove edge
+                if remove_edge_rate >= uniform(0,1):
+                    pass
 
             pass
+        
+        #Prune the network, removing redundant links
+        cppn.prune()
 
         #TODO ADD 2 LINES BELLOW BACK IN
         #population = evaluate_pop(population, run_directory, 
@@ -68,9 +79,19 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
 
 def crossover(cppn_a, cppn_b):
     """
-    
+    Function to crossover weights of two CPPNs
+    Only weights with the same innovation number are crossed over
+    Pseudo uniform crossover
     """
-    pass
+    #TODO Add comments
+    for connection_a in cppn_a.connections:
+        historical_marking = connection_a.historical_marking
+        for connection_b in cppn_b.connections:
+            if historical_marking == connection_b.historical_marking:
+                temp = connection_a.weight
+                connection_a.weight = connection_b.weight
+                connection_b.weight = temp
+                break
 
 def mutate_node(node):
     """
@@ -84,21 +105,20 @@ def mutate_node(node):
         return False
 
 def add_node_rand_connection(cppn):
-    function = choice(cppn.activation_functions)
-    cppn.add_node(Node(function, NodeType.HIDDEN, cppn))
-
-    #TODO ADD RANDOM INPUT CONNECTION, JUST CHOOSE ANY HIDDEN NODE
-    #OR INPUT NODE AND CREATE CONNECTION
-
-def mutate_connection(connection):
-    connection.weight = uniform(0,1)
-
-def prune(cppn):
     """
     
     """
-    #TODO
-    pass
+    #TODO Add comments
+    function = choice(cppn.activation_functions)
+    cppn.add_node(Node(function, NodeType.HIDDEN, cppn))
+    valid = False
+    while not valid:
+        out = choice(cppn.nodes)
+        if out.type != NodeType.MATERIAL_OUTPUT and out.type != NodeType.PRESENCE_OUTPUT:
+            cppn.create_connection(out, cppn.nodes[len(cppn.nodes) - 1], uniform(0,1))
+
+def mutate_connection(connection):
+    connection.weight = uniform(0,1)
 
 if __name__ == "__main__":
     pass
