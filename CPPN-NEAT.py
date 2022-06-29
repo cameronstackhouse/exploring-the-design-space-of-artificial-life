@@ -65,33 +65,43 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
         #TODO ADD 2 LINES BELLOW BACK IN
         #population = evaluate_pop(population, run_directory, 
                     #generations_complete, truncation_rate)
-        
-        #TODO Crossover CPPNS
-        
+                
         #Checks to see if a new overall fittest individual was produced
         for individual in population:
             if fittest == None or individual.fitness > fittest.fitness:
                 fittest = individual
+        
+        #TODO Crossover CPPNS
+        population = crossover_pop(population)
 
         generations_complete+=1 #Increments generations counter
     
     return fittest #Returns the fittest individual
 
-def crossover(cppn_a, cppn_b):
+def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> None:
     """
-    Function to crossover weights of two CPPNs
+    Function to crossover weights of two CPPNs.
     Only weights with the same innovation number are crossed over
-    Pseudo uniform crossover
+    using a Pseudo uniform crossover.
+
+    :param cppn_a: first CPPN to be crossed over
+    :param cppn_b: second CPPN to be crossed over
     """
-    #TODO Add comments
-    for connection_a in cppn_a.connections:
-        historical_marking = connection_a.historical_marking
-        for connection_b in cppn_b.connections:
-            if historical_marking == connection_b.historical_marking:
+    #Compares each weight in each connection in each network and crosses over the weights if the innovation numbers match
+
+    for connection_a in cppn_a.connections: #Iterates through all connections in the first cppn
+        historical_marking = connection_a.historical_marking #Gets the historical marking of the connection
+        for connection_b in cppn_b.connections: #Iterates through all connections in the second cppn
+            if historical_marking == connection_b.historical_marking: #Compares the two connections historical markings
+                #If the markings match then the weights are swapped
                 temp = connection_a.weight
                 connection_a.weight = connection_b.weight
                 connection_b.weight = temp
                 break
+
+def crossover_pop(population):
+    #TODO
+    return population
 
 def mutate_node(node):
     """
