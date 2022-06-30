@@ -26,12 +26,13 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
     generations_complete = 0 #Counter of number of completed generations
     while generations_complete < generations:
         population = crossover_pop(population) #Crosses over the population
-        population = mutate_population(population)
+        population = mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate) #Mutates the population
        
+        #TODO Add speciation (Different groups of populations, use historical markings)
 
-        #TODO ADD 2 LINES BELLOW BACK IN
-        #population = evaluate_pop(population, run_directory, 
-                    #generations_complete, truncation_rate)
+        #Evaluates the population using voxcraft-sim to find fitness of each solution
+        #TODO ADD LINE BELLOW BACK IN
+        #evaluate_pop(population, run_directory, generations_complete, truncation_rate)
                 
         #Checks to see if a new overall fittest individual was produced
         for individual in population:
@@ -68,18 +69,26 @@ def crossover_pop(population, population_size):
     
     """
     #TODO Add description
-    return [crossover_indv(choice(population), choice(population_size)) for _ in range(len(population))]
+    return [crossover_indv(choice(population), choice(population)) for _ in range(population_size)]
 
 def mutate_node(node):
     """
     
     """
+    #TODO Add description
     #Only mutates non output node activation functions as output node activation functions are always sigmoid functions
     if node.type != NodeType.MATERIAL_OUTPUT or node.type != NodeType.PRESENCE_OUTPUT:
         node.activation_function = choice(node.outer_cppn.activation_functions)
-        return True
-    else:
-        return False
+
+def mutate_nodes(population, rate):
+    """
+    
+    """
+    #TODO Add description and comments
+    for cppn in population:
+        for node in cppn.nodes:
+            if rate >= uniform(0,1):
+                mutate_node(node)
 
 def add_node_rand_connection(cppn):
     """
@@ -94,25 +103,85 @@ def add_node_rand_connection(cppn):
         if out.type != NodeType.MATERIAL_OUTPUT and out.type != NodeType.PRESENCE_OUTPUT:
             cppn.create_connection(out, cppn.nodes[len(cppn.nodes) - 1], uniform(0,1))
 
+def add_node_pop(population, rate):
+    """
+    
+    """
+    #TODO Add comments
+    for cppn in population:
+        if rate >= uniform(0,1):
+            add_node_rand_connection(cppn)
+
 def mutate_connection(connection):
     """
     
     """
+    #TODO Add description
     connection.weight = uniform(0,1)
 
-def mutate_population(population):
-    #TODO Add speciation (Different groups of populations, use historical markings)
-    #TODO Check for validity after each mutation
-    #TODO Check if rand needs to be manually seeded
-    #TODO Add node
-    #TODO Remove node
-    #TODO Mutate node 
-    #TODO Add edge
-    #TODO Mutate edge
-    #TODO Remove edge
-    #TODO Prune the network, removing redundant links
+def mutate_connections(population, rate):
+    """
+
+    """
+    #TODO Add description
+    for cppn in population:
+        for connection in cppn.connections:
+            if rate >= uniform(0,1):
+                mutate_connection(connection)
+
+def remove_connection(connection):
+    #TODO 
+    #TODO Check for validity of removal
     pass
+
+def remove_connections(population, rate):
+    #TODO Add comments
+    for cppn in population:
+        for connection in cppn:
+            if rate >= uniform(0,1):
+                remove_connection(connection)
+
+def add_connection(cppn):
+    #TODO
+    #TODO Check for validity, cycles
+    cppn.prune()
+    pass
+
+def add_connections(population, rate):
+    #TODO Add comments
+    for cppn in population:
+        if rate >= uniform(0,1):
+            add_connection(cppn)
+
+def remove_nodes(population, rate):
+    #TODO Add comments
+    #TODO Make functionality work in networks.py
+    for cppn in population:
+        if rate >= uniform(0,1):
+            to_remove = choice(cppn.nodes)
+            cppn.remove_node(to_remove)
+
+def mutate_population(population,  add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate):
+    #TODO Complete functions to make work
+
+    add_node_pop(population, add_node_rate) #Adds nodes to each cppn
+    remove_nodes(population, remove_node_rate) #Removes nodes from cppns
+    mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
+    add_connection(population, add_edge_rate) #Adds edges to cppns
+    mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
+    remove_connections(population, remove_edge_rate) #Removes edges in cppns            
 
 
 if __name__ == "__main__":
-    pass
+    """
+    #######################
+    TESTING ZONE
+    DELETE FOR RELEASE
+    #TODO
+    #######################
+    """
+    population = []
+    for _ in range(100):
+        population.append(CPPN([8,8,7]))
+    
+    population = crossover_pop(population, 100)

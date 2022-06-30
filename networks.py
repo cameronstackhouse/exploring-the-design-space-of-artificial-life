@@ -3,6 +3,8 @@ Module defining components for the creation of functioning
 compositional pattern-producing networks
 """
 
+#TODO ADD TYPE HINTING
+
 from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp
@@ -236,6 +238,12 @@ class CPPN:
         """
         self.nodes.append(node) #Adds node to the list of nodes in the CPPN
     
+    def remove_node(self, node):
+        """
+        TODO Check for validity
+        """
+        self.nodes.remove(node)
+        self.prune()
     
     def reset(self) -> None:
         """
