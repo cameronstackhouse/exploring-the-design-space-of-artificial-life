@@ -25,42 +25,9 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
     
     generations_complete = 0 #Counter of number of completed generations
     while generations_complete < generations:
-        #TODO Add speciation (Different groups of populations, use historical markings)
-        for cppn in population:
-            #TODO Check for validity after each mutation
-            #TODO Check if rand needs to be manually seeded
-
-            #TODO Add node
-            if add_node_rate >= uniform(0,1):
-                add_node_rand_connection(cppn)
-
-            for node in cppn.nodes:
-                #TODO Mutate node 
-                if mutate_node_rate >= uniform(0,1):
-                    result = mutate_node(node)
-
-
-                #TODO Remove node
-                if remove_node_rate >= uniform(0,1):
-                    pass
-            
-            #TODO Add edge
-            if add_edge_rate >= uniform(0,1):
-                pass
-            
-            for connection in cppn.connections:
-                #TODO Mutate edge
-                if mutate_edge_rate >= uniform(0,1):
-                    pass
-
-                #TODO Remove edge
-                if remove_edge_rate >= uniform(0,1):
-                    pass
-
-            pass
-        
-        #Prune the network, removing redundant links
-        cppn.prune()
+        population = crossover_pop(population) #Crosses over the population
+        population = mutate_population(population)
+       
 
         #TODO ADD 2 LINES BELLOW BACK IN
         #population = evaluate_pop(population, run_directory, 
@@ -71,12 +38,9 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
             if fittest == None or individual.fitness > fittest.fitness:
                 fittest = individual
         
-        #TODO Crossover CPPNS
-        population = crossover_pop(population)
-
         generations_complete+=1 #Increments generations counter
     
-    return fittest #Returns the fittest individual
+    return population, fittest #Returns the fittest individual and the population
 
 def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> None:
     """
@@ -99,9 +63,12 @@ def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> None:
                 connection_b.weight = temp
                 break
 
-def crossover_pop(population):
-    #TODO
-    return population
+def crossover_pop(population, population_size):
+    """
+    
+    """
+    #TODO Add description
+    return [crossover_indv(choice(population), choice(population_size)) for _ in range(len(population))]
 
 def mutate_node(node):
     """
@@ -128,7 +95,24 @@ def add_node_rand_connection(cppn):
             cppn.create_connection(out, cppn.nodes[len(cppn.nodes) - 1], uniform(0,1))
 
 def mutate_connection(connection):
+    """
+    
+    """
     connection.weight = uniform(0,1)
+
+def mutate_population(population):
+    #TODO Add speciation (Different groups of populations, use historical markings)
+    #TODO Check for validity after each mutation
+    #TODO Check if rand needs to be manually seeded
+    #TODO Add node
+    #TODO Remove node
+    #TODO Mutate node 
+    #TODO Add edge
+    #TODO Mutate edge
+    #TODO Remove edge
+    #TODO Prune the network, removing redundant links
+    pass
+
 
 if __name__ == "__main__":
     pass
