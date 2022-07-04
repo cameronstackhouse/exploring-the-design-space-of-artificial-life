@@ -129,6 +129,8 @@ class CPPN:
         self.b_inputs = []
         self.fitness = None
         self.xyz_size = xyz_size #Dimentions of the design space
+        self.temp_mark = []
+        self.unmarked = []
         self.set_initial_graph() #Sets the initial graph
     
     def set_input_states(self) -> None:
@@ -240,10 +242,27 @@ class CPPN:
     
     def remove_node(self, node):
         """
-        TODO Check for validity
+        TODO Remove links to node
         """
-        self.nodes.remove(node)
-        self.prune()
+        if node.type == NodeType.HIDDEN:
+            self.nodes.remove(node)
+            cons_to = []
+            cons_from = []
+            for connection in self.connections:
+                if connection.input is node:
+                    cons_to.append(connection)
+                    self.connections.remove(connection)
+                elif connection.out is node:
+                    cons_from.append(connection)
+                    self.connections.remove(connection)
+            
+            #TODO CLEAN THIS UP
+            for connection_to in cons_to:
+                for connection_from in cons_from:
+                    for connection_whole in self.connections:
+                        if connection_whole.input is connection_to.output and connection_whole.output is connection_from.input and connection_whole.enabled == False:
+                            connection_whole.enabled = True
+            self.prune()
     
     def reset(self) -> None:
         """
@@ -317,8 +336,40 @@ class CPPN:
             return 2
         
     def has_cycles(self) -> bool:
-        #TODO
-        pass
+        """
+        Function to check if a CPPN contains cycles
+
+        :rtype: bool
+        :return: boolean indicating if the CPPN contains cycles
+        """
+        #TODO Add comments, ENSURE THIS WORKS
+        for node in self.nodes:
+            self.unmarked.append(node)
+        while len(self.unmarked) != 0:
+            node = self.unmarked.pop(0)
+            if self.visit(node) is True:
+                return True
+        
+        self.unmarked = []
+        self.temp_mark = []
+        return False
+
+    def visit(self, node):
+        """
+        
+        """
+        #TODO ADD COMMENTS AND ENSURE IT WORKS
+        if node in self.temp_mark:
+            return True
+        
+        if node in self.unmarked:
+            self.temp_mark.append(node)
+            for connection in self.connections:
+                if connection.out is node:
+                    self.visit(connection.input)
+            self.unmarked.remove(node)
+            self.temp_mark.remove(node)
+            return False
 
     def prune(self) -> None:
         #TODO
@@ -403,6 +454,8 @@ if __name__ == "__main__":
     ******************
     """
     a = CPPN([8,8,7])
+
+    print(a.has_cycles())
    
     b = a.to_phenotype()
 

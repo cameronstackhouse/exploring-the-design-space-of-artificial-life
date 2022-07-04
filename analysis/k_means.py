@@ -190,6 +190,6 @@ def plot(centroids: np.array, vectors: np.array, three_dimensional: bool = False
     plt.show() #Shows the figure
 
 if __name__ == "__main__":
-    vectors = np.array([np.array([randint(0, 8), randint(0, 8), randint(0, 8)]) for _ in range(100)])
-    centroids, vectors = k_means(vectors, [8,8,7], 3)
+    vectors = np.array([np.array([randint(0, 8), randint(0, 8), randint(0, 8)]) for _ in range(367)])
+    centroids, vectors = k_means(vectors, [8,8,7], 7)
     plot(centroids, vectors, True)
