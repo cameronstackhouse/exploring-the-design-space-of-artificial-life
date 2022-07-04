@@ -8,6 +8,7 @@ compositional pattern-producing networks
 from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp
+from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
 from tools.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs, normalize #Imports all activation functions
@@ -52,7 +53,7 @@ class Node:
         """
         self.activation_function = activation_function
     
-    def add_input(self, value) -> None:
+    def add_input(self, value: float) -> None:
         """
         Function to add a value to the input values into a node
 
@@ -104,7 +105,7 @@ class CPPN:
     interconnected nodes with varying activation functions for use in the
     design of reconfigurable organisms
     """
-    def __init__(self, xyz_size) -> None:
+    def __init__(self, xyz_size: List) -> None:
         """
         Function to initilise a basic CPPN for designing reconfigurable organsims,
         setting an initial graph (5 input nodes fully connected to 2 output nodes)
@@ -232,7 +233,7 @@ class CPPN:
         
         return self.material_produced() #Returns an integer indicating the material at that voxel
 
-    def add_node(self, node) -> None:
+    def add_node(self, node: Node) -> None:
         """
         Method to add a node to the CPPN
 
@@ -240,10 +241,11 @@ class CPPN:
         """
         self.nodes.append(node) #Adds node to the list of nodes in the CPPN
     
-    def remove_node(self, node):
+    def remove_node(self, node: Node):
         """
         TODO Remove links to node
         """
+        #TODO Add comments
         if node.type == NodeType.HIDDEN:
             self.nodes.remove(node)
             cons_to = []
@@ -262,7 +264,6 @@ class CPPN:
                     for connection_whole in self.connections:
                         if connection_whole.input is connection_to.output and connection_whole.output is connection_from.input and connection_whole.enabled == False:
                             connection_whole.enabled = True
-            self.prune()
     
     def reset(self) -> None:
         """
@@ -284,13 +285,16 @@ class CPPN:
         :param input: input node
         :param weight: weight associated with the connection
         """
-        #TODO CHECK FOR CYCLES, FALSE IF CYCLES
+        #TODO Add comments
         new_connection = self.Connection(out, input, weight, self.innovation_counter) #Creates a new connection
-        self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
         self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
+        if self.has_cycles():
+            self.connections.remove(new_connection)
+            return False
+        self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
         return True
     
-    def to_phenotype(self):
+    def to_phenotype(self) -> np.array:
         """
         Function to pass each point in an 3D design space into the
         CPPN to be mapped to a phenotype. The output at each point
@@ -344,26 +348,32 @@ class CPPN:
         :return: boolean indicating if the CPPN contains cycles
         """
         for i in range(5): #Iterates through all five input nodes
-            popped = [] #List of popped nodes
+            visited = [] #List of visited nodes
             stack = [self.nodes[i]] #Stack for DFS
             while len(stack) != 0: #While there are still nodes to visit
                 current = stack.pop(len(stack) - 1) #Pops node from top of stack
-                if current in popped: #Checks if the popped node has already been encountered
+                if current in visited: #Checks if the node has already been visited
                     return True #If so there is a cycle in the CPPN
-                popped.append(current) #Adds the popped node to the list of popped nodes
+                visited.append(current) #Adds the popped node to the list of visited nodes
                 for connection in self.connections: #Iterates through all connections out of the node
                     if connection.out is current:
                         stack.append(connection.input) #Adds next nodes to visit to the stack
         return False #Returns false if no cycle was found
 
-
     def prune(self) -> None:
         #TODO
         pass
 
-    def num_activation_functions(self):
-        #TODO Add description
+    def num_activation_functions(self) -> dict:
+        """
+        Function to return the quantity of each different activation
+        function in the network
+
+        :rtype: dict
+        :return: dictionary containing activation functions as keys and the quantity of each
+        """
         functions = dict()
+        #Iterates through all nodes in a network, adding their activation function to a dictionary or incrementing their counter
         for node in self.nodes:
             if node.activation_function in functions:
                 functions[node.activation_function] = functions[node.activation_function]+1
@@ -372,11 +382,18 @@ class CPPN:
         
         return functions
 
-    def num_cells(self):
-        #TODO Add description
+    def num_cells(self) -> dict:
+        """
+        Function to return the number of the three different types of cells in the 
+        phenotype
+
+        :rtype: dict
+        :return dictionary containing number of skin and muscle cells
+        """
         none = 0
         skin = 0
         muscle = 0
+        #Iterates through phenotype cells and increments the associated cell counter
         for cell in self.phenotype:
             if cell == 0:
                 none+=1
