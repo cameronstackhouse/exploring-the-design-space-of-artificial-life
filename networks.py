@@ -337,24 +337,24 @@ class CPPN:
         
     def has_cycles(self) -> bool:
         """
-        Function to check if a CPPN contains cycles
+        Function which uses a depth first search
+        to check if a CPPN contains cycles
 
         :rtype: bool
         :return: boolean indicating if the CPPN contains cycles
         """
-        #TODO Add comments, ENSURE THIS WORKS
-        for i in range(5):
-            popped = []
-            stack = [self.nodes[i]]
-            while len(stack) != 0:
-                current = stack.pop(len(stack) - 1)
-                if current in popped:
-                    return True
-                popped.append(current)
-                for connection in self.connections:
+        for i in range(5): #Iterates through all five input nodes
+            popped = [] #List of popped nodes
+            stack = [self.nodes[i]] #Stack for DFS
+            while len(stack) != 0: #While there are still nodes to visit
+                current = stack.pop(len(stack) - 1) #Pops node from top of stack
+                if current in popped: #Checks if the popped node has already been encountered
+                    return True #If so there is a cycle in the CPPN
+                popped.append(current) #Adds the popped node to the list of popped nodes
+                for connection in self.connections: #Iterates through all connections out of the node
                     if connection.out is current:
-                        stack.append(connection.input)
-        return False
+                        stack.append(connection.input) #Adds next nodes to visit to the stack
+        return False #Returns false if no cycle was found
 
 
     def prune(self) -> None:
@@ -440,10 +440,6 @@ if __name__ == "__main__":
     ******************
     """
     a = CPPN([8,8,7])
-
-    #c = CPPN.Connection(a.nodes[len(a.nodes) - 1], a.nodes[0], 1, 3)
-
-    #a.connections.append(c)
 
     print(a.has_cycles())
    
