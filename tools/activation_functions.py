@@ -59,12 +59,15 @@ def neg_sqrt_abs(x: float) -> float:
     """
     return np.nan_to_num(-(sqrt_abs(x)))
 
-def normalize(x: float) -> float:
+def normalize(x: np.array) -> np.array:
     """
-    
-    :param x: 
+    Function to normalize a set of data to have values
+    between -1 and 1
+
+    :param x: array of input data to normalize
+    :rtype: numpy array
+    :return: normalized data (between -1 and 1)
     """
-    #TODO Add description
     x -= np.min(x)
     x /= np.max(x)
     x = np.nan_to_num(x)
