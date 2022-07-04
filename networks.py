@@ -343,33 +343,19 @@ class CPPN:
         :return: boolean indicating if the CPPN contains cycles
         """
         #TODO Add comments, ENSURE THIS WORKS
-        for node in self.nodes:
-            self.unmarked.append(node)
-        while len(self.unmarked) != 0:
-            node = self.unmarked.pop(0)
-            if self.visit(node) is True:
-                return True
-        
-        self.unmarked = []
-        self.temp_mark = []
+        for i in range(5):
+            popped = []
+            stack = [self.nodes[i]]
+            while len(stack) != 0:
+                current = stack.pop(len(stack) - 1)
+                if current in popped:
+                    return True
+                popped.append(current)
+                for connection in self.connections:
+                    if connection.out is current:
+                        stack.append(connection.input)
         return False
 
-    def visit(self, node):
-        """
-        
-        """
-        #TODO ADD COMMENTS AND ENSURE IT WORKS
-        if node in self.temp_mark:
-            return True
-        
-        if node in self.unmarked:
-            self.temp_mark.append(node)
-            for connection in self.connections:
-                if connection.out is node:
-                    self.visit(connection.input)
-            self.unmarked.remove(node)
-            self.temp_mark.remove(node)
-            return False
 
     def prune(self) -> None:
         #TODO
@@ -454,6 +440,10 @@ if __name__ == "__main__":
     ******************
     """
     a = CPPN([8,8,7])
+
+    #c = CPPN.Connection(a.nodes[len(a.nodes) - 1], a.nodes[0], 1, 3)
+
+    #a.connections.append(c)
 
     print(a.has_cycles())
    
