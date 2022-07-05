@@ -66,6 +66,7 @@ class Node:
         Function to sum the input values into the node and 
         pass the total into the nodes activation function
         """
+        #TODO EXCEEDING RECURSION DEPTH!!
         total = 0 #Summation of input values
         num_connections_in = 0 #Number of enabled connections into the node
 
@@ -76,10 +77,9 @@ class Node:
         
         #Checks if the number of conections into the node is the same as the number of inputs the node currently has
         if num_connections_in != len(self.inputs):
-            for conection in self.outer.connections:
-                #Activates the output node that has not been evaluated yet to provide the current node its input
-                if self is conection.input and connection.enabled and connection.out.output is None:
-                    conection.out.activate() #Activates the node that hasn't been activated yet
+            for connection in self.outer.connections:
+                if self is connection.input and connection.enabled and connection.out.output is None:
+                    connection.out.activate()
 
         for value in self.inputs:
             total += value #Sums the input values
@@ -209,6 +209,9 @@ class CPPN:
 
         self.reset() #Clears already existing values in CPPN
 
+        presence = None
+        material = None
+
         #Passes the correct input values into each input node in the network at the given point
         for node in self.nodes:
             if node.type is NodeType.INPUT_X:
@@ -228,8 +231,16 @@ class CPPN:
                 node.activate() #Activates the node
         
         for node in self.nodes: #Iterates through all nodes and activates all non input nodes (as they have already been activated)
-            if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D or NodeType.INPUT_B):
+            if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D or NodeType.INPUT_B or NodeType.PRESENCE_OUTPUT or NodeType.MATERIAL_OUTPUT):
                 node.activate()
+            
+            if node.type is NodeType.PRESENCE_OUTPUT:
+                presence = node
+            elif node.type is NodeType.MATERIAL_OUTPUT:
+                material = node
+        
+        presence.activate()
+        material.activate()
         
         return self.material_produced() #Returns an integer indicating the material at that voxel
 
@@ -246,10 +257,12 @@ class CPPN:
         TODO Remove links to node
         """
         #TODO Add comments
+        #Checks if the node is a hidden node, only hidden nodes can be deleted
         if node.type == NodeType.HIDDEN:
-            self.nodes.remove(node)
-            cons_to = []
-            cons_from = []
+            self.nodes.remove(node) #Removes node from CPPN
+            cons_to = [] #List of connections into the removed node
+            cons_from = [] #List of connections out of the removed node
+
             for connection in self.connections:
                 if connection.input is node:
                     cons_to.append(connection)
@@ -276,7 +289,7 @@ class CPPN:
         self.material = None
         self.presence = None 
     
-    def create_connection(self, out, input, weight) -> bool:
+    def create_connection(self, out: Node, input: Node, weight: float) -> bool:
         """
         Method to create a connection between two nodes
         with a given weight
@@ -285,11 +298,10 @@ class CPPN:
         :param input: input node
         :param weight: weight associated with the connection
         """
-        #TODO Add comments
         new_connection = self.Connection(out, input, weight, self.innovation_counter) #Creates a new connection
         self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
-        if self.has_cycles():
-            self.connections.remove(new_connection)
+        if self.has_cycles(): #Checks if the CPPN with the new connection has cycles
+            self.connections.remove(new_connection) #If so remove the new connection
             return False
         self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
         return True
@@ -329,7 +341,7 @@ class CPPN:
         when a coordinate point is passed into it) into an integer
         indicating what type of material exists at that location
         """
-        #TODO VASTLY NEEDS IMPROVING
+        #TODO Add comments
         presence = self.presence
         material = self.material
         if presence < 0.3:
@@ -463,8 +475,6 @@ if __name__ == "__main__":
     b = a.to_phenotype()
 
     newarr = b.reshape(8,8,7)
-
-    print(newarr)
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")

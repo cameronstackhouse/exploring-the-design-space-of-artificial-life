@@ -5,6 +5,8 @@ CPPNs
 
 from random import uniform, choice
 from networks import CPPN, NodeType, Node
+from matplotlib import pyplot as plt
+
 
 #TODO ADD LINE BACK IN
 #from tools.evaluate import evaluate_pop
@@ -43,9 +45,9 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
                 
         #Checks to see if a new overall fittest individual was produced
         
-        for individual in population:
-            if fittest == None or individual.fitness > fittest.fitness:
-                fittest = individual
+        # for individual in population:
+        #     if fittest == None or individual.fitness > fittest.fitness:
+        #         fittest = individual
         
         generations_complete+=1 #Increments generations counter
     
@@ -120,7 +122,7 @@ def add_node_rand_connection(cppn):
     """
     #TODO Add comments
     function = choice(cppn.activation_functions)
-    cppn.add_node(Node(function, NodeType.HIDDEN, cppn))
+    Node(function, NodeType.HIDDEN, cppn)
     valid = False
     while not valid:
         out = choice(cppn.nodes)
@@ -191,11 +193,11 @@ def remove_nodes(population, rate):
 def mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate):
     #TODO Complete functions to make work
     add_node_pop(population, add_node_rate) #Adds nodes to each cppn
-    remove_nodes(population, remove_node_rate) #Removes nodes from cppns #TODO COMPLETE
+    #remove_nodes(population, remove_node_rate) #Removes nodes from cppns #TODO COMPLETE
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
-    add_connections(population, add_edge_rate) #Adds edges to cppns #TODO COMPLETE
+    add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
-    remove_connections(population, remove_edge_rate) #Removes edges in cppns #TODO COMPLETE       
+    #remove_connections(population, remove_edge_rate) #Removes edges in cppns #TODO COMPLETE       
 
 
 if __name__ == "__main__":
@@ -206,10 +208,33 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    population = []
-    for _ in range(100):
-        population.append(CPPN([8,8,7]))
+    a, b = evolve(100, 0.5, 0.5, 0.1, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+
+    first = a[10]
+
+    print(len(first.nodes))
+
+    b = first.to_phenotype()
+
+    newarr = b.reshape(8,8,7)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    data = newarr
+    z,x,y = data.nonzero()
+
+    ax.scatter(x, y, z, cmap='coolwarm', alpha=1)
+    plt.show()
+
+    nc = first.num_cells()
+    na = first.num_activation_functions()
+
+    for x in nc:
+        print(f"{x}: {nc[x]}")
     
+    for x in na:
+        print(f"{x}: {na[x]}")
+
 
     
     
