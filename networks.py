@@ -4,6 +4,7 @@ compositional pattern-producing networks
 """
 
 #TODO ADD TYPE HINTING
+#TODO ADD LAYER SYSTEM. Nodes = [[], [], []] 3 Layer NN
 
 from random import choice, uniform
 from enum import Enum
@@ -75,7 +76,7 @@ class Node:
             if self is connection.input and connection.enabled:
                 num_connections_in+=1 #If the connection is a connection into the node, the number of connections counter is incremented
         
-        #TODO FIX THIS, FEED FORWARD INSTEAD, ITERATING THROUGH EACH LAYER
+        #TODO FIX THIS, FEED FORWARD INSTEAD, ITERATING THROUGH EACH LAYER. CHANGE TO ADD LAYERS OF NODES
         #Checks if the number of conections into the node is the same as the number of inputs the node currently has
         # if num_connections_in != len(self.inputs):
         #     for connection in self.outer.connections:
