@@ -122,12 +122,12 @@ def add_node_rand_connection(cppn):
     """
     #TODO Add comments
     function = choice(cppn.activation_functions)
-    Node(function, NodeType.HIDDEN, cppn)
+    new = Node(function, NodeType.HIDDEN, cppn)
     valid = False
     while not valid:
         out = choice(cppn.nodes)
         if out.type != NodeType.MATERIAL_OUTPUT and out.type != NodeType.PRESENCE_OUTPUT:
-            cppn.create_connection(out, cppn.nodes[len(cppn.nodes) - 1], uniform(0,1))
+            cppn.create_connection(out, new, uniform(0,1))
             valid = True
 
 def add_node_pop(population, rate):
@@ -171,10 +171,13 @@ def remove_connections(population, rate):
                 remove_connection(cppn, connection)
 
 def add_connection(cppn):
-    #TODO
-    #TODO Check for validity, cycles
-    cppn.prune()
-    pass
+    #TODO CHANGE TO LAYER SYSTEM
+    if len(cppn.nodes) != 7:
+        output = choice(cppn.nodes[7:])
+        input = choice(cppn.nodes[5:])
+        weight = uniform(0,1)
+        cppn.create_connection(output, input, weight)
+    
 
 def add_connections(population, rate):
     #TODO Add comments
@@ -208,11 +211,13 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.5, 0.5, 0.1, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.5, 0.5, 0.1, 0.9, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
-    first = a[10]
+    first = a[45]
 
-    print(len(first.nodes))
+    for con in first.connections:
+        if con.out.type is NodeType.HIDDEN:
+            print(con.input.type)
 
     b = first.to_phenotype()
 
@@ -226,14 +231,6 @@ if __name__ == "__main__":
     ax.scatter(x, y, z, cmap='coolwarm', alpha=1)
     plt.show()
 
-    nc = first.num_cells()
-    na = first.num_activation_functions()
-
-    for x in nc:
-        print(f"{x}: {nc[x]}")
-    
-    for x in na:
-        print(f"{x}: {na[x]}")
 
 
     
