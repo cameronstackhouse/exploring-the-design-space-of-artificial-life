@@ -75,11 +75,12 @@ class Node:
             if self is connection.input and connection.enabled:
                 num_connections_in+=1 #If the connection is a connection into the node, the number of connections counter is incremented
         
+        #TODO FIX THIS, FEED FORWARD INSTEAD, ITERATING THROUGH EACH LAYER
         #Checks if the number of conections into the node is the same as the number of inputs the node currently has
-        if num_connections_in != len(self.inputs):
-            for connection in self.outer.connections:
-                if self is connection.input and connection.enabled and connection.out.output is None:
-                    connection.out.activate()
+        # if num_connections_in != len(self.inputs):
+        #     for connection in self.outer.connections:
+        #         if self is connection.input and connection.enabled and connection.out.output is None:
+        #             connection.out.activate()
 
         for value in self.inputs:
             total += value #Sums the input values
