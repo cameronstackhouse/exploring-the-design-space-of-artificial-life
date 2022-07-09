@@ -122,10 +122,22 @@ def add_node_between_con(cppn):
     
     """
     #TODO Add comments
-    #TODO CHANGE TO ADD NODE INBETWEEN A RANDOM CONNECTION AND THEN DISABLE THAT CONNECTION
-    #TODO WHEN ADDING A NODE, DFS TO FIND NUMBER OF NODES IN PATH, IF LESS THAN len(nodes) ADD LAYER AND INCREMENT LAYER NUMBER OF ALL NODES ABOVE NEW LAYER
+    connection = choice(cppn.connections) 
+    layer_out = connection.out.layer
+    layer_in = connection.input.layer
+    new_layer = layer_in - layer_out
+    if len(cppn.nodes) > new_layer:
+        difference = len(cppn.nodes) - new_layer
+        for _ in range(difference):
+            #Increment layer num of all nodes in upper layers
+            for layer in cppn.nodes[1:]:
+                for node in layer:
+                    node.increment_layer()
+            cppn.nodes.insert(1, []) #Inserts a new layer
+    #TODO Create new node and place it at correct layer
     function = choice(cppn.activation_functions)
-    conenction = choice(cppn.connections) 
+    #TODO Add connections to and from the node
+    #TODO Disable old connection
     
 
 def add_node_pop(population, rate):
