@@ -94,6 +94,12 @@ class Node:
         """
         #TODO Add comments
         self.layer = self.layer + 1
+    
+    def decrement_layer(self) -> None:
+        """
+        
+        """
+        self.layer = self.layer -1
 
 class CPPN:
     """
@@ -244,8 +250,8 @@ class CPPN:
         """
         #TODO Add comments
         #Checks if the node is a hidden node, only hidden nodes can be deleted
-        if node.type == NodeType.HIDDEN:
-            self.nodes.remove(node) #Removes node from CPPN
+        if node.type is NodeType.HIDDEN:
+            self.nodes[node.layer].remove(node) #Removes node from CPPN
             cons_to = [] #List of connections into the removed node
             cons_from = [] #List of connections out of the removed node
 
@@ -261,9 +267,16 @@ class CPPN:
             for connection_to in cons_to:
                 for connection_from in cons_from:
                     for connection_whole in self.connections:
-                        if connection_whole.input is connection_to.output and connection_whole.output is connection_from.input and connection_whole.enabled == False:
+                        if connection_whole.input is connection_to.out and connection_whole.out is connection_from.input and connection_whole.enabled == False:
                             connection_whole.enabled = True
-    
+            
+            if len(self.nodes[node.layer]) == 0:
+                #TODO Remove layer
+                for layer in self.nodes[node.layer+1:]:
+                    for node in layer:
+                        node.decrement_layer()
+                self.nodes.pop(node.layer)
+
     def reset(self) -> None:
         """
         Clears input and output values of each node in the network
@@ -285,12 +298,17 @@ class CPPN:
         :param input: input node
         :param weight: weight associated with the connection
         """
+        for connection in self.connections:
+            if connection.out is out and connection.input is input:
+                return False
+
         new_connection = self.Connection(out, input, weight, self.innovation_counter) #Creates a new connection
         self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
-        if self.has_cycles(): #Checks if the CPPN with the new connection has cycles
-            self.connections.remove(new_connection) #If so remove the new connection
-            return False
+        # if self.has_cycles(): #Checks if the CPPN with the new connection has cycles
+        #     self.connections.remove(new_connection) #If so remove the new connection
+        #     return False
         self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
+
         return True
     
     def to_phenotype(self) -> np.array:

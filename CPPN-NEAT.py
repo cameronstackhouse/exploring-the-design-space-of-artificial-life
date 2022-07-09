@@ -3,7 +3,7 @@ Module to simulate CPPN-NEAT evolution on a population of
 CPPNs
 """
 
-from random import uniform, choice
+from random import randint, uniform, choice
 from networks import CPPN, NodeType, Node
 from matplotlib import pyplot as plt
 
@@ -103,7 +103,7 @@ def mutate_node(node):
     """
     #TODO Add description
     #Only mutates non output node activation functions as output node activation functions are always sigmoid functions
-    if node.type != NodeType.MATERIAL_OUTPUT or node.type != NodeType.PRESENCE_OUTPUT:
+    if node.type != NodeType.MATERIAL_OUTPUT and node.type != NodeType.PRESENCE_OUTPUT:
         node.activation_function = choice(node.outer.activation_functions)
 
 def mutate_nodes(population, rate):
@@ -122,32 +122,27 @@ def add_node_between_con(cppn):
     
     """
     #TODO Add comments
+    new_node = None
     connection = choice(cppn.connections) 
-    layer_out = connection.out.layer
-    layer_in = connection.input.layer
-    new_layer = layer_in - layer_out
+    out = connection.out
+    layers_to_end = len(cppn.nodes[out.layer+1:])
 
-    if len(cppn.nodes) > new_layer:
-        difference = len(cppn.nodes) - new_layer #Finds the layer the new node should be placed in
-        for _ in range(difference): #Adds extra layers 
-            #Increment layer num of all nodes in upper, non-input layers
-            for layer in cppn.nodes[1:]:
-                for node in layer:
-                    node.increment_layer()
-            cppn.nodes.insert(1, []) #Inserts a new layer into the CPPN
+    if layers_to_end == 1:
+        cppn.nodes.insert(out.layer+1, [])
+        new_node = Node(choice(cppn.activation_functions), NodeType.HIDDEN, cppn, out.layer+1)
 
-    #Creates a new node and place it at the correct layer
-    function = choice(cppn.activation_functions)
-    new_node = Node(function, NodeType.HIDDEN, cppn, new_layer)
+        for layer in cppn.nodes[out.layer+2:]:
+            for node in layer:
+                node.increment_layer()
+    else:
+        new_node = Node(choice, NodeType.HIDDEN, cppn, 1)
+    
+    connection_out = connection.out
+    connection_input = connection.input
 
-    #Adds connections to and from the node inbetween the original connection
-    weight_first = uniform(0,1)
-    weight_second = uniform(0,1)
-    cppn.create_connection(connection.out, new_node, weight_first)
-    cppn.create_connection(new_node, connection.input, weight_second)
-
-    #Disables the old connection
     connection.set_enabled(False)
+    cppn.create_connection(connection_out, new_node, uniform(0,1))
+    cppn.create_connection(new_node, connection_input, uniform(0,1))
 
 def add_node_pop(population, rate):
     """
@@ -191,12 +186,17 @@ def remove_connections(population, rate):
 
 def add_connection(cppn):
     #TODO CHANGE TO LAYER SYSTEM
-    if len(cppn.nodes) != 7:
-        output = choice(cppn.nodes[7:])
-        input = choice(cppn.nodes[5:])
+    if len(cppn.nodes) > 2:
+        output_layer_index = randint(0,len(cppn.nodes) - 2)
+        output = choice(cppn.nodes[output_layer_index])
+
+        input_layer = cppn.nodes[output_layer_index+1]
+
+        input = choice(input_layer)
+
         weight = uniform(0,1)
+
         cppn.create_connection(output, input, weight)
-    
 
 def add_connections(population, rate):
     #TODO Add comments
@@ -208,10 +208,12 @@ def remove_nodes(population, rate):
     #TODO Add comments
     #TODO Make functionality work in networks.py
     for cppn in population:
-        if rate >= uniform(0,1):
-            #TODO Choose random layer
-            to_remove = choice(cppn.nodes)
-            cppn.remove_node(to_remove)
+        if len(cppn.nodes) > 2:
+            if rate >= uniform(0,1):
+                #TODO Choose random layer
+                layer = choice(cppn.nodes[1:-1])
+                node = choice(layer)
+                cppn.remove_node(node)
 
 def mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate):
     #TODO Complete functions to make work
@@ -231,13 +233,12 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.5, 0.5, 0.1, 0.9, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.2, 0.5, 0.05, 0.9, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
     first = a[45]
 
-    for con in first.connections:
-        if con.out.type is NodeType.HIDDEN:
-            print(con.input.type)
+    for layer in first.nodes:
+        print(len(layer))
 
     b = first.to_phenotype()
 
