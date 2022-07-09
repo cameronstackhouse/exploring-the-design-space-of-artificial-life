@@ -68,21 +68,7 @@ class Node:
         Function to sum the input values into the node and 
         pass the total into the nodes activation function
         """
-        #TODO EXCEEDING RECURSION DEPTH!!
         total = 0 #Summation of input values
-        num_connections_in = 0 #Number of enabled connections into the node
-
-        #Iterates through the list of connections checking for connections into the node
-        for connection in self.outer.connections:
-            if self is connection.input and connection.enabled:
-                num_connections_in+=1 #If the connection is a connection into the node, the number of connections counter is incremented
-        
-        #TODO FIX THIS, FEED FORWARD INSTEAD, ITERATING THROUGH EACH LAYER. CHANGE TO ADD LAYERS OF NODES
-        #Checks if the number of conections into the node is the same as the number of inputs the node currently has
-        # if num_connections_in != len(self.inputs):
-        #     for connection in self.outer.connections:
-        #         if self is connection.input and connection.enabled and connection.out.output is None:
-        #             connection.out.activate()
 
         for value in self.inputs:
             total += value #Sums the input values
