@@ -126,19 +126,28 @@ def add_node_between_con(cppn):
     layer_out = connection.out.layer
     layer_in = connection.input.layer
     new_layer = layer_in - layer_out
+
     if len(cppn.nodes) > new_layer:
-        difference = len(cppn.nodes) - new_layer
-        for _ in range(difference):
-            #Increment layer num of all nodes in upper layers
+        difference = len(cppn.nodes) - new_layer #Finds the layer the new node should be placed in
+        for _ in range(difference): #Adds extra layers 
+            #Increment layer num of all nodes in upper, non-input layers
             for layer in cppn.nodes[1:]:
                 for node in layer:
                     node.increment_layer()
-            cppn.nodes.insert(1, []) #Inserts a new layer
-    #TODO Create new node and place it at correct layer
+            cppn.nodes.insert(1, []) #Inserts a new layer into the CPPN
+
+    #Creates a new node and place it at the correct layer
     function = choice(cppn.activation_functions)
-    #TODO Add connections to and from the node
-    #TODO Disable old connection
-    
+    new_node = Node(function, NodeType.HIDDEN, cppn, new_layer)
+
+    #Adds connections to and from the node inbetween the original connection
+    weight_first = uniform(0,1)
+    weight_second = uniform(0,1)
+    cppn.create_connection(connection.out, new_node, weight_first)
+    cppn.create_connection(new_node, connection.input, weight_second)
+
+    #Disables the old connection
+    connection.set_enabled(False)
 
 def add_node_pop(population, rate):
     """

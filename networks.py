@@ -234,6 +234,7 @@ class CPPN:
         Method to add a node to the CPPN
 
         :param node: node to be added to the CPPN
+        :param layer: layer of the CPPN to add the node into
         """
         self.nodes[layer].append(node) #Adds node to the list of nodes in the CPPN
     
