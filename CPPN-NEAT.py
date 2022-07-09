@@ -112,6 +112,7 @@ def mutate_nodes(population, rate):
     """
     #TODO Add description and comments
     for cppn in population:
+        #TODO Iterate through each layer
         for node in cppn.nodes:
             if rate >= uniform(0,1):
                 mutate_node(node)
@@ -125,6 +126,7 @@ def add_node_rand_connection(cppn):
     new = Node(function, NodeType.HIDDEN, cppn)
     valid = False
     while not valid:
+        #TODO choose random node from previous layers
         out = choice(cppn.nodes)
         if out.type != NodeType.MATERIAL_OUTPUT and out.type != NodeType.PRESENCE_OUTPUT:
             cppn.create_connection(out, new, uniform(0,1))
@@ -190,6 +192,7 @@ def remove_nodes(population, rate):
     #TODO Make functionality work in networks.py
     for cppn in population:
         if rate >= uniform(0,1):
+            #TODO Choose random layer
             to_remove = choice(cppn.nodes)
             cppn.remove_node(to_remove)
 

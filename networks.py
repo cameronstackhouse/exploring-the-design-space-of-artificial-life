@@ -31,7 +31,7 @@ class Node:
     """
     Class defining a node in a compositional pattern-producing network
     """
-    def __init__(self, activation_function, type, outer_cppn) -> None:
+    def __init__(self, activation_function, type, outer_cppn, layer) -> None:
         """
         Initilization method for creating a CPPN node
 
@@ -44,7 +44,7 @@ class Node:
         self.type = type #Type of node (Input, Hidden, Output)
         self.output = None #Initilises the node output to none
         self.outer = outer_cppn
-        outer_cppn.add_node(self) #Adds the node to the CPPNs list of nodes
+        outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
     
     def set_activation_function(self, activation_function) -> None:
         """
@@ -117,8 +117,9 @@ class CPPN:
         :param xyz_size: volume of the coordinate space for design
         """
         #TODO Add ability to change the size of the 3D coordinate space (Use JSON settings file)
+        #TODO Change node comments
         self.activation_functions = [np.sin, np.abs, neg_abs, np.square, neg_square, sqrt_abs, neg_sqrt_abs] #List of possible activation functions for each node in the network
-        self.nodes = [] #List of nodes in the network
+        self.nodes = [[], []] #List of nodes in the network
         self.connections = [] #List of connections between nodes in the network
         self.innovation_counter = 0 #Innovation counter for adding new connections to the network using NEAT
         self.material = None #Output indicating what type of material is present at a given location
@@ -186,18 +187,17 @@ class CPPN:
         #Creates an input node for each paramater: i, j, k, d, and b
         for type in [NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z, NodeType.INPUT_D, NodeType.INPUT_B]:
             activation_function = choice(self.activation_functions) #Chooses a random activation function
-            Node(activation_function, type, self) #Creates the new node, automatically adding it to the CPPN
+            Node(activation_function, type, self, 0) #Creates the new node, automatically adding it to the first layer in the CPPN
 
-        #Creates an output node for material and presence
-        material = Node(sigmoid, NodeType.MATERIAL_OUTPUT, self)
-        presence = Node(sigmoid, NodeType.PRESENCE_OUTPUT, self)
+        #Creates an output node for material and presence and adds both to the output layer
+        material = Node(sigmoid, NodeType.MATERIAL_OUTPUT, self, 1)
+        presence = Node(sigmoid, NodeType.PRESENCE_OUTPUT, self, 1)
 
-        #Connects the input functions with the two output nodes 
-        for node in self.nodes:
-            if node.type is not NodeType.MATERIAL_OUTPUT and node.type is not NodeType.PRESENCE_OUTPUT: #If the node isn't an output node
-                #Connect the node to the two output nodes
-                self.create_connection(node, material, uniform(0,1))
-                self.create_connection(node, presence, uniform(0,1))
+        #Connects the input nodes with the two output nodes
+        for node in self.nodes[0]:
+            #Connect the node to the two output nodes
+            self.create_connection(node, material, uniform(0,1))
+            self.create_connection(node, presence, uniform(0,1))
     
     def run(self, pixel: int) -> int:
         """
@@ -211,11 +211,8 @@ class CPPN:
 
         self.reset() #Clears already existing values in CPPN
 
-        presence = None
-        material = None
-
         #Passes the correct input values into each input node in the network at the given point
-        for node in self.nodes:
+        for node in self.nodes[0]:
             if node.type is NodeType.INPUT_X:
                 node.add_input(self.x_inputs[pixel])
                 node.activate() #Activates the node
@@ -232,31 +229,23 @@ class CPPN:
                 node.add_input(self.b_inputs[pixel])
                 node.activate() #Activates the node
         
-        for node in self.nodes: #Iterates through all nodes and activates all non input nodes (as they have already been activated)
-            if node.type is not (NodeType.INPUT_Y or NodeType.INPUT_X or NodeType.INPUT_Z or NodeType.INPUT_D or NodeType.INPUT_B or NodeType.PRESENCE_OUTPUT or NodeType.MATERIAL_OUTPUT):
+        for layer in self.nodes[1:]: #Iterates through all nodes and activates all non input nodes (as they have already been activated)
+            for node in layer:
                 node.activate()
-            
-            if node.type is NodeType.PRESENCE_OUTPUT:
-                presence = node
-            elif node.type is NodeType.MATERIAL_OUTPUT:
-                material = node
-        
-        presence.activate()
-        material.activate()
         
         return self.material_produced() #Returns an integer indicating the material at that voxel
 
-    def add_node(self, node: Node) -> None:
+    def add_node(self, node: Node, layer: int) -> None:
         """
         Method to add a node to the CPPN
 
         :param node: node to be added to the CPPN
         """
-        self.nodes.append(node) #Adds node to the list of nodes in the CPPN
+        self.nodes[layer].append(node) #Adds node to the list of nodes in the CPPN
     
     def remove_node(self, node: Node):
         """
-        TODO Remove links to node
+        
         """
         #TODO Add comments
         #Checks if the node is a hidden node, only hidden nodes can be deleted
@@ -284,9 +273,10 @@ class CPPN:
         """
         Clears input and output values of each node in the network
         """
-        for node in self.nodes: #Clears individual nodes I/O
-            node.inputs = []
-            node.output = None
+        for layer in self.nodes: #Clears individual nodes I/O
+            for node in layer:
+                node.inputs = []
+                node.output = None
         #Clears CPPN output values
         self.material = None
         self.presence = None 
@@ -361,9 +351,9 @@ class CPPN:
         :rtype: bool
         :return: boolean indicating if the CPPN contains cycles
         """
-        for i in range(5): #Iterates through all five input nodes
+        for node in self.nodes[0]: #Iterates through all five input nodes
             visited = [] #List of visited nodes
-            stack = [self.nodes[i]] #Stack for DFS
+            stack = [node] #Stack for DFS
             while len(stack) != 0: #While there are still nodes to visit
                 current = stack.pop(len(stack) - 1) #Pops node from top of stack
                 if current in visited: #Checks if the node has already been visited
@@ -388,11 +378,12 @@ class CPPN:
         """
         functions = dict()
         #Iterates through all nodes in a network, adding their activation function to a dictionary or incrementing their counter
-        for node in self.nodes:
-            if node.activation_function in functions:
-                functions[node.activation_function] = functions[node.activation_function]+1
-            else:
-                functions[node.activation_function] = 1
+        for layer in self.nodes:
+            for node in layer:
+                if node.activation_function in functions:
+                    functions[node.activation_function] = functions[node.activation_function]+1
+                else:
+                    functions[node.activation_function] = 1
         
         return functions
 
