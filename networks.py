@@ -44,6 +44,7 @@ class Node:
         self.type = type #Type of node (Input, Hidden, Output)
         self.output = None #Initilises the node output to none
         self.outer = outer_cppn
+        self.layer = layer
         outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
     
     def set_activation_function(self, activation_function) -> None:
@@ -100,6 +101,13 @@ class Node:
         #If the node is a material output node then update the CPPN material output value
         if self.type == NodeType.MATERIAL_OUTPUT:
             self.outer.material = self.output
+    
+    def increment_layer(self) -> None:
+        """
+        
+        """
+        #TODO Add comments
+        self.layer = self.layer + 1
 
 class CPPN:
     """

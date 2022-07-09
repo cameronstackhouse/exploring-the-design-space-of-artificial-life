@@ -112,25 +112,21 @@ def mutate_nodes(population, rate):
     """
     #TODO Add description and comments
     for cppn in population:
-        #TODO Iterate through each layer
-        for node in cppn.nodes:
-            if rate >= uniform(0,1):
-                mutate_node(node)
+        for layer in cppn.nodes:
+            for node in layer:
+                if rate >= uniform(0,1):
+                    mutate_node(node)
 
 def add_node_rand_connection(cppn):
     """
     
     """
     #TODO Add comments
+    #TODO CHANGE TO ADD NODE INBETWEEN A RANDOM CONNECTION AND THEN DISABLE THAT CONNECTION
+    #TODO WHEN ADDING A NODE, DFS TO FIND NUMBER OF NODES IN PATH, IF LESS THAN len(nodes) ADD LAYER AND INCREMENT LAYER NUMBER OF ALL NODES ABOVE NEW LAYER
+    #TODO DISABLE CONNECTION BETWEEN PREVIOUS TWO NODES
     function = choice(cppn.activation_functions)
-    new = Node(function, NodeType.HIDDEN, cppn)
-    valid = False
-    while not valid:
-        #TODO choose random node from previous layers
-        out = choice(cppn.nodes)
-        if out.type != NodeType.MATERIAL_OUTPUT and out.type != NodeType.PRESENCE_OUTPUT:
-            cppn.create_connection(out, new, uniform(0,1))
-            valid = True
+    
 
 def add_node_pop(population, rate):
     """
