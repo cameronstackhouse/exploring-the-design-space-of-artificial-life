@@ -125,18 +125,15 @@ def add_node_between_con(cppn):
     new_node = None
     connection = choice(cppn.connections) 
     out = connection.out
-    layers_to_end = len(cppn.nodes[out.layer+1:])
+    input = connection.input
 
-    if layers_to_end == 1:
+    out_layer = connection.out.layer
+
+    if input in cppn.nodes[out_layer+1]:
         cppn.nodes.insert(out.layer+1, [])
-        new_node = Node(choice(cppn.activation_functions), NodeType.HIDDEN, cppn, out.layer+1)
+     
+    new_node = Node(choice(cppn.activation_functions), NodeType.HIDDEN, cppn, out.layer+1)
 
-        for layer in cppn.nodes[out.layer+2:]:
-            for node in layer:
-                node.increment_layer()
-    else:
-        new_node = Node(choice, NodeType.HIDDEN, cppn, 1) #TODO FIX THIS!!
-    
     connection_out = connection.out
     connection_input = connection.input
 
@@ -233,7 +230,7 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.2, 0.5, 0.05, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.5, 0.5, 0.05, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
     first = a[45]
 

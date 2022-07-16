@@ -15,6 +15,7 @@ def evaluate_pop(pop, run_directory, run_name, truncation_rate):
     start = time.time() 
     num_evaluated = 0
 
+    #Pass fitness function in here
     vxa = VXA(EnableExpansion=1, SimTime=5) # pass vxa tags in here
     
     vxa.add_material(RGBA=(255,0,255), E=5e4, RHO=1e4)
