@@ -171,7 +171,6 @@ def remove_connection(cppn, connection):
     #TODO 
     #TODO Check for validity of removal. Check at least 1 connection to 2 output nodes
     cppn.connections.remove(connection)
-    cppn.prune()
     
 
 def remove_connections(population, rate):
@@ -230,7 +229,7 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.5, 0.5, 0.05, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.13, 0.5, 0.05, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
     first = a[45]
 
@@ -240,6 +239,13 @@ if __name__ == "__main__":
     b = first.to_phenotype()
 
     newarr = b.reshape(8,8,7)
+
+    na = first.num_activation_functions()
+
+    for x in na:
+        print(f"{x}: {na[x]}")
+    
+    print(first.num_cells())
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")

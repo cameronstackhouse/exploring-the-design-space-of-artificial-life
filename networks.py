@@ -44,7 +44,7 @@ class Node:
         self.type = type #Type of node (Input, Hidden, Output)
         self.output = None #Initilises the node output to none
         self.outer = outer_cppn
-        self.layer = layer
+        self.layer = layer #TODO REMOVE THIS AND METHODS ASSOCIATED WITH THIS
         outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
     
     def set_activation_function(self, activation_function) -> None:
@@ -249,6 +249,7 @@ class CPPN:
         
         """
         #TODO Add comments
+        #TODO CHANGE TO WORK WITH NODE LAYER SYSTEM, MAYBE REMOVE POPPING USING LAYER ASSOCIATED WITH NODE
         #Checks if the node is a hidden node, only hidden nodes can be deleted
         if node.type is NodeType.HIDDEN:
             self.nodes[node.layer].remove(node) #Removes node from CPPN
@@ -347,6 +348,7 @@ class CPPN:
         indicating what type of material exists at that location
         """
         #TODO Add comments
+        #TODO Ask chico about this!
         presence = self.presence
         material = self.material
         if presence < 0.3:
@@ -376,10 +378,6 @@ class CPPN:
                     if connection.out is current:
                         stack.append(connection.input) #Adds next nodes to visit to the stack
         return False #Returns false if no cycle was found
-
-    def prune(self) -> None:
-        #TODO
-        pass
 
     def num_activation_functions(self) -> dict:
         """
