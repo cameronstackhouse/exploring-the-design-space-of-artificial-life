@@ -138,12 +138,6 @@ def add_node_between_con(cppn):
         if out in cppn.nodes[i]:
             counter = i
             break
-    
-    in_layer = 0
-    for i in range(len(cppn.nodes)):
-        if input in cppn.nodes[i]:
-            in_layer = i
-            break
 
     out_layer = counter
 
@@ -223,7 +217,6 @@ def add_connections(population, rate):
 
 def remove_nodes(population, rate):
     #TODO Add comments
-    #TODO FIX, STOP NODES FROM BEING ADDED TO LAST LAYER
     for cppn in population:
         if len(cppn.nodes) > 2:
             if rate >= uniform(0,1):
@@ -269,12 +262,16 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.7, 0.1, 0.5, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.7, 0.1, 0.3, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
     first = a[89]
 
     for layer in first.nodes:
         print(len(layer))
+
+    for connection in first.connections:
+        if connection.out.type is NodeType.PRESENCE_OUTPUT or connection.out.type is NodeType.MATERIAL_OUTPUT:
+            print("THIS SHOULDNT HAPPEN")
 
     b = first.to_phenotype()
 
