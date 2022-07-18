@@ -147,16 +147,11 @@ def add_node_between_con(cppn):
 
     out_layer = counter
 
-    try:
-        if input in cppn.nodes[out_layer+1]:
-            cppn.nodes.insert(out_layer+1, [])
-    except:
-        print(f"{out_layer} : {in_layer}")
-        print(f"{out.type} : {input.type}")
-        print(f"conenction marker: {connection.historical_marking}")
-        for layer in cppn.nodes:
-            print(len(layer))
-     
+    if out_layer+1 == len(cppn.nodes)-1:
+        cppn.nodes.insert(out_layer+1, [])
+    elif input in cppn.nodes[out_layer+1]:
+        cppn.nodes.insert(out_layer+1, [])
+ 
     new_node = Node(choice(cppn.activation_functions), NodeType.HIDDEN, cppn, out_layer+1)
     new_node.previous_in = connection.input
     new_node.previous_out = connection.out
@@ -246,13 +241,20 @@ def remove_nodes(population, rate):
                 #TODO USE PREVIOUS IN/OUT TO RENABLE CONNECTIONS
                 for connection in cppn.connections:
                     if connection.out is node.previous_out and connection.input is node.previous_in:
-                        connection.set_enabled(True)
+
+                        endpoint_exists = False
+                        for layer in cppn.nodes:
+                            if connection.input in layer:
+                                endpoint_exists = True
+                        
+                        if endpoint_exists:
+                            connection.set_enabled(True)
  
 
 def mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate):
     #TODO Complete functions to make work
     add_node_pop(population, add_node_rate) #Adds nodes to each cppn
-    #remove_nodes(population, remove_node_rate) #Removes nodes from cppns #TODO COMPLETE
+    remove_nodes(population, remove_node_rate) #Removes nodes from cppns #TODO COMPLETE
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
