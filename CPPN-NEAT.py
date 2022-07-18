@@ -247,7 +247,7 @@ def remove_nodes(population, rate):
 def mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate):
     #TODO Complete functions to make work
     add_node_pop(population, add_node_rate) #Adds nodes to each cppn
-    remove_nodes(population, remove_node_rate) #Removes nodes from cppns #TODO COMPLETE
+    remove_nodes(population, remove_node_rate) #Removes nodes from cppns
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.7, 0.1, 0.3, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.4, 0.1, 0.3, 0.3, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
     first = a[89]
 
