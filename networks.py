@@ -44,6 +44,8 @@ class Node:
         self.type = type #Type of node (Input, Hidden, Output)
         self.output = None #Initilises the node output to none
         self.outer = outer_cppn
+        self.previous_out = None
+        self.previous_in = None
         outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
     
     def set_activation_function(self, activation_function) -> None:

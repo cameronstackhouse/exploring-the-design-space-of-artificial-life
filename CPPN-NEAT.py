@@ -123,30 +123,27 @@ def add_node_between_con(cppn):
     """
     #TODO Add comments
     new_node = None
-    valid = False
 
-    #TODO FIX, GETS STUCK IN WHILE LOOP, REENABLE OLD CONNECTION
-    while not valid:
-        connection = choice(cppn.connections) 
-        if connection.enabled == True:
-            valid = True
-    
+    enabled_connections = []
+    for connection in cppn.connections:
+        if connection.enabled:
+            enabled_connections.append(connection)
+
+    connection = choice(enabled_connections) 
     out = connection.out
     input = connection.input
 
     counter = 0
-    for layer in cppn.nodes:
-        if out in layer:
-            out_layer = counter
+    for i in range(len(cppn.nodes)):
+        if out in cppn.nodes[i]:
+            counter = i
             break
-        counter+=1
     
     in_layer = 0
-    for layer in cppn.nodes:
-        if input in layer:
-            in_layer = counter
+    for i in range(len(cppn.nodes)):
+        if input in cppn.nodes[i]:
+            in_layer = i
             break
-        in_layer+=1
 
     out_layer = counter
 
@@ -156,8 +153,13 @@ def add_node_between_con(cppn):
     except:
         print(f"{out_layer} : {in_layer}")
         print(f"{out.type} : {input.type}")
+        print(f"conenction marker: {connection.historical_marking}")
+        for layer in cppn.nodes:
+            print(len(layer))
      
     new_node = Node(choice(cppn.activation_functions), NodeType.HIDDEN, cppn, out_layer+1)
+    new_node.previous_in = connection.input
+    new_node.previous_out = connection.out
 
     connection_out = connection.out
     connection_input = connection.input
@@ -196,7 +198,6 @@ def remove_connection(cppn, connection):
     #TODO 
     cppn.connections.remove(connection)
     #TODO Check for validity of removal. Check at least 1 route to the 2 output nodes (dfs)
-    
 
 def remove_connections(population, rate):
     #TODO Add comments
@@ -227,7 +228,7 @@ def add_connections(population, rate):
 
 def remove_nodes(population, rate):
     #TODO Add comments
-    #TODO Make functionality work in networks.py
+    #TODO FIX, STOP NODES FROM BEING ADDED TO LAST LAYER
     for cppn in population:
         if len(cppn.nodes) > 2:
             if rate >= uniform(0,1):
@@ -239,15 +240,19 @@ def remove_nodes(population, rate):
                 #Disables all connections into and out of the node
                 for connection in cppn.connections:
                     if connection.input is node or connection.out is node:
-                        connection.set_enabled(False)
+                        #connection.set_enabled(False)
+                        cppn.connections.remove(connection)
                 
-                #TODO Clean up, re enable old connections
+                #TODO USE PREVIOUS IN/OUT TO RENABLE CONNECTIONS
+                for connection in cppn.connections:
+                    if connection.out is node.previous_out and connection.input is node.previous_in:
+                        connection.set_enabled(True)
  
 
 def mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate):
     #TODO Complete functions to make work
     add_node_pop(population, add_node_rate) #Adds nodes to each cppn
-    remove_nodes(population, remove_node_rate) #Removes nodes from cppns #TODO COMPLETE
+    #remove_nodes(population, remove_node_rate) #Removes nodes from cppns #TODO COMPLETE
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
@@ -262,7 +267,7 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.13, 0.5, 0.05, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.7, 0.1, 0.5, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
     first = a[89]
 

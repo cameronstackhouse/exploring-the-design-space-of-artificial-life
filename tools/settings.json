@@ -1,5 +1,5 @@
 {
-    "pipeline": {
+    "pipeline_params": {
         "node_add_rate": 0.3,
         "node_removal_rate": 0.1,
         "mutate_node_rate": 0.3,
