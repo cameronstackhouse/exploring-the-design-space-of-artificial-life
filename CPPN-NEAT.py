@@ -122,17 +122,42 @@ def add_node_between_con(cppn):
     
     """
     #TODO Add comments
+    #TODO FIX, GETS STUCK IN WHILE LOOP, REENABLE OLD CONNECTION
     new_node = None
-    connection = choice(cppn.connections) 
+    valid = False
+
+    while not valid:
+        connection = choice(cppn.connections) 
+        if connection.enabled == True:
+            valid = True
+    
     out = connection.out
     input = connection.input
 
-    out_layer = connection.out.layer
+    counter = 0
+    for layer in cppn.nodes:
+        if out in layer:
+            out_layer = counter
+            break
+        counter+=1
+    
+    in_layer = 0
+    for layer in cppn.nodes:
+        if input in layer:
+            in_layer = counter
+            break
+        in_layer+=1
 
-    if input in cppn.nodes[out_layer+1]:
-        cppn.nodes.insert(out.layer+1, [])
+    out_layer = counter
+
+    try:
+        if input in cppn.nodes[out_layer+1]:
+            cppn.nodes.insert(out_layer+1, [])
+    except:
+        print(f"{out_layer} : {in_layer}")
+        print(f"{out.type} : {input.type}")
      
-    new_node = Node(choice(cppn.activation_functions), NodeType.HIDDEN, cppn, out.layer+1)
+    new_node = Node(choice(cppn.activation_functions), NodeType.HIDDEN, cppn, out_layer+1)
 
     connection_out = connection.out
     connection_input = connection.input
@@ -169,8 +194,8 @@ def mutate_connections(population, rate):
 
 def remove_connection(cppn, connection):
     #TODO 
-    #TODO Check for validity of removal. Check at least 1 connection to 2 output nodes
     cppn.connections.remove(connection)
+    #TODO Check for validity of removal. Check at least 1 route to the 2 output nodes (dfs)
     
 
 def remove_connections(population, rate):
@@ -210,11 +235,13 @@ def remove_nodes(population, rate):
                 layer = choice(cppn.nodes[1:-1])
                 node = choice(layer)
                 cppn.remove_node(node)
+                #TODO Clean up, re add connections
+ 
 
 def mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate):
     #TODO Complete functions to make work
     add_node_pop(population, add_node_rate) #Adds nodes to each cppn
-    #remove_nodes(population, remove_node_rate) #Removes nodes from cppns #TODO COMPLETE
+    remove_nodes(population, remove_node_rate) #Removes nodes from cppns #TODO COMPLETE
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
@@ -229,9 +256,9 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.13, 0.5, 0.05, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.13, 0.5, 0.5, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
-    first = a[45]
+    first = a[89]
 
     for layer in first.nodes:
         print(len(layer))

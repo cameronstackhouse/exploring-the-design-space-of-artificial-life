@@ -44,7 +44,6 @@ class Node:
         self.type = type #Type of node (Input, Hidden, Output)
         self.output = None #Initilises the node output to none
         self.outer = outer_cppn
-        self.layer = layer #TODO REMOVE THIS AND METHODS ASSOCIATED WITH THIS
         outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
     
     def set_activation_function(self, activation_function) -> None:
@@ -88,18 +87,6 @@ class Node:
         if self.type == NodeType.MATERIAL_OUTPUT:
             self.outer.material = self.output
     
-    def increment_layer(self) -> None:
-        """
-        
-        """
-        #TODO Add comments
-        self.layer = self.layer + 1
-    
-    def decrement_layer(self) -> None:
-        """
-        
-        """
-        self.layer = self.layer -1
 
 class CPPN:
     """
@@ -249,34 +236,30 @@ class CPPN:
         
         """
         #TODO Add comments
-        #TODO CHANGE TO WORK WITH NODE LAYER SYSTEM, MAYBE REMOVE POPPING USING LAYER ASSOCIATED WITH NODE
         #Checks if the node is a hidden node, only hidden nodes can be deleted
         if node.type is NodeType.HIDDEN:
-            self.nodes[node.layer].remove(node) #Removes node from CPPN
-            cons_to = [] #List of connections into the removed node
-            cons_from = [] #List of connections out of the removed node
+            for n, layer in enumerate(self.nodes):
+                if node in layer:
+                    layer.remove(node)
 
-            for connection in self.connections:
-                if connection.input is node:
-                    cons_to.append(connection)
-                    self.connections.remove(connection)
-                elif connection.out is node:
-                    cons_from.append(connection)
-                    self.connections.remove(connection)
-            
-            #TODO CLEAN THIS UP
-            for connection_to in cons_to:
-                for connection_from in cons_from:
-                    for connection_whole in self.connections:
-                        if connection_whole.input is connection_to.out and connection_whole.out is connection_from.input and connection_whole.enabled == False:
-                            connection_whole.enabled = True
-            
-            if len(self.nodes[node.layer]) == 0:
-                #TODO Remove layer
-                for layer in self.nodes[node.layer+1:]:
-                    for node in layer:
-                        node.decrement_layer()
-                self.nodes.pop(node.layer)
+                    #Disables all connections into and out of the node
+                    for connection in self.connections:
+                        if connection.input is node:
+                            connection.set_enabled(False)
+                        elif connection.out is node:
+                            connection.set_enabled(False)
+                    
+                    #TODO Have to fix re enabling connections!
+                    # for connection_to in connections_to:
+                    #     for connection_from in connections_from:
+                    #         for connection_whole in self.connections:
+                    #             if connection_whole.input is connection_to.out and connection_whole.out is connection_from.input and not connection_whole.enabled:
+                    #                 connection_whole.set_enabled(True)
+                    #                 print("HEREE")
+                    
+                    if len(layer) == 0:
+                        self.nodes.pop(n)
+                    break
 
     def reset(self) -> None:
         """

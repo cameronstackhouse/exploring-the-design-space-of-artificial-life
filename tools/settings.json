@@ -1,0 +1,11 @@
+{
+    "pipeline": {
+        "node_add_rate": 0.3,
+        "node_removal_rate": 0.1,
+        "mutate_node_rate": 0.3,
+        "connection_addition_rate": 0.2,
+        "connection_removal_rate": 0.1,
+        "mutate_connection_rate": 0.3,
+        "truncation_rate": 0.3
+    }
+}
