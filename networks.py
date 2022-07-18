@@ -241,23 +241,8 @@ class CPPN:
             for n, layer in enumerate(self.nodes):
                 if node in layer:
                     layer.remove(node)
-
-                    #Disables all connections into and out of the node
-                    for connection in self.connections:
-                        if connection.input is node:
-                            connection.set_enabled(False)
-                        elif connection.out is node:
-                            connection.set_enabled(False)
                     
-                    #TODO Have to fix re enabling connections!
-                    # for connection_to in connections_to:
-                    #     for connection_from in connections_from:
-                    #         for connection_whole in self.connections:
-                    #             if connection_whole.input is connection_to.out and connection_whole.out is connection_from.input and not connection_whole.enabled:
-                    #                 connection_whole.set_enabled(True)
-                    #                 print("HEREE")
-                    
-                    if len(layer) == 0:
+                    if len(layer) == 0: #Checks if layer is now empty, if so the layer is removed
                         self.nodes.pop(n)
                     break
 

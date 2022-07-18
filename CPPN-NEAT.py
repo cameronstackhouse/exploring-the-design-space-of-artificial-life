@@ -122,10 +122,10 @@ def add_node_between_con(cppn):
     
     """
     #TODO Add comments
-    #TODO FIX, GETS STUCK IN WHILE LOOP, REENABLE OLD CONNECTION
     new_node = None
     valid = False
 
+    #TODO FIX, GETS STUCK IN WHILE LOOP, REENABLE OLD CONNECTION
     while not valid:
         connection = choice(cppn.connections) 
         if connection.enabled == True:
@@ -235,7 +235,13 @@ def remove_nodes(population, rate):
                 layer = choice(cppn.nodes[1:-1])
                 node = choice(layer)
                 cppn.remove_node(node)
-                #TODO Clean up, re add connections
+        
+                #Disables all connections into and out of the node
+                for connection in cppn.connections:
+                    if connection.input is node or connection.out is node:
+                        connection.set_enabled(False)
+                
+                #TODO Clean up, re enable old connections
  
 
 def mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate):
@@ -256,7 +262,7 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.13, 0.5, 0.5, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.13, 0.5, 0.05, 0.2, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
     first = a[89]
 
