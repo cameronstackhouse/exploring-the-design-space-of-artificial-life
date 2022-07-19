@@ -130,7 +130,9 @@ def add_node_between_con(cppn):
         if connection.enabled:
             enabled_connections.append(connection)
 
+    
     connection = choice(enabled_connections) 
+    
     out = connection.out
     input = connection.input
 
@@ -185,15 +187,27 @@ def mutate_connections(population, rate):
                 mutate_connection(connection)
 
 def remove_connection(cppn, connection):
-    #TODO 
+    """
+    
+    """
+    #TODO add comments
     cppn.connections.remove(connection)
-    #TODO Check for validity of removal. Check at least 1 route to the 2 output nodes (dfs)
-
+    cppn.run(0)
+    end_nodes = cppn.nodes[-1]
+    for node in end_nodes:
+        if len(node.inputs) == 0:
+            cppn.connections.append(connection)
+            break
 
 def remove_connections(population, rate):
     #TODO Add comments
     for cppn in population:
+        enabled_connections = []
         for connection in cppn.connections:
+            if connection.enabled:
+                enabled_connections.append(connection)
+        
+        for connection in enabled_connections:
             if rate >= uniform(0,1):
                 remove_connection(cppn, connection)
 
@@ -217,7 +231,10 @@ def add_connections(population, rate):
         if rate >= uniform(0,1):
             add_connection(cppn)
 
-def remove_nodes(population, rate):
+def remove_nodes(population, rate) -> None:
+    """
+    
+    """
     #TODO Add comments
     for cppn in population:
         if len(cppn.nodes) > 2:
@@ -266,7 +283,7 @@ def mutate_population(population, add_node_rate, mutate_node_rate, remove_node_r
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
-    #remove_connections(population, remove_edge_rate) #Removes edges in cppns #TODO COMPLETE       
+    remove_connections(population, remove_edge_rate) #Removes edges in cppns
 
 
 if __name__ == "__main__":
@@ -277,7 +294,7 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.5, 0.1, 0.3, 0.3, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.5, 0.1, 0.3, 0.8, 0.5, 0.2, 0.3, 100, "a", [8,8,7])
 
     first = a[88]
 
@@ -294,23 +311,6 @@ if __name__ == "__main__":
 
     for x in na:
         print(f"{x}: {na[x]}")
-    
-    for connection in first.connections:
-        if connection.enabled:
-            input = connection.input
-            input_in = 0
-            for layer in first.nodes:
-                if input in layer:
-                    break
-                input_in+=1
-        
-            output_in = 0
-            for layer in first.nodes:
-                if connection.out in layer:
-                    break
-                output_in+=1
-        
-            print(f"Out layer: {output_in} Input layer: {input_in}")
     
     print(first.num_cells())
 
