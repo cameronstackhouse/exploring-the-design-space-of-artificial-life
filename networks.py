@@ -376,6 +376,37 @@ class CPPN:
         #TODO Determines the "symmetry" of the phenotype on each axis
         pass
 
+    def valid_connections(self) -> bool:
+        """
+        Function to determine if a CPPN has valid connections by
+        checking that every connection has the out node in
+        a lower layer to the input node
+
+        :rtype: bool
+        :return: boolean value indicating if the CPPN has valid connections
+        """
+        #Iterates through all enabled connections
+        for connection in self.connections:
+            if connection.enabled:
+                out = connection.out
+                input = connection.input
+
+                out_layer = 0
+                input_layer = 0
+
+                #Finds the layer index that the out and input nodes are on
+                for n, layer in enumerate(self.nodes):
+                    if out in layer:
+                        out_layer = n
+                    elif input in layer:
+                        input_layer = n
+
+                #Checks to ensure the layer index of input is lower than out
+                if out_layer >= input_layer:
+                    return False #If not return false, as there is an invalid connection 
+        
+        return True #If all connections are valid return true
+
     class Connection:
         """
         Class defining a connection between two nodes in a CPPN network
@@ -421,6 +452,8 @@ if __name__ == "__main__":
     ******************
     """
     a = CPPN([8,8,7])
+
+    print(a.valid_connections())
    
     b = a.to_phenotype()
 

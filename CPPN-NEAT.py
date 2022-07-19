@@ -277,9 +277,11 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.2, 0.1, 0.3, 0.3, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.5, 0.1, 0.3, 0.3, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
     first = a[88]
+
+    print(first.valid_connections())
 
     for layer in first.nodes:
         print(len(layer))
