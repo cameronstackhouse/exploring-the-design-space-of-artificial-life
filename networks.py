@@ -88,7 +88,6 @@ class Node:
         #If the node is a material output node then update the CPPN material output value
         if self.type == NodeType.MATERIAL_OUTPUT:
             self.outer.material = self.output
-    
 
 class CPPN:
     """
@@ -328,27 +327,6 @@ class CPPN:
         else:
             return 2
         
-    def has_cycles(self) -> bool:
-        """
-        Function which uses a depth first search
-        to check if a CPPN contains cycles
-
-        :rtype: bool
-        :return: boolean indicating if the CPPN contains cycles
-        """
-        for node in self.nodes[0]: #Iterates through all five input nodes
-            visited = [] #List of visited nodes
-            stack = [node] #Stack for DFS
-            while len(stack) != 0: #While there are still nodes to visit
-                current = stack.pop(len(stack) - 1) #Pops node from top of stack
-                if current in visited: #Checks if the node has already been visited
-                    return True #If so there is a cycle in the CPPN
-                visited.append(current) #Adds the popped node to the list of visited nodes
-                for connection in self.connections: #Iterates through all connections out of the node
-                    if connection.out is current:
-                        stack.append(connection.input) #Adds next nodes to visit to the stack
-        return False #Returns false if no cycle was found
-
     def num_activation_functions(self) -> dict:
         """
         Function to return the quantity of each different activation
@@ -443,8 +421,6 @@ if __name__ == "__main__":
     ******************
     """
     a = CPPN([8,8,7])
-
-    print(a.has_cycles())
    
     b = a.to_phenotype()
 
