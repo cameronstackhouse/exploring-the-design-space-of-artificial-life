@@ -132,6 +132,7 @@ def add_node_between_con(cppn):
 
     
     connection = choice(enabled_connections) 
+   
     
     out = connection.out
     input = connection.input
@@ -191,13 +192,19 @@ def remove_connection(cppn, connection):
     
     """
     #TODO add comments
-    cppn.connections.remove(connection)
-    cppn.run(0)
-    end_nodes = cppn.nodes[-1]
-    for node in end_nodes:
-        if len(node.inputs) == 0:
-            cppn.connections.append(connection)
-            break
+    enabled_connections = []
+    for connection in cppn.connections:
+        if connection.enabled:
+            enabled_connections.append(connection)
+    
+    if len(enabled_connections) > 1:
+        cppn.connections.remove(connection)
+        cppn.run(0)
+        end_nodes = cppn.nodes[-1]
+        for node in end_nodes:
+            if len(node.inputs) == 0:
+                cppn.connections.append(connection)
+                break
 
 def remove_connections(population, rate):
     #TODO Add comments
@@ -294,11 +301,9 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.5, 0.1, 0.3, 0.8, 0.5, 0.2, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(20, 0.3, 0.2, 0.5, 0.3, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
-    first = a[88]
-
-    print(first.valid_connections())
+    first = a[8]
 
     for layer in first.nodes:
         print(len(layer))
