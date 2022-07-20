@@ -4,6 +4,7 @@ CPPNs
 """
 
 from random import randint, uniform, choice
+from typing import List
 from networks import CPPN, NodeType, Node
 from matplotlib import pyplot as plt
 from tools.draw_cppn import draw_cppn
@@ -24,16 +25,21 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
     population = create_population(population_size, size_params) #Generates an initial population of CPPNs
 
     #Calculates the initial fitness of the population
+
     #TODO ADD LINE BELLOW BACK IN
     #fit_population = evaluate_pop(population, run_directory, generations_complete, truncation_rate)
     
     generations_complete = 0 #Counter of number of completed generations
     while generations_complete < generations:
+
         #TODO Add back in bellow
         #population = select_population(population, fit_population, population_size, truncation_rate) #Selects the top fit trunction_rate% of the population
+
         print(generations_complete)
+
         #TODO Add back in bellow
         #population = select_population(population, fit_population)
+
         crossover_pop(population, population_size) #Crosses over the population
         mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate) #Mutates the population
        
@@ -90,53 +96,64 @@ def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> None:
                 connection_b.weight = temp
                 break
 
-def crossover_pop(population, population_size):
+def crossover_pop(population: List, population_size: int) -> None:
     """
-    
-    """
-    #TODO Add comments
-    for _ in range(population_size):
-        crossover_indv(choice(population), choice(population))
+    Function to crossover the weights of connections in 
+    a population.
 
-def mutate_node(node):
+    :param population: population of CPPNs
+    :param population_size: size of population to generate
     """
-    
+    for _ in range(population_size): #Iterates through population size
+        crossover_indv(choice(population), choice(population)) #Crosses over two random individuals from the population
+
+def mutate_node(node: Node) -> None:
     """
-    #TODO Add description
+    Function to mutate a node in a CPPN by changing
+    its activation function
+
+    :param node: node to mutate
+    """
     #Only mutates non output node activation functions as output node activation functions are always sigmoid functions
     if node.type != NodeType.MATERIAL_OUTPUT and node.type != NodeType.PRESENCE_OUTPUT:
-        node.activation_function = choice(node.outer.activation_functions)
+        node.activation_function = choice(node.outer.activation_functions) #Sets its activation function as a random activation function
 
-def mutate_nodes(population, rate):
+def mutate_nodes(population: List, rate: float) -> None:
     """
-    
-    """
-    #TODO Add description and comments
-    for cppn in population:
-        for layer in cppn.nodes:
-            for node in layer:
-                if rate >= uniform(0,1):
-                    mutate_node(node)
+    Function to mutate nodes within a population.
 
-def add_node_between_con(cppn):
+    :param population: population of CPPNs
+    :param rate: rate at which a node is mutated
     """
-    
+    for cppn in population: #Iterates through all CPPNs in a population
+        for layer in cppn.nodes: #Iterates through all layers in a cppn
+            for node in layer: #Iterates through all nodes in a layer
+                if rate >= uniform(0,1): #If a random number is less than or equal to the mutation rate
+                    mutate_node(node) #Mutate the current node
+
+def add_node_between_con(cppn: CPPN) -> None:
     """
-    #TODO Add comments
+    Function to add a node in the middle of an enabled 
+    connection in a CPPN.
+
+    :param cppn: CPPN to add the node
+    """
     new_node = None
 
+    #Finds all connections that are enabled
     enabled_connections = []
     for connection in cppn.connections:
         if connection.enabled:
             enabled_connections.append(connection)
 
     
-    connection = choice(enabled_connections) 
-   
+    connection = choice(enabled_connections) #Chooses a random connection from enabled connections
     
+    #Gets the input and output nodes of the connection
     out = connection.out
     input = connection.input
 
+    #Finds the index of the layer which the output node is in
     counter = 0
     for i in range(len(cppn.nodes)):
         if out in cppn.nodes[i]:
@@ -145,47 +162,55 @@ def add_node_between_con(cppn):
 
     out_layer = counter
 
-    if out_layer+1 == len(cppn.nodes)-1:
-        cppn.nodes.insert(out_layer+1, [])
-    elif input in cppn.nodes[out_layer+1]:
-        cppn.nodes.insert(out_layer+1, [])
+    #Checks if a new layer needs to be inserted
+    if out_layer+1 == len(cppn.nodes)-1: #Checks if the next layer is the output layer
+        cppn.nodes.insert(out_layer+1, []) #Inserts an empty layer next to the output layer
+    elif input in cppn.nodes[out_layer+1]: #Checks if next layer contains the input node
+        cppn.nodes.insert(out_layer+1, []) #If so inserts an empty layer at that position
  
-    new_node = Node(choice(cppn.activation_functions), NodeType.HIDDEN, cppn, out_layer+1)
+    new_node = Node(choice(cppn.activation_functions), NodeType.HIDDEN, cppn, out_layer+1) #Creates a new node and adds it to the correct layer
     new_node.previous_in = connection.input
     new_node.previous_out = connection.out
 
     connection_out = connection.out
     connection_input = connection.input
 
-    connection.set_enabled(False)
-    cppn.create_connection(connection_out, new_node, uniform(0,1))
+    connection.set_enabled(False) #Disables the old connection
+
+    #Creates two new connection, emulating the node being placed in the middle of the old connection
+    cppn.create_connection(connection_out, new_node, uniform(0,1)) 
     cppn.create_connection(new_node, connection_input, uniform(0,1))
 
-def add_node_pop(population, rate):
+def add_node_pop(population: List, rate: float) -> None:
     """
-    
-    """
-    #TODO Add comments
-    for cppn in population:
-        if rate >= uniform(0,1):
-            add_node_between_con(cppn)
+    Function to add nodes to a population
 
-def mutate_connection(connection):
+    :param population: population of CPPNs
+    :param rate: rate at which nodes are added to a CPPN
     """
-    
-    """
-    #TODO Add description
-    connection.weight = uniform(0,1)
+    for cppn in population: #Iterates through CPPNs in the population
+        if rate >= uniform(0,1): #Checks if a random number is less than or equal to the addition rate
+            add_node_between_con(cppn) #Adds a node between a random enabled connection
 
-def mutate_connections(population, rate):
+def mutate_connection(connection: CPPN.Connection) -> None:
     """
+    Function to mutate a connection in a CPPN
 
+    :param connection: connection to mutate
     """
-    #TODO Add description
-    for cppn in population:
-        for connection in cppn.connections:
-            if rate >= uniform(0,1):
-                mutate_connection(connection)
+    connection.weight = uniform(0,1) #Changes the weight to a random value between 0 and 1
+
+def mutate_connections(population: List, rate: float):
+    """
+    Function to mutate connections in a population
+
+    :param population: population of CPPNs
+    :param rate: rate of connection mutation
+    """
+    for cppn in population: #Iterates through the population
+        for connection in cppn.connections: #Iterates through connections in a CPPN
+            if rate >= uniform(0,1): #Checks if a random number is less than or equal to the mutation rate
+                mutate_connection(connection) #Mutates the connection
 
 def remove_connection(cppn, connection):
     """
@@ -238,15 +263,18 @@ def add_connections(population, rate):
         if rate >= uniform(0,1):
             add_connection(cppn)
 
-def remove_nodes(population, rate) -> None:
+def remove_nodes(population: List, rate: float) -> None:
     """
-    
+    Function to remove nodes from a population of CPPNs
+
+    :param population: population of CPPNs
+    :param rate: rate of node removal
     """
     #TODO Add comments
     for cppn in population:
         if len(cppn.nodes) > 2:
             if rate >= uniform(0,1):
-                #TODO Choose random layer
+    
                 layer = choice(cppn.nodes[1:-1])
                 node = choice(layer)
                 cppn.remove_node(node)
@@ -301,7 +329,7 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(20, 0.3, 0.2, 0.5, 0.3, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+    a, b = evolve(100, 0.2, 0.2, 0.1, 0.3, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
 
     first = a[8]
 
