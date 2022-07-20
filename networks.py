@@ -3,9 +3,6 @@ Module defining components for the creation of functioning
 compositional pattern-producing networks
 """
 
-#TODO ADD TYPE HINTING
-#TODO ADD LAYER SYSTEM. Nodes = [[], [], []] 3 Layer NN
-
 from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp

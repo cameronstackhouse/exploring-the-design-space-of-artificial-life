@@ -311,8 +311,19 @@ def remove_nodes(population: List, rate: float) -> None:
                             connection.set_enabled(True)
                 
 
-def mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate):
-    #TODO Complete functions to make work
+def mutate_population(population: List, add_node_rate: float, mutate_node_rate: float, remove_node_rate: float, add_edge_rate: float, 
+    mutate_edge_rate: float, remove_edge_rate: float) -> None:
+    """
+    Function to mutate a population of CPPNs
+
+    :param add_node_rate:
+    :param mutate_node_rate:
+    :param remove_node_rate:
+    :param add_edge_rate:
+    :param mutate_edge_rate:
+    :param remove_edge_rate:
+    """
+    #TODO Finish description
     add_node_pop(population, add_node_rate) #Adds nodes to each cppn
     remove_nodes(population, remove_node_rate) #Removes nodes from cppns
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
