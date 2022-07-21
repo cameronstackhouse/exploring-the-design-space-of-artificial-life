@@ -227,6 +227,7 @@ def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
     :param conenction: Connection to be removed
     """
     #TODO Add comments
+    #TODO works but not computationally feasable!
     cppn.connections.remove(connection)
 
     cppn.run(0)
@@ -366,12 +367,12 @@ if __name__ == "__main__":
 
     #TODO remove and replace with JSON
     POPULATION_SIZE = 100
-    ADD_NODE_RATE = 0.3
-    MUTATE_NODE_RATE = 0.1
-    DELETE_NODE_RATE = 0.3
-    ADD_CONNECTION_RATE = 0.5
+    ADD_NODE_RATE = 0.4
+    MUTATE_NODE_RATE = 0.2
+    DELETE_NODE_RATE = 0.1
+    ADD_CONNECTION_RATE = 0.4
     MUTATE_CONNECTION_RATE = 0.3
-    DELETE_CONNECTION_RATE = 0.4
+    DELETE_CONNECTION_RATE = 0.1
     TRUNCATION_RATE = 0.5
     GENERATIONS = 100
 
