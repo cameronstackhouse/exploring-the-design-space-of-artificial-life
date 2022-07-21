@@ -122,7 +122,8 @@ def mutate_node(node: Node) -> None:
     """
     #Only mutates non output node activation functions as output node activation functions are always sigmoid functions
     if node.type != NodeType.MATERIAL_OUTPUT and node.type != NodeType.PRESENCE_OUTPUT:
-        node.activation_function = choice(node.outer.activation_functions) #Sets its activation function as a random activation function
+        activation_function = choice(node.outer.activation_functions)
+        node.activation_function = activation_function #Sets its activation function as a random activation function
 
 def mutate_nodes(population: List, rate: float) -> None:
     """
@@ -264,7 +265,7 @@ def remove_connections(population: List, rate: float) -> None:
     :param population: population of CPPNs
     :param rate: rate at which nodes are removed from a CPPN
     """
-
+    #TODO THIS IS NOT WORKING!!
     #Iterates through CPPNs in the population
     for cppn in population:
         valid_connections = []
@@ -325,8 +326,6 @@ def remove_nodes(population: List, rate: float) -> None:
     :param rate: rate of node removal
     """
     #TODO Add comments
-
-    #TODO CONNECTIONS NOT BEING PRESERVED INTO OUTPUT LAYER!
     for cppn in population:
         if len(cppn.nodes) > 2:
             if rate >= uniform(0,1):
@@ -385,7 +384,7 @@ def mutate_population(population: List, add_node_rate: float, mutate_node_rate: 
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
-    remove_connections(population, remove_edge_rate) #Removes edges in cppns TODO GET WORKING!
+    #remove_connections(population, remove_edge_rate) #Removes edges in cppns TODO GET WORKING!
 
 
 if __name__ == "__main__":
@@ -401,7 +400,7 @@ if __name__ == "__main__":
     POPULATION_SIZE = 100
     ADD_NODE_RATE = 0.7
     MUTATE_NODE_RATE = 0.5
-    DELETE_NODE_RATE = 0.9 
+    DELETE_NODE_RATE = 0.3
     ADD_CONNECTION_RATE = 1
     MUTATE_CONNECTION_RATE = 0.1
     DELETE_CONNECTION_RATE = 0.8
