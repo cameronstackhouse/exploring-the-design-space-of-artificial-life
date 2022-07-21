@@ -225,23 +225,7 @@ def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
     :param cppn: CPPN to remove connection from
     :param conenction: Connection to be removed
     """
-
-    #Creates a list of all the enabled connections in the CPPN
-    enabled_connections = []
-    for connection in cppn.connections:
-        if connection.enabled:
-            enabled_connections.append(connection)
-    
-    if len(enabled_connections) > 1: #If there is more than one enabled connection
-        cppn.connections.remove(connection) #Remove the connection from the CPPN
-        cppn.run(0) #Run the CPPN using the first set of input paramaters, used to check CPPN validity after connection deletion
-        end_nodes = cppn.nodes[-1]
-
-        #Checks that the output nodes both have at least one input (meaning that they are still connected to the rest of the CPPN)
-        for node in end_nodes:
-            if len(node.inputs) == 0: #Checks if either of the output nodes has 0 inputs
-                cppn.connections.append(connection) #If so then the connection is readded to the CPPN to make it valid
-                break
+    #TODO
 
 def remove_connections(population: List, rate: float) -> None:
     """
