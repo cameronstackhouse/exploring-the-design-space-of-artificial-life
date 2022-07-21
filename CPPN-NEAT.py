@@ -226,37 +226,14 @@ def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
     :param cppn: CPPN to remove connection from
     :param conenction: Connection to be removed
     """
-    #TODO
+    #TODO Add comments
     cppn.connections.remove(connection)
 
-    valid = False
-
-    for node in cppn.nodes[0]:
-        visit = [node]
-        stop = False
-        presence_found = False
-        material_found = False
-        while len(visit) > 0 and not stop:
-            current = visit.pop()
-            
-            if current.type is NodeType.MATERIAL_OUTPUT:
-                material_found = True
-            elif current.type is NodeType.PRESENCE_OUTPUT:
-                presence_found = True
-
-            for connection in cppn.connections:
-                if connection.enabled and connection.out is current:
-                    visit.append(connection.input)
-            
-            if material_found and presence_found:
-                stop = True
-                valid = True
-        
-        if valid:
-            break
-    
-    if not valid:
+    cppn.run(0)
+    if cppn.material == 0.5 or cppn.presence == 0.5:
         cppn.connections.append(connection)
+  
+    cppn.connections.append(connection)
 
 def remove_connections(population: List, rate: float) -> None:
     """
@@ -265,20 +242,11 @@ def remove_connections(population: List, rate: float) -> None:
     :param population: population of CPPNs
     :param rate: rate at which nodes are removed from a CPPN
     """
-    #TODO THIS IS NOT WORKING!!
     #Iterates through CPPNs in the population
     for cppn in population:
-        valid_connections = []
-        #Iterates through connections in a CPPN, finding ones that are enabled
         for connection in cppn.connections:
-            if connection.enabled:
-                valid_connections.append(connection)
-        
-        #Iterates through enabled connections in a CPPN
-        if len(valid_connections) > 1:
-            for connection in valid_connections:
-                if rate >= uniform(0,1): #Checks if a random number is less than or equal to the removal rate
-                    remove_connection(cppn, connection) #If so the connection is removed from the CPPN
+            if rate >= uniform(0,1): #Checks if a random number is less than or equal to the removal rate
+                remove_connection(cppn, connection) #If so the connection is removed from the CPPN
 
 def add_connection(cppn: CPPN) -> None:
     """
@@ -384,7 +352,7 @@ def mutate_population(population: List, add_node_rate: float, mutate_node_rate: 
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
-    #remove_connections(population, remove_edge_rate) #Removes edges in cppns TODO GET WORKING!
+    remove_connections(population, remove_edge_rate) #Removes edges in cppns TODO GET WORKING!
 
 
 if __name__ == "__main__":
@@ -398,12 +366,12 @@ if __name__ == "__main__":
 
     #TODO remove and replace with JSON
     POPULATION_SIZE = 100
-    ADD_NODE_RATE = 0.7
-    MUTATE_NODE_RATE = 0.5
+    ADD_NODE_RATE = 0.3
+    MUTATE_NODE_RATE = 0.1
     DELETE_NODE_RATE = 0.3
-    ADD_CONNECTION_RATE = 1
-    MUTATE_CONNECTION_RATE = 0.1
-    DELETE_CONNECTION_RATE = 0.8
+    ADD_CONNECTION_RATE = 0.5
+    MUTATE_CONNECTION_RATE = 0.3
+    DELETE_CONNECTION_RATE = 0.4
     TRUNCATION_RATE = 0.5
     GENERATIONS = 100
 
@@ -415,10 +383,6 @@ if __name__ == "__main__":
 
     for layer in first.nodes:
         print(len(layer))
-    
-    for connection in first.connections:
-        if (connection.input.type is NodeType.MATERIAL_OUTPUT or connection.input.type is NodeType.PRESENCE_OUTPUT) and connection.enabled:
-            print("CONNNNNNN")
 
     b = first.to_phenotype()
 
