@@ -3,6 +3,7 @@ Module to simulate CPPN-NEAT evolution on a population of
 CPPNs
 """
 
+from genericpath import exists
 from random import randint, uniform, choice
 from typing import List
 from networks import CPPN, NodeType, Node
@@ -252,14 +253,14 @@ def remove_connections(population: List, rate: float) -> None:
 
     #Iterates through CPPNs in the population
     for cppn in population:
-        enabled_connections = []
+        valid_connections = []
         #Iterates through connections in a CPPN, finding ones that are enabled
         for connection in cppn.connections:
             if connection.enabled:
-                enabled_connections.append(connection)
+                valid_connections.append(connection)
         
         #Iterates through enabled connections in a CPPN
-        for connection in enabled_connections:
+        for connection in valid_connections:
             if rate >= uniform(0,1): #Checks if a random number is less than or equal to the removal rate
                 remove_connection(cppn, connection) #If so the connection is removed from the CPPN
 
@@ -277,12 +278,18 @@ def add_connection(cppn: CPPN) -> None:
 
     input = choice(input_layer) #Chooses an input node from the input layer
 
+    connection_exists = False
+
     for connection in cppn.connections: #Iterates through connections
-        if not connection.out is output and not connection.input is input: #Checks to ensure a connection between the two nodes does not already exist
+        if connection.out is output and connection.input is input: #Checks to ensure a connection between the two nodes does not already exist
+            connection_exists = True
+            connection.weight = uniform(0,1)
+            break
+
+        if not connection_exists:
             weight = uniform(0,1) #Get the weight for the new connection
             cppn.create_connection(output, input, weight) #Create the new connection and add it to the CPPN
-        if connection.out is output and connection.input is input and not connection.enabled: #Checks if connection does exist and is disabled
-            connection.enabled = True #If so then re-enable the connection
+
 
 def add_connections(population: List, rate: float) -> None:
     """
@@ -361,7 +368,7 @@ def mutate_population(population: List, add_node_rate: float, mutate_node_rate: 
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
-    remove_connections(population, remove_edge_rate) #Removes edges in cppns
+    #remove_connections(population, remove_edge_rate) #Removes edges in cppns TODO GET WORKING!
 
 
 if __name__ == "__main__":
@@ -375,12 +382,12 @@ if __name__ == "__main__":
 
     #TODO remove and replace with JSON
     POPULATION_SIZE = 100
-    ADD_NODE_RATE = 1
+    ADD_NODE_RATE = 0.8
     MUTATE_NODE_RATE = 1
-    DELETE_NODE_RATE = 0.8
+    DELETE_NODE_RATE = 0.3
     ADD_CONNECTION_RATE = 0.3
     MUTATE_CONNECTION_RATE = 0.5
-    DELETE_CONNECTION_RATE = 0.0
+    DELETE_CONNECTION_RATE = 0.2
     TRUNCATION_RATE = 0.5
     GENERATIONS = 100
 
