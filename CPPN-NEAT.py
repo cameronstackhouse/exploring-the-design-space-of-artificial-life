@@ -9,11 +9,8 @@ from networks import CPPN, NodeType, Node
 from matplotlib import pyplot as plt
 from tools.draw_cppn import draw_cppn
 
-
 #TODO ADD LINE BACK IN
 #from tools.evaluate import evaluate_pop
-
-#TODO Evolve CPPNs using modified NEAT
 
 def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, 
     remove_edge_rate, truncation_rate, generations, run_directory, size_params):
@@ -60,20 +57,28 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
     
     return population, fittest #Returns the fittest individual and the population
 
-def create_population(population_size, size_params):
+def create_population(population_size: int, size_params: List) -> None:
     """
-    
-    """
-    #TODO Add comments
-    return [CPPN(size_params) for _ in range(population_size)]
+    Function to create a population of CPPNs.
 
-def select_population(population, fit_population, population_size, truncation_rate):
+    :param population_size: number of CPPNs in the population
+    :param size_params: list representing the dimentions of the design space
     """
-    
+    return [CPPN(size_params) for _ in range(population_size)] #Generates a list containing the population of CPPNs
+
+def select_population(population: list, fit_population: list, population_size: int, truncation_rate: float) -> List:
     """
-    #TODO Add comments
-    sorted_pop = sorted(zip(population, fit_population), key=lambda fitness: fitness[1])
-    return [individual for individual, _ in sorted_pop[:int(population_size*truncation_rate)]]
+    Function to select the suitably fit individuals in the population.
+
+    :param population: population of CPPNs
+    :param fit_population: list of fitness of each phenotype produced by each CPPN
+    :param population_size: size of population to generate
+    :param truncation_rate: rate at which the population is truncated (higher rate means fewer, fitter, individuals are chosen)
+    :rtype: List 
+    :return: List containing the top fittest individuals in the population
+    """
+    sorted_pop = sorted(zip(population, fit_population), key=lambda fitness: fitness[1]) #Sorts the population by their phenotypes respective fitness scores
+    return [individual for individual, _ in sorted_pop[:int(population_size*truncation_rate)]] #Gets the top fittest individuals of the population and adds them to a list
 
 def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> None:
     """
@@ -200,7 +205,7 @@ def mutate_connection(connection: CPPN.Connection) -> None:
     """
     connection.weight = uniform(0,1) #Changes the weight to a random value between 0 and 1
 
-def mutate_connections(population: List, rate: float):
+def mutate_connections(population: List, rate: float) -> None:
     """
     Function to mutate connections in a population
 
@@ -212,56 +217,83 @@ def mutate_connections(population: List, rate: float):
             if rate >= uniform(0,1): #Checks if a random number is less than or equal to the mutation rate
                 mutate_connection(connection) #Mutates the connection
 
-def remove_connection(cppn, connection):
+def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
     """
-    
+    Function to remove a given connection from a CPPN
+
+    :param cppn: CPPN to remove connection from
+    :param conenction: Connection to be removed
     """
-    #TODO add comments
+
+    #Creates a list of all the enabled connections in the CPPN
     enabled_connections = []
     for connection in cppn.connections:
         if connection.enabled:
             enabled_connections.append(connection)
     
-    if len(enabled_connections) > 1:
-        cppn.connections.remove(connection)
-        cppn.run(0)
+    if len(enabled_connections) > 1: #If there is more than one enabled connection
+        cppn.connections.remove(connection) #Remove the connection from the CPPN
+        cppn.run(0) #Run the CPPN using the first set of input paramaters, used to check CPPN validity after connection deletion
         end_nodes = cppn.nodes[-1]
+
+        #Checks that the output nodes both have at least one input (meaning that they are still connected to the rest of the CPPN)
         for node in end_nodes:
-            if len(node.inputs) == 0:
-                cppn.connections.append(connection)
+            if len(node.inputs) == 0: #Checks if either of the output nodes has 0 inputs
+                cppn.connections.append(connection) #If so then the connection is readded to the CPPN to make it valid
                 break
 
-def remove_connections(population, rate):
-    #TODO Add comments
+def remove_connections(population: List, rate: float) -> None:
+    """
+    Function to remove connections from population
+
+    :param population: population of CPPNs
+    :param rate: rate at which nodes are removed from a CPPN
+    """
+
+    #Iterates through CPPNs in the population
     for cppn in population:
         enabled_connections = []
+        #Iterates through connections in a CPPN, finding ones that are enabled
         for connection in cppn.connections:
             if connection.enabled:
                 enabled_connections.append(connection)
         
+        #Iterates through enabled connections in a CPPN
         for connection in enabled_connections:
-            if rate >= uniform(0,1):
-                remove_connection(cppn, connection)
+            if rate >= uniform(0,1): #Checks if a random number is less than or equal to the removal rate
+                remove_connection(cppn, connection) #If so the connection is removed from the CPPN
 
-def add_connection(cppn):
-    #TODO CHANGE TO LAYER SYSTEM
-    if len(cppn.nodes) > 2:
-        output_layer_index = randint(0,len(cppn.nodes) - 2)
-        output = choice(cppn.nodes[output_layer_index])
+def add_connection(cppn: CPPN) -> None:
+    """
+    Function to add a connection to a CPPN
 
-        input_layer = cppn.nodes[output_layer_index+1]
+    :param cppn: CPPN to add connection to
+    """
 
-        input = choice(input_layer)
+    output_layer_index = randint(0,len(cppn.nodes) - 2) #Chooses a random layer to get the output node from
+    output = choice(cppn.nodes[output_layer_index]) #Chooses a random node from that layer
 
-        weight = uniform(0,1)
+    input_layer = cppn.nodes[output_layer_index+1] #Gets the input layer as the layer above the output layer
 
-        cppn.create_connection(output, input, weight)
+    input = choice(input_layer) #Chooses an input node from the input layer
 
-def add_connections(population, rate):
-    #TODO Add comments
-    for cppn in population:
-        if rate >= uniform(0,1):
-            add_connection(cppn)
+    for connection in cppn.connections: #Iterates through connections
+        if not connection.out is output and not connection.input is input: #Checks to ensure a connection between the two nodes does not already exist
+            weight = uniform(0,1) #Get the weight for the new connection
+            cppn.create_connection(output, input, weight) #Create the new connection and add it to the CPPN
+        if connection.out is output and connection.input is input and not connection.enabled: #Checks if connection does exist and is disabled
+            connection.enabled = True #If so then re-enable the connection
+
+def add_connections(population: List, rate: float) -> None:
+    """
+    Function to add connections to a population of CPPNs
+
+    :param population: population of CPPNs to add connections to
+    :param rate: rate at which connections are added to the population of CPPNs
+    """
+    for cppn in population: #Iterates through the population of CPPNs
+        if rate >= uniform(0,1): #Checks if the random number is less than or equal to the addition rate
+            add_connection(cppn) #Adds a connection to the CPPN
 
 def remove_nodes(population: List, rate: float) -> None:
     """

@@ -1,13 +1,14 @@
 import time
 import logging #TODO Use this
 import subprocess as sub
+from typing import List
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
 
 #TODO Finish function to evaluate a population of organisms
 #TODO Add input option to specify what is being tested for (Locomotion, Object Movement, Object Transport)
 
-def evaluate_pop(pop, run_directory, run_name, truncation_rate):
+def evaluate_pop(pop, run_directory, run_name) -> List:
     """
     
     """
@@ -15,8 +16,11 @@ def evaluate_pop(pop, run_directory, run_name, truncation_rate):
     start = time.time() 
     num_evaluated = 0
 
-    #Pass fitness function in here
-    vxa = VXA(EnableExpansion=1, SimTime=5) # pass vxa tags in here
+    fitness = []
+
+    #TODO look at MathTree to see how to create fitness function!
+
+    vxa = VXA() # pass vxa tags in here
     
     vxa.add_material(RGBA=(255,0,255), E=5e4, RHO=1e4)
     vxa.add_material(RGBA=(255,0,0), E=1e8, RHO=1e4)
@@ -29,7 +33,7 @@ def evaluate_pop(pop, run_directory, run_name, truncation_rate):
         vxd = VXD()
         vxd.set_tags(RecordVoxel=1) # pass vxd tags in here to overwite vxa tags
         vxd.set_data(body) #Sets the data to be written as the phenotype generated
-        vxd.write(f"{run_directory}/fitnessFiles/{run_name}--id_{n}.vxd") #Writes vxd file of current individual to the run directory
+        vxd.write(f"{run_directory}/fitnessFiles/{run_name}--id{n}.vxd") #Writes vxd file of current individual to the run directory
 
         #TODO Evaluate using voxcraft-sim, checking for errors
         #TODO Change to output to named history file AND xml file for results processing
@@ -40,3 +44,5 @@ def evaluate_pop(pop, run_directory, run_name, truncation_rate):
         #TODO Delete vxa and vxd
     
     time_taken = time.time() - start #Time taken to evaluate one generation
+
+    return fitness
