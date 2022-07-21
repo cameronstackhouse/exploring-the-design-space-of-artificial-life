@@ -372,7 +372,21 @@ if __name__ == "__main__":
     #TODO
     #######################
     """
-    a, b = evolve(100, 0.2, 0.2, 0.1, 0.3, 0.5, 0.1, 0.3, 100, "a", [8,8,7])
+
+    #TODO remove and replace with JSON
+    POPULATION_SIZE = 100
+    ADD_NODE_RATE = 1
+    MUTATE_NODE_RATE = 1
+    DELETE_NODE_RATE = 0.8
+    ADD_CONNECTION_RATE = 0.3
+    MUTATE_CONNECTION_RATE = 0.5
+    DELETE_CONNECTION_RATE = 0.0
+    TRUNCATION_RATE = 0.5
+    GENERATIONS = 100
+
+    a, b = evolve(POPULATION_SIZE, ADD_NODE_RATE, MUTATE_NODE_RATE, DELETE_NODE_RATE,
+    ADD_CONNECTION_RATE, MUTATE_CONNECTION_RATE, DELETE_CONNECTION_RATE, TRUNCATION_RATE,
+    GENERATIONS, "a", [8,8,7])
 
     first = a[8]
 

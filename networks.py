@@ -217,6 +217,15 @@ class CPPN:
         for layer in self.nodes[1:]: #Iterates through all nodes and activates all non input nodes (as they have already been activated)
             for node in layer:
                 node.activate()
+            
+        if self.material == 0.5 or self.presence == 0.5:
+            for node in self.nodes[-1]:
+                if len(node.inputs) == 0:
+                    count = 0
+                    for connection in self.connections:
+                        if connection.enabled and connection.input is node:
+                            count +=1
+                    print(f"NUM CONNECTIONS: {count}")
         
         return self.material_produced() #Returns an integer indicating the material at that voxel
 
