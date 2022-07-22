@@ -381,7 +381,7 @@ if __name__ == "__main__":
     GENERATIONS, "a", [8,8,7])
 
     first = a[8]
-
+ 
     print(first.connection_types())
 
     for layer in first.nodes:

@@ -25,7 +25,9 @@ def evaluate_pop(pop, run_directory, run_name) -> List:
     vxa.add_material(RGBA=(255,0,255), E=5e4, RHO=1e4)
     vxa.add_material(RGBA=(255,0,0), E=1e8, RHO=1e4)
 
-    vxa.write(f"{run_directory}/fitnessFiles/base.vxa") #Writes the base for a generation of simulations
+    sub.Popen(f"rm -r /fitnessFiles/{run_directory}/{run_name}") #Deletes contents of run directory if exists
+
+    vxa.write(f"/fitnessFiles/{run_directory}/{run_name}/base.vxa") #Writes the base for a generation of simulations
 
     #Iterates through the population to evaluate each one individually
     for n, individual in enumerate(pop):
@@ -33,15 +35,14 @@ def evaluate_pop(pop, run_directory, run_name) -> List:
         vxd = VXD()
         vxd.set_tags(RecordVoxel=1) # pass vxd tags in here to overwite vxa tags
         vxd.set_data(body) #Sets the data to be written as the phenotype generated
-        vxd.write(f"{run_directory}/fitnessFiles/{run_name}--id{n}.vxd") #Writes vxd file of current individual to the run directory
+        vxd.write(f"/fitnessFiles/{run_directory}/{run_name}/id{n}.vxd") #Writes vxd file of current individual to the run directory
 
-        #TODO Evaluate using voxcraft-sim, checking for errors
-        #TODO Change to output to named history file AND xml file for results processing
-        sub.Popen(f"./voxcraft-sim -f {run_directory}/fitnessFiles/{run_name}--id{n}.vxd", shell=True)
-
+        #TODO output history file to a results file in run directory
         #TODO Read results from history file and set the CPPNs fitness to that value
 
-        #TODO Delete vxa and vxd
+    #TODO Evaluate using voxcraft-sim, checking for errors
+    #TODO Change to output to named history file AND xml file for results processing
+    sub.Popen(f"./voxcraft-sim -f /fitnessFiles/{run_directory}/{run_name} > {run_name}.history", shell=True)
     
     time_taken = time.time() - start #Time taken to evaluate one generation
 
