@@ -372,7 +372,7 @@ if __name__ == "__main__":
     DELETE_NODE_RATE = 0.1
     ADD_CONNECTION_RATE = 0.4
     MUTATE_CONNECTION_RATE = 0.3
-    DELETE_CONNECTION_RATE = 0.1
+    DELETE_CONNECTION_RATE = 0.05
     TRUNCATION_RATE = 0.5
     GENERATIONS = 100
 
@@ -381,6 +381,8 @@ if __name__ == "__main__":
     GENERATIONS, "a", [8,8,7])
 
     first = a[8]
+
+    print(first.connection_types())
 
     for layer in first.nodes:
         print(len(layer))

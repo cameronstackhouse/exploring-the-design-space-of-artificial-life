@@ -412,6 +412,21 @@ class CPPN:
                     return False #If not return false, as there is an invalid connection 
         
         return True #If all connections are valid return true
+    
+    def connection_types(self) -> dict:
+        """
+        
+        """
+        #TODO Add comments
+        enabled_counter = 0
+        disabled_counter = 0
+        for connection in self.connections:
+            if connection.enabled:
+                enabled_counter+=1
+            else:
+                disabled_counter+=1
+        
+        return {"enabled": enabled_counter, "disabled": disabled_counter}
 
     class Connection:
         """
