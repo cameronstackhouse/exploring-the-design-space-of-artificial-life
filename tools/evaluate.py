@@ -42,7 +42,7 @@ def evaluate_pop(pop, run_directory, run_name) -> List:
 
     #TODO Evaluate using voxcraft-sim, checking for errors
     #TODO Change to output to named history file AND xml file for results processing
-    sub.Popen(f"./voxcraft-sim -f /fitnessFiles/{run_directory}/{run_name} > {run_name}.history", shell=True)
+    sub.Popen(f"./voxcraft-sim -i /fitnessFiles/{run_directory}/{run_name} > {run_name}.history", shell=True)
     
     time_taken = time.time() - start #Time taken to evaluate one generation
 
