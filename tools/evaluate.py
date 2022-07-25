@@ -9,7 +9,7 @@ from voxcraftpython.VoxcraftVXD import VXD
 #TODO Finish function to evaluate a population of organisms
 #TODO Add input option to specify what is being tested for (Locomotion, Object Movement, Object Transport)
 
-def evaluate_pop(pop, run_directory, run_name) -> List:
+def evaluate_pop(pop, run_directory, run_name, fitness_function) -> List:
     """
     
     """
@@ -28,9 +28,9 @@ def evaluate_pop(pop, run_directory, run_name) -> List:
     vxa.add_material(RGBA=(255,0,255), E=5e4, RHO=1e4)
     vxa.add_material(RGBA=(255,0,0), E=1e8, RHO=1e4)
 
-    sub.Popen(f"rm -r /fitnessFiles/{run_directory}/{run_name}") #Deletes contents of run directory if exists
+    sub.Popen(f"rm -r ../fitnessFiles/{run_directory}/{run_name}") #Deletes contents of run directory if exists
 
-    vxa.write(f"/fitnessFiles/{run_directory}/{run_name}/base.vxa") #Writes the base for a generation of simulations
+    vxa.write("base.vxa") #TODO Copy this to ../fitnessFiles/{run_directory}/{run_name}/
 
     #Iterates through the population to evaluate each one individually
     for n, individual in enumerate(pop):
@@ -38,7 +38,7 @@ def evaluate_pop(pop, run_directory, run_name) -> List:
         vxd = VXD()
         vxd.set_tags(RecordVoxel=1) # pass vxd tags in here to overwite vxa tags
         vxd.set_data(body) #Sets the data to be written as the phenotype generated
-        vxd.write(f"/fitnessFiles/{run_directory}/{run_name}/id{n}.vxd") #Writes vxd file of current individual to the run directory
+        vxd.write(f"id{n}.vxd") #TODO Copy to /fitnessFiles/{run_directory}/{run_name}/
         logging.info(f"Writing vxd file for individual: {n}")
 
     #TODO Evaluate using voxcraft-sim, checking for errors
