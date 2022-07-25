@@ -12,6 +12,9 @@ def evaluate_pop(pop, run_directory, run_name) -> List:
     """
     
     """
+    #TODO Init logging
+    logging.basicConfig(filename=f"{run_name}_evaluation.log", format='%(levelname)s:%(message)s', encoding="utf-8", level=logging.DEBUG)
+
     #TODO Make it return a list of fitness for each phenotype
     start = time.time() 
     num_evaluated = 0
@@ -19,11 +22,10 @@ def evaluate_pop(pop, run_directory, run_name) -> List:
     fitness = []
 
     #TODO look at MathTree to see how to create fitness function!
-
     vxa = VXA() # pass vxa tags in here
     
     vxa.add_material(RGBA=(255,0,255), E=5e4, RHO=1e4)
-    vxa.add_material(RGBA=(255,0,0), E=1e8, RHO=1e4)
+    vxa.add_material(RGBA=(255,0,0), E=1e8, RHO=1e4) #
 
     sub.Popen(f"rm -r /fitnessFiles/{run_directory}/{run_name}") #Deletes contents of run directory if exists
 
@@ -36,14 +38,16 @@ def evaluate_pop(pop, run_directory, run_name) -> List:
         vxd.set_tags(RecordVoxel=1) # pass vxd tags in here to overwite vxa tags
         vxd.set_data(body) #Sets the data to be written as the phenotype generated
         vxd.write(f"/fitnessFiles/{run_directory}/{run_name}/id{n}.vxd") #Writes vxd file of current individual to the run directory
+        logging.info(f"Writing vxd file for individual: {n}")
 
         #TODO output history file to a results file in run directory
         #TODO Read results from history file and set the CPPNs fitness to that value
 
     #TODO Evaluate using voxcraft-sim, checking for errors
     #TODO Change to output to named history file AND xml file for results processing
-    sub.Popen(f"./voxcraft-sim -i /fitnessFiles/{run_directory}/{run_name} > {run_name}.history", shell=True)
+    sub.Popen(f"./voxcraft-sim -i /fitnessFiles/{run_directory}/{run_name}/ -o output.xml > {run_name}.history", shell=True)
     
     time_taken = time.time() - start #Time taken to evaluate one generation
-
+    logging.info(f"Evaluation complete. Time taken: {time_taken}.")
+    
     return fitness
