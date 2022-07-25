@@ -5,12 +5,11 @@
 
 ## Description
 
-Based on:
-/*
-    - https://github.com/voxcraft/voxcraft-sim
-    - https://github.com/skriegman/reconfigurable_organisms
-    - https://github.com/caitlingrasso/Voxcraft-python
-*/
+Based on: 
+* https://github.com/voxcraft/voxcraft-sim 
+* https://github.com/skriegman/reconfigurable_organisms
+* https://github.com/caitlingrasso/Voxcraft-python
+
 ## How to use
 
 ## Further Readings
