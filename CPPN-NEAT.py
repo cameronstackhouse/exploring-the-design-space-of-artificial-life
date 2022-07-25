@@ -14,7 +14,7 @@ from tools.draw_cppn import draw_cppn
 #from tools.evaluate import evaluate_pop
 
 def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, 
-    remove_edge_rate, truncation_rate, generations, run_directory, size_params):
+    remove_edge_rate, truncation_rate, generations, run_directory, size_params, fitness_function):
     #TODO Write description
     """
     
@@ -46,7 +46,7 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
         #Evaluates the population using voxcraft-sim to find fitness of each solution
 
         #TODO Add back in bellow
-        #fit_population = evaluate_pop(population, run_directory, generations_complete, truncation_rate)
+        #fit_population = evaluate_pop(population, run_directory, generations_complete, fitness_function)
                 
         #Checks to see if a new overall fittest individual was produced
         
@@ -378,7 +378,7 @@ if __name__ == "__main__":
 
     a, b = evolve(POPULATION_SIZE, ADD_NODE_RATE, MUTATE_NODE_RATE, DELETE_NODE_RATE,
     ADD_CONNECTION_RATE, MUTATE_CONNECTION_RATE, DELETE_CONNECTION_RATE, TRUNCATION_RATE,
-    GENERATIONS, "a", [8,8,7])
+    GENERATIONS, "a", [8,8,7], "FITNESS PLACEHOLDER")
 
     first = a[8]
  

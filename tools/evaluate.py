@@ -2,7 +2,7 @@ import time
 import logging #TODO Use this
 import subprocess as sub
 from typing import List
-from read_xml import read_sim_output
+from tools.read_xml import read_sim_output
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
 
