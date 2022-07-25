@@ -2,6 +2,7 @@ import time
 import logging #TODO Use this
 import subprocess as sub
 from typing import List
+from read_xml import read_sim_output
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
 
@@ -12,20 +13,20 @@ def evaluate_pop(pop, run_directory, run_name) -> List:
     """
     
     """
-    #TODO Init logging
+    #Initilises logging
     logging.basicConfig(filename=f"{run_name}_evaluation.log", format='%(levelname)s:%(message)s', encoding="utf-8", level=logging.DEBUG)
 
     #TODO Make it return a list of fitness for each phenotype
     start = time.time() 
-    num_evaluated = 0
 
     fitness = []
 
     #TODO look at MathTree to see how to create fitness function!
     vxa = VXA() # pass vxa tags in here
     
+    #Adds both cardiac and skin cells to the simulation
     vxa.add_material(RGBA=(255,0,255), E=5e4, RHO=1e4)
-    vxa.add_material(RGBA=(255,0,0), E=1e8, RHO=1e4) #
+    vxa.add_material(RGBA=(255,0,0), E=1e8, RHO=1e4)
 
     sub.Popen(f"rm -r /fitnessFiles/{run_directory}/{run_name}") #Deletes contents of run directory if exists
 
@@ -40,12 +41,11 @@ def evaluate_pop(pop, run_directory, run_name) -> List:
         vxd.write(f"/fitnessFiles/{run_directory}/{run_name}/id{n}.vxd") #Writes vxd file of current individual to the run directory
         logging.info(f"Writing vxd file for individual: {n}")
 
-        #TODO output history file to a results file in run directory
-        #TODO Read results from history file and set the CPPNs fitness to that value
-
     #TODO Evaluate using voxcraft-sim, checking for errors
-    #TODO Change to output to named history file AND xml file for results processing
-    sub.Popen(f"./voxcraft-sim -i /fitnessFiles/{run_directory}/{run_name}/ -o output.xml > {run_name}.history", shell=True)
+    #TODO Ensure this works!
+    sub.Popen(f"./voxcraft-sim -i ../fitnessFiles/{run_directory}/{run_name}/ -o output.xml > ../fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
+
+    #TODO Read results from history file and set the CPPNs fitness to that value
     
     time_taken = time.time() - start #Time taken to evaluate one generation
     logging.info(f"Evaluation complete. Time taken: {time_taken}.")
