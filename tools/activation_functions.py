@@ -4,6 +4,8 @@ Module containing various different activation functions
 
 import numpy as np
 
+np.seterr(divide="ignore", invalid="ignore") #Ignores the divide error as NaN already dealt with
+
 def sigmoid(x: float) -> float:
     """
     Returns the value of the sigmoid function applied on x
