@@ -16,29 +16,30 @@ def read_sim_output(filename: str) -> List[dict]:
     :rtype: List of dictionaries
     :return: List of dictionaries each containing simulation information for each individual
     """
-    #TODO Add comments and expand upon this
+    #TODO expand upon this
     results = []
-    tree = ET.parse(f"{filename}.xml")
-    root = tree.getroot()
+    tree = ET.parse(f"{filename}.xml") #Parses the XML file
+    root = tree.getroot() #Gets the root of the document
     
-    bestfit = root[1]
-    detail = root[2]
+    bestfit = root[1] #Accesses the best fit section of the xml file
+    detail = root[2] #Accesses the details section of the xml file
 
+    #Iterates through all robots details in the simulation
     for robot in detail:
         result = dict()
-        fitness = robot[1].text
-        current_x = robot[7][0].text
-        current_y = robot[7][1].text
-        current_z = robot[7][2].text
-        total_distance_of_all_voxels = robot[8].text
+        fitness = robot[1].text #Gets the fitness of the voxel
+        current_x = robot[7][0].text #Gets the new x position of the voxel
+        current_y = robot[7][1].text #Gets the new y position of the voxel
+        current_z = robot[7][2].text #Gets the new z position of the voxel
+        total_distance_of_all_voxels = robot[8].text 
         
         result["fitness"] = fitness
-        result["current_x"] = current_x
-        result["current_y"] = current_y
-        result["current_z"] = current_z
-        result["total_distance"] = total_distance_of_all_voxels
+        result["x_movement"] = int(current_x) - int(robot[6][0].text) #Finds the distance the voxel has moved along the x axis
+        result["y_movement"] = int(current_y) - int(robot[6][1].text) #Finds the distance the voxel has moved along the y axis
+        result["z_movement"] = int(current_z) - int(robot[6][2].text) #Finds the distance the voxel has moved along the z axis
+        result["total_distance"] = float(total_distance_of_all_voxels)
 
-        results.append(result)
+        results.append(result) #Adds the results of the individual to a list of results
 
     return results
 
@@ -57,6 +58,9 @@ def read_settings(filename: str) -> dict:
 
     return data
 
-q = read_sim_output("tools/example")
 
-print(q)
+if __name__ == "__main__":
+    #TODO DELETE FOR RELEASE
+    q = read_sim_output("tools/example")
+
+    print(q)
