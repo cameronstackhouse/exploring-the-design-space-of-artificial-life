@@ -3,7 +3,7 @@ import logging #TODO Use this
 import subprocess as sub
 from typing import List
 from enum import Enum
-from io import read_sim_output
+from read_outputs import read_sim_output
 
 #Imports an interface for writing VXA and VXD files
 from voxcraftpython.VoxcraftVXA import VXA
