@@ -37,7 +37,10 @@ def read_settings(filename: str) -> dict:
     :rtype: dict
     :return: dictionary representation of the JSON file
     """
-    f = open(filename) #Opens the json file
+    f = open(f"{filename}.json") #Opens the json file
     data = json.load(f) #Loads the json file into a dictionary
+    f.close()
 
     return data
+
+read_sim_output("tools/test")
