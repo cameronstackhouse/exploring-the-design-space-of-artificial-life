@@ -16,15 +16,29 @@ def read_sim_output(filename: str) -> List[dict]:
     :rtype: List of dictionaries
     :return: List of dictionaries each containing simulation information for each individual
     """
-    #TODO
+    #TODO Add comments and expand upon this
     results = []
     tree = ET.parse(f"{filename}.xml")
     root = tree.getroot()
-    for child in root:
-        individual_result = dict()
-        #TODO Can access different tags by child[index]
-        #TODO Add to individual result dictionary
-        results.append(individual_result)
+    
+    bestfit = root[1]
+    detail = root[2]
+
+    for robot in detail:
+        result = dict()
+        fitness = robot[1].text
+        current_x = robot[7][0].text
+        current_y = robot[7][1].text
+        current_z = robot[7][2].text
+        total_distance_of_all_voxels = robot[8].text
+        
+        result["fitness"] = fitness
+        result["current_x"] = current_x
+        result["current_y"] = current_y
+        result["current_z"] = current_z
+        result["total_distance"] = total_distance_of_all_voxels
+
+        results.append(result)
 
     return results
 
@@ -43,4 +57,6 @@ def read_settings(filename: str) -> dict:
 
     return data
 
-read_sim_output("tools/test")
+q = read_sim_output("tools/example")
+
+print(q)
