@@ -1,13 +1,20 @@
+from msilib.schema import Class
 import time
 import logging #TODO Use this
 import subprocess as sub
 from typing import List
+from enum import Enum
 from tools.read_xml import read_sim_output
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
 
 #TODO Finish function to evaluate a population of organisms
 #TODO Add input option to specify what is being tested for (Locomotion, Object Movement, Object Transport)
+
+class FitnessFunction(Enum):
+    MAX_DISTANCE = 1
+    OBJECT_TRANSPORT = 2
+    #TODO Add more fitness func values here
 
 def evaluate_pop(pop, run_directory, run_name, fitness_function) -> List:
     """
