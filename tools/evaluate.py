@@ -1,10 +1,9 @@
-from msilib.schema import Class
 import time
 import logging #TODO Use this
 import subprocess as sub
 from typing import List
 from enum import Enum
-from tools.io import read_sim_output
+from io import read_sim_output
 
 #Imports an interface for writing VXA and VXD files
 from voxcraftpython.VoxcraftVXA import VXA
@@ -61,7 +60,12 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     sub.Popen(f"./voxcraft-sim -i ../fitnessFiles/{run_directory}/{run_name}/ -o output.xml > ../fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
 
     #TODO Read results from history file and set the CPPNs fitness to that value
+    results = read_sim_output(f"../fitnessFiles/{run_directory}/{run_name}/output.xml")  #TODO Change directory to be correct dir
     
+    #TODO Change fitness to be a pqueue
+    for indv in results:
+        fitness.append(indv["fitness"])
+
     time_taken = time.time() - start #Time taken to evaluate one generation
     logging.info(f"Evaluation complete. Time taken: {time_taken}.")
     
