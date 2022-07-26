@@ -42,9 +42,10 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     vxa.add_material(RGBA=(255,0,255), E=5e4, RHO=1e4)
     vxa.add_material(RGBA=(255,0,0), E=1e8, RHO=1e4)
 
-    sub.Popen(f"rm -r ../fitnessFiles/{run_directory}/{run_name}") #Deletes contents of run directory if exists
+    sub.Popen(f"rm -r ../fitnessFiles/{run_directory}/{run_name}", shell=True) #Deletes contents of run directory if exists
 
-    vxa.write("base.vxa") #TODO Copy this to ../fitnessFiles/{run_directory}/{run_name}/
+    vxa.write("base.vxa")
+    sub.Popen("cp base.vxa ../fitnessFiles/{run_directory}/{run_name}/", shell=True) #TODO Ensure works!
 
     #Iterates through the population to evaluate each one individually
     for n, individual in enumerate(pop):
@@ -52,19 +53,22 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
         vxd = VXD()
         vxd.set_tags(RecordVoxel=1) # pass vxd tags in here to overwite vxa tags
         vxd.set_data(body) #Sets the data to be written as the phenotype generated
-        vxd.write(f"id{n}.vxd") #TODO Copy to /fitnessFiles/{run_directory}/{run_name}/
+
+        vxd.write(f"id{n}.vxd") 
+        sub.Popen(f"cp id{n}.vxd ../fitnessFiles/{run_directory}/{run_name}/", shell=True) #TODO Ensure works!
+
         logging.info(f"Writing vxd file for individual: {n}")
 
     #TODO Evaluate using voxcraft-sim, checking for errors
     #TODO Ensure this works!
-    sub.Popen(f"./voxcraft-sim -i ../fitnessFiles/{run_directory}/{run_name}/ -o output.xml > ../fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
+    sub.Popen(f"./voxcraft-sim -i ../fitnessFiles/{run_directory}/{run_name}/ -o ../fitnessFiles/{run_directory}/{run_name}/output.xml > ../fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
 
     #TODO Read results from history file and set the CPPNs fitness to that value
-    results = read_sim_output(f"../fitnessFiles/{run_directory}/{run_name}/output.xml")  #TODO Change directory to be correct dir
+    #results = read_sim_output("../fitnessFiles/{run_directory}/{run_name}/output") #TODO Change directory to be correct dir
     
     #TODO Change fitness to be a pqueue
-    for indv in results:
-        fitness.append(indv["fitness"])
+    # for indv in results:
+    #     fitness.append(indv["fitness"])
 
     time_taken = time.time() - start #Time taken to evaluate one generation
     logging.info(f"Evaluation complete. Time taken: {time_taken}.")
