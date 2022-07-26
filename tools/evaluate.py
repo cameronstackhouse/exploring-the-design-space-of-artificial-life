@@ -5,6 +5,8 @@ import subprocess as sub
 from typing import List
 from enum import Enum
 from tools.io import read_sim_output
+
+#Imports an interface for writing VXA and VXD files
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
 
@@ -16,9 +18,15 @@ class FitnessFunction(Enum):
     OBJECT_TRANSPORT = 2
     #TODO Add more fitness func values here
 
-def evaluate_pop(pop, run_directory, run_name, fitness_function) -> List:
+def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function: FitnessFunction) -> List:
     """
-    
+    Function to evaluate a population of computer-designed organisms generated
+    by a population of CPPNs using voxcraft-sim
+
+    :param pop: population of CPPNs
+    :param run_directory: directory containing all generations of runs
+    :param run_name: name of the evaluation run
+    :param fitness_function: fitness function to be used for evaluation
     """
     #Initilises logging
     logging.basicConfig(filename=f"{run_name}_evaluation.log", format='%(levelname)s:%(message)s', encoding="utf-8", level=logging.DEBUG)
