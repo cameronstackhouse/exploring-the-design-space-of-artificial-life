@@ -4,7 +4,7 @@ import logging #TODO Use this
 import subprocess as sub
 from typing import List
 from enum import Enum
-from tools.read_xml import read_sim_output
+from tools.io import read_sim_output
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
 
