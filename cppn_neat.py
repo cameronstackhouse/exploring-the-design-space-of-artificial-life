@@ -327,20 +327,20 @@ def mutate_population(population: List, add_node_rate: float, mutate_node_rate: 
     """
     Function to mutate a population of CPPNs
 
-    :param add_node_rate:
-    :param mutate_node_rate:
-    :param remove_node_rate:
-    :param add_edge_rate:
-    :param mutate_edge_rate:
-    :param remove_edge_rate:
+    :param add_node_rate: rate at which a node is added
+    :param mutate_node_rate: rate at which a node is mutated
+    :param remove_node_rate: rate at which a node is deleted
+    :param add_edge_rate: rate at which an edge is added
+    :param mutate_edge_rate: rate at which an edge is mutated
+    :param remove_edge_rate: rate at which an edge is removed
     """
-    #TODO Finish description
+
     add_node_pop(population, add_node_rate) #Adds nodes to each cppn
     remove_nodes(population, remove_node_rate) #Removes nodes from cppns
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
-    remove_connections(population, remove_edge_rate) #Removes edges in cppns TODO GET WORKING!
+    remove_connections(population, remove_edge_rate) #Removes edges in cppns
 
 
 if __name__ == "__main__":
@@ -357,7 +357,7 @@ if __name__ == "__main__":
     ADD_NODE_RATE = 0.4
     MUTATE_NODE_RATE = 0.2
     DELETE_NODE_RATE = 0.1
-    ADD_CONNECTION_RATE = 0.4
+    ADD_CONNECTION_RATE = 0.8
     MUTATE_CONNECTION_RATE = 0.3
     DELETE_CONNECTION_RATE = 0.05
     TRUNCATION_RATE = 0.5
