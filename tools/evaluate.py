@@ -14,7 +14,7 @@ from voxcraftpython.VoxcraftVXD import VXD
 
 class FitnessFunction(Enum):
     MAX_DISTANCE = 1
-    OBJECT_TRANSPORT = 2
+    VERTICAL_DISTANCE = 2
     #TODO Add more fitness func values here
 
 def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function: FitnessFunction) -> List:
