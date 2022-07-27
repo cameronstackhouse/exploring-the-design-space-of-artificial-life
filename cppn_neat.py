@@ -3,7 +3,6 @@ Module to simulate CPPN-NEAT evolution on a population of
 CPPNs
 """
 
-from genericpath import exists
 from random import randint, uniform, choice
 from typing import List
 from networks import CPPN, NodeType, Node
