@@ -8,6 +8,7 @@ from typing import List
 from networks import CPPN, NodeType, Node
 from matplotlib import pyplot as plt
 from tools.draw_cppn import draw_cppn
+from tools.read_outputs import read_settings
 
 #TODO ADD LINE BACK IN
 #from tools.evaluate import evaluate_pop
@@ -352,20 +353,23 @@ if __name__ == "__main__":
     #######################
     """
 
-    #TODO remove and replace with JSON
-    POPULATION_SIZE = 100
-    ADD_NODE_RATE = 0.4
-    MUTATE_NODE_RATE = 0.2
-    DELETE_NODE_RATE = 0.1
-    ADD_CONNECTION_RATE = 0.8
-    MUTATE_CONNECTION_RATE = 0.3
-    DELETE_CONNECTION_RATE = 0.05
-    TRUNCATION_RATE = 0.5
-    GENERATIONS = 100
+    settings = read_settings("settings")
+    evolution_params = settings["evolution_paramaters"]
+    print(evolution_params)
 
-    a, b = evolve(POPULATION_SIZE, ADD_NODE_RATE, MUTATE_NODE_RATE, DELETE_NODE_RATE,
-    ADD_CONNECTION_RATE, MUTATE_CONNECTION_RATE, DELETE_CONNECTION_RATE, TRUNCATION_RATE,
-    GENERATIONS, "a", [8,8,7], "FITNESS PLACEHOLDER")
+    pop_size = int(evolution_params["population_size"])
+    generations = int(evolution_params["generations"])
+    add_node_rate = float(evolution_params["node_add_rate"])
+    mutate_node_rate = float(evolution_params["mutate_node_rate"])
+    delete_node_rate = float(evolution_params["node_removal_rate"])
+    add_connection_rate = float(evolution_params["connection_addition_rate"])
+    mutate_connection_rate = float(evolution_params["mutate_connection_rate"])
+    remove_connection_rate = float(evolution_params["connection_removal_rate"])
+    truncation_rate = float(evolution_params["truncation_rate"])
+
+    a, b = evolve(pop_size, add_node_rate, mutate_node_rate, delete_node_rate,
+    add_connection_rate, mutate_connection_rate, remove_connection_rate, truncation_rate,
+    generations, "a", [8,8,7], "FITNESS PLACEHOLDER")
 
     first = a[8]
  

@@ -62,5 +62,5 @@ def read_settings(filename: str) -> dict:
 if __name__ == "__main__":
     #TODO DELETE FOR RELEASE
     q = read_sim_output("tools/example")
-
-    print(q)
+    b = read_settings("settings")
+    print(b)
