@@ -293,45 +293,33 @@ def remove_nodes(population: List, rate: float) -> None:
     :param population: population of CPPNs
     :param rate: rate of node removal
     """
-    #TODO Add comments
-    for cppn in population:
-        if len(cppn.nodes) > 2:
-            if rate >= uniform(0,1):
-    
-                layer = choice(cppn.nodes[1:-1])
-                node = choice(layer)
-                cppn.remove_node(node)
+    for cppn in population: #Iterates through all CPPNs in the population
+        if len(cppn.nodes) > 2: #Checks if there are more than 2 layers in the CPPN as input and output nodes can't be removed
+            if rate >= uniform(0,1): #Checks that a random number is less than or equal to the node removal rate
+                layer = choice(cppn.nodes[1:-1]) #Chooses a random non-input/output layer to delete a node from
+                node = choice(layer) #Chooses a node from the selected layer
+                cppn.remove_node(node) #Removes the node
         
-                #Removes all connections where the node does now not exist
-                for connection in cppn.connections:
+                #Removes all connections where the io node(s) do now not exist
+                for connection in cppn.connections: #Iterates through all connections
                     out = connection.out
                     input = connection.input
                     out_exists = False
                     in_exists = False
-                    for layer in cppn.nodes:
+                    #Iterates through layers in the CPPN, checking that the output and input nodes of the connection still exist
+                    for layer in cppn.nodes: 
                         if out in layer:
                             out_exists = True
                         elif input in layer:
                             in_exists = True
-                    if not (in_exists and out_exists):
-                        cppn.connections.remove(connection)
+                    if not (in_exists and out_exists): #Checks if the output and input nodes of a connection still exist
+                        cppn.connections.remove(connection) #If not the connection is removed
                 
-                #TODO USE PREVIOUS IN/OUT TO RENABLE CONNECTIONS
-                for connection in cppn.connections:
+                for connection in cppn.connections: #Iterates through all connections
+                    #Checks if the CPPN has a connection that should be renabled after the removal of a node
+                    #This is done by re-enabling the connection which the node was previously added to the middle of
                     if connection.out is node.previous_out and connection.input is node.previous_in:
-
-                        endpoint_exists = False
-                        for layer in cppn.nodes:
-                            if connection.input in layer:
-                                endpoint_exists = True
-                        
-                        beginning_exists = False
-                        for layer in cppn.nodes:
-                            if connection.out in layer:
-                                beginning_exists = True
-                        
-                        if endpoint_exists and beginning_exists:
-                            connection.set_enabled(True)
+                        connection.set_enabled(True)
                 
 
 def mutate_population(population: List, add_node_rate: float, mutate_node_rate: float, remove_node_rate: float, add_edge_rate: float, 
