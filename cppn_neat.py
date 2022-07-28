@@ -57,7 +57,10 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
         generations_complete+=1 #Increments generations counter
     
     #TODO Prune the population of nodes
+    for cppn in population:
+        cppn.prune()
     
+    #fittest.prune()
     return population, fittest #Returns the fittest individual and the population
 
 def create_population(population_size: int, size_params: List) -> None:

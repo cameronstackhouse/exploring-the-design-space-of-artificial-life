@@ -1,4 +1,5 @@
 import pickle
+#TODO Use graphviz
 
 class GenotypePhenotypeMap:
     """

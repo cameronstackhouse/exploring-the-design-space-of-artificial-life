@@ -429,6 +429,11 @@ class CPPN:
                 disabled_counter+=1
         
         return {"enabled": enabled_counter, "disabled": disabled_counter}
+    
+    def prune(self) -> None:
+        #TODO Add comments
+        #TODO
+        pass
 
     class Connection:
         """
