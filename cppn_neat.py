@@ -56,6 +56,8 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
         
         generations_complete+=1 #Increments generations counter
     
+    #TODO Prune the population of nodes
+    
     return population, fittest #Returns the fittest individual and the population
 
 def create_population(population_size: int, size_params: List) -> None:
@@ -372,6 +374,8 @@ if __name__ == "__main__":
     generations, "a", [8,8,7], "FITNESS PLACEHOLDER")
 
     first = a[8]
+
+    draw_cppn(first) # TODO FIX THIS TOO MANY VALUES TO UNPACK!! (TO DO WITH IDS) 
  
     print(first.connection_types())
 

@@ -10,6 +10,7 @@ from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
 from tools.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs, normalize #Imports all activation functions
+from tools.draw_cppn import draw_cppn
 
 class NodeType(Enum):
     """
@@ -43,6 +44,7 @@ class Node:
         self.outer = outer_cppn
         self.previous_out = None
         self.previous_in = None
+        self.name = None
         outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
     
     def set_activation_function(self, activation_function) -> None:
@@ -473,6 +475,8 @@ if __name__ == "__main__":
     ******************
     """
     a = CPPN([8,8,7])
+
+    draw_cppn(a, False)
 
     print(a.valid_connections())
    
