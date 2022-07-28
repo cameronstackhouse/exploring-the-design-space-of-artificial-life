@@ -6,7 +6,15 @@ from graphviz import Digraph
 
 #TODO Add comments
 
-def draw_cppn(cppn, show_disabled_connections = False, out_dir = "analysis"):   
+def draw_cppn(cppn, show_disabled_connections = False, show_weights = False, out_dir = "analysis") -> None:   
+    """
+    Function to draw a CPPN using graphviz
+
+    :param cppn:
+    :param show_disabled_connections:
+    :param show_weights:
+    :param out_dir:
+    """
     dot = Digraph()
 
     counter = 0
@@ -30,7 +38,10 @@ def draw_cppn(cppn, show_disabled_connections = False, out_dir = "analysis"):
     #TODO Add weight to egdes
 
     for connection in valid_connections:
-        dot.edge(connection.out.name, connection.input.name)
+        if show_weights:
+            dot.edge(connection.out.name, connection.input.name, label=str(round(connection.weight, 2)))
+        else:
+            dot.edge(connection.out.name, connection.input.name)
 
     dot.format = "png"
     dot.render("Graph", view=True, directory=f"{out_dir}/drawings", outfile=f"{out_dir}/drawings/graph.png") #TODO Change where files are saved

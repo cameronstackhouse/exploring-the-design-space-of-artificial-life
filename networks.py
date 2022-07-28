@@ -432,8 +432,19 @@ class CPPN:
     
     def prune(self) -> None:
         #TODO Add comments
-        #TODO
-        pass
+        for connection in self.connections:
+            if connection.enabled:
+                out_exists = False
+                in_exists = False
+                for layer in self.nodes:
+                    for node in layer:
+                        if connection.out is node:
+                            out_exists = True
+                        elif connection.input is node:
+                            in_exists = True
+            
+                if not (out_exists and in_exists):
+                    self.connections.remove(connection)
 
     class Connection:
         """
@@ -481,7 +492,7 @@ if __name__ == "__main__":
     """
     a = CPPN([8,8,7])
 
-    draw_cppn(a, False)
+    draw_cppn(a, show_weights=True)
 
     print(a.valid_connections())
    

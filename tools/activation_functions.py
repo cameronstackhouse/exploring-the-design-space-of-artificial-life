@@ -14,7 +14,7 @@ def sigmoid(x: float) -> float:
     :rtype: float
     :return: sigmoid function value of x
     """
-    return np.nan_to_num(1/(1+np.exp(-x))) #Sigmoid function applied to x
+    return np.nan_to_num(1/(1+np.exp(-x))) #Sigmoid function applied to x #TODO Investigate overflow error
 
 def neg_abs(x: float) -> float:
     """

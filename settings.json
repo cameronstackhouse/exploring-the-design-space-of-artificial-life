@@ -7,8 +7,8 @@
         "node_add_rate": 0.5,
         "node_removal_rate": 0.2,
         "mutate_node_rate": 0.3,
-        "connection_addition_rate": 0.4,
-        "connection_removal_rate": 0.0,
+        "connection_addition_rate": 1,
+        "connection_removal_rate": 0.2,
         "mutate_connection_rate": 0.3,
         "truncation_rate": 0.3
     },

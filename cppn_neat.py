@@ -378,7 +378,7 @@ if __name__ == "__main__":
 
     first = a[8]
 
-    draw_cppn(first) # TODO FIX THIS TOO MANY VALUES TO UNPACK!! (TO DO WITH IDS) 
+    draw_cppn(first, show_weights= True)
  
     print(first.connection_types())
 
