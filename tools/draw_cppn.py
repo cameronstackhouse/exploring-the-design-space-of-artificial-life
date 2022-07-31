@@ -6,7 +6,7 @@ from graphviz import Digraph
 
 #TODO Add comments
 
-def draw_cppn(cppn, show_disabled_connections = False, show_weights = False, out_dir = "analysis") -> None:   
+def draw_cppn(cppn, show_disabled_connections: bool = False, show_weights: bool = False, out_dir: str = "analysis") -> None:   
     """
     Function to draw a CPPN using graphviz
 

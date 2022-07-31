@@ -101,10 +101,9 @@ class CPPN:
         and setting the x, y, z, d, and b inputs needed for the CPPN to fully generate
         a design
 
-        :param xyz_size: volume of the coordinate space for design
+        :param xyz_size: list of length 3 indicating the size of each axis (x,y,z) in the design space
         """
         #TODO Add ability to change the size of the 3D coordinate space (Use JSON settings file)
-        #TODO Change node comments
         self.activation_functions = [np.sin, np.abs, neg_abs, np.square, neg_square, sqrt_abs, neg_sqrt_abs] #List of possible activation functions for each node in the network
         self.nodes = [[], []] #List of nodes in the network
         self.connections = [] #List of connections between nodes in the network
@@ -169,7 +168,6 @@ class CPPN:
         Also sets the two output nodes, one to indicate the presence of material
         at a given coordinate and one to indicate the material of that node
         """
-
         self.set_input_states()
         #Creates an input node for each paramater: i, j, k, d, and b
         for type in [NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z, NodeType.INPUT_D, NodeType.INPUT_B]:
@@ -240,17 +238,17 @@ class CPPN:
         """
         self.nodes[layer].append(node) #Adds node to the list of nodes in the CPPN
     
-    def remove_node(self, node: Node):
+    def remove_node(self, node: Node) -> None:
         """
-        
+        Function to remove a node from a CPPN
+
+        :param node: Node to be removed
         """
-        #TODO Add comments
         #Checks if the node is a hidden node, only hidden nodes can be deleted
         if node.type is NodeType.HIDDEN:
-            for n, layer in enumerate(self.nodes):
-                if node in layer:
-                    layer.remove(node)
-                    
+            for n, layer in enumerate(self.nodes): #Iterates through layers of CPPN
+                if node in layer: #Checks if node is in the layer
+                    layer.remove(node) #Removes node from the layer
                     if len(layer) == 0: #Checks if layer is now empty, if so the layer is removed
                         self.nodes.pop(n)
                     break
@@ -323,17 +321,19 @@ class CPPN:
         Function to convert a tuple result (produced from a CPPN
         when a coordinate point is passed into it) into an integer
         indicating what type of material exists at that location
+
+        :rtype: int
+        :return: Value indicating material at a given location (0 for none, 1 for skin, and 2 for cardiac)
         """
-        #TODO Add comments
         #TODO Ask chico about this!
-        presence = self.presence
-        material = self.material
-        if presence < 0.3:
-            return 0
-        elif material < 0.7:
-            return 1
+        presence = self.presence #Gets presence output of CPPN
+        material = self.material #Gets material output of CPPN
+        if presence < 0.3: #Checks if presence output is less than 0.3
+            return 0 #If so there is no material in the location
+        elif material < 0.7: #Checks if material output is less than 0.7
+            return 1 #If so there is skin in the location
         else:
-            return 2
+            return 2 #Else there is a cardiac cell in the location
         
     def num_activation_functions(self) -> dict:
         """
@@ -381,7 +381,7 @@ class CPPN:
         pass
 
     def phenotype_symmetry(self):
-        #TODO Determines the "symmetry" of the phenotype on each axis
+        #TODO Determines the "symmetry" of the phenotype on each axis (x,y,z)
         pass
 
     def valid_connections(self) -> bool:
@@ -417,13 +417,16 @@ class CPPN:
     
     def connection_types(self) -> dict:
         """
-        
+        Function to get information about how many connections are
+        enabled and disabled in the CPPN
+
+        :rtype: dict
+        :return: dictionary with two keys "enabled" and "disabled" both with counters as values
         """
-        #TODO Add comments
         enabled_counter = 0
         disabled_counter = 0
-        for connection in self.connections:
-            if connection.enabled:
+        for connection in self.connections: #Iterates through connections
+            if connection.enabled: #Checks if connection is enabled
                 enabled_counter+=1
             else:
                 disabled_counter+=1
@@ -431,7 +434,11 @@ class CPPN:
         return {"enabled": enabled_counter, "disabled": disabled_counter}
     
     def prune(self) -> None:
+        """
+        
+        """
         #TODO Add comments
+        #TODO Complete
         for connection in self.connections:
             if connection.enabled:
                 out_exists = False

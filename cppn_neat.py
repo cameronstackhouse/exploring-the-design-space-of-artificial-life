@@ -371,10 +371,11 @@ if __name__ == "__main__":
     mutate_connection_rate = float(evolution_params["mutate_connection_rate"])
     remove_connection_rate = float(evolution_params["connection_removal_rate"])
     truncation_rate = float(evolution_params["truncation_rate"])
+    size_params = list(evolution_params["size_paramaters"])
 
     a, b = evolve(pop_size, add_node_rate, mutate_node_rate, delete_node_rate,
     add_connection_rate, mutate_connection_rate, remove_connection_rate, truncation_rate,
-    generations, "a", [8,8,7], "FITNESS PLACEHOLDER")
+    generations, "a", size_params, "FITNESS PLACEHOLDER")
 
     first = a[8]
 
