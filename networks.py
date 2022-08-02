@@ -103,7 +103,6 @@ class CPPN:
 
         :param xyz_size: list of length 3 indicating the size of each axis (x,y,z) in the design space
         """
-        #TODO Add ability to change the size of the 3D coordinate space (Use JSON settings file)
         self.activation_functions = [np.sin, np.abs, neg_abs, np.square, neg_square, sqrt_abs, neg_sqrt_abs] #List of possible activation functions for each node in the network
         self.nodes = [[], []] #List of nodes in the network
         self.connections = [] #List of connections between nodes in the network
@@ -310,7 +309,7 @@ class CPPN:
         finally:
             #Closes multiprocessing pool
             pool.close()
-            pool.join()
+            pool.join() 
         
         self.phenotype = results
 

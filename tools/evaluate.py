@@ -27,6 +27,7 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     :param run_name: name of the evaluation run
     :param fitness_function: fitness function to be used for evaluation
     """
+    #TODO Add speciation
     #Initilises logging
     logging.basicConfig(filename=f"{run_name}_evaluation.log", format='%(levelname)s:%(message)s', encoding="utf-8", level=logging.DEBUG)
 
@@ -42,10 +43,10 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     vxa.add_material(RGBA=(255,0,255), E=5e4, RHO=1e4)
     vxa.add_material(RGBA=(255,0,0), E=1e8, RHO=1e4)
 
-    sub.Popen(f"rm -r ../fitnessFiles/{run_directory}/{run_name}", shell=True) #Deletes contents of run directory if exists
+    sub.Popen(f"rm -r /fitnessFiles/{run_directory}/{run_name}", shell=True) #Deletes contents of run directory if exists
 
     vxa.write("base.vxa")
-    sub.Popen("cp base.vxa ../fitnessFiles/{run_directory}/{run_name}/", shell=True) #TODO Ensure works!
+    sub.Popen(f"cp base.vxa /fitnessFiles/{run_directory}/{run_name}/", shell=True) #TODO Ensure works!
 
     #Iterates through the population to evaluate each one individually
     for n, individual in enumerate(pop):
@@ -55,13 +56,13 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
         vxd.set_data(body) #Sets the data to be written as the phenotype generated
 
         vxd.write(f"id{n}.vxd") 
-        sub.Popen(f"cp id{n}.vxd ../fitnessFiles/{run_directory}/{run_name}/", shell=True) #TODO Ensure works!
+        sub.Popen(f"cp id{n}.vxd /fitnessFiles/{run_directory}/{run_name}/", shell=True) #TODO Ensure works!
 
         logging.info(f"Writing vxd file for individual: {n}")
 
     #TODO Evaluate using voxcraft-sim, checking for errors
     #TODO Ensure this works!
-    sub.Popen(f"./voxcraft-sim -i ../fitnessFiles/{run_directory}/{run_name}/ -o ../fitnessFiles/{run_directory}/{run_name}/output.xml > ../fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
+    sub.Popen(f"./voxcraft-sim -i /fitnessFiles/{run_directory}/{run_name}/ -o /fitnessFiles/{run_directory}/{run_name}/output.xml > /fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
 
     #TODO Read results from history file and set the CPPNs fitness to that value
     #results = read_sim_output("../fitnessFiles/{run_directory}/{run_name}/output") #TODO Change directory to be correct dir
