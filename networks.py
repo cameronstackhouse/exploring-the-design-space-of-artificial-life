@@ -96,7 +96,7 @@ class CPPN:
     design of reconfigurable organisms
     """
     innovation_counter = 0 #Innovation counter for adding new connections to the network using NEAT
-    connections = []
+    total_cons = []
     def __init__(self, xyz_size: List) -> None:
         """
         Function to initilise a basic CPPN for designing reconfigurable organsims,
@@ -309,15 +309,16 @@ class CPPN:
                 return False
         
         exists = False
-        for connection in CPPN.connections:
+        for connection in CPPN.total_cons:
             if connection.out.position == out.position and connection.input.position == input.position:
                 new_connection = self.Connection(out, input, weight, connection.historical_marking) #Creates a new connection
                 self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
                 exists = True
+                break
 
         if not exists:
             new_connection = self.Connection(out, input, weight, CPPN.innovation_counter) #Creates a new connection
-            CPPN.connections.append(new_connection)
+            CPPN.total_cons.append(new_connection)
             self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
             CPPN.innovation_counter += 1
 
