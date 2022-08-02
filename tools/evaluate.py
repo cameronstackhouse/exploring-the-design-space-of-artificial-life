@@ -17,7 +17,7 @@ class FitnessFunction(Enum):
     VERTICAL_DISTANCE = 2
     #TODO Add more fitness func values here
 
-def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function: FitnessFunction) -> List:
+def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function: FitnessFunction):
     """
     Function to evaluate a population of computer-designed organisms generated
     by a population of CPPNs using voxcraft-sim
@@ -27,14 +27,12 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     :param run_name: name of the evaluation run
     :param fitness_function: fitness function to be used for evaluation
     """
-    #TODO Add speciation
+    #TODO Add speciation using compatibility distance function
     #Initilises logging
     logging.basicConfig(filename=f"{run_name}_evaluation.log", format='%(levelname)s:%(message)s', encoding="utf-8", level=logging.DEBUG)
 
     #TODO Make it return a list of fitness for each phenotype
     start = time.time() 
-
-    fitness = []
 
     #TODO look at MathTree to see how to create fitness function!
     vxa = VXA() # pass vxa tags in here
@@ -65,13 +63,11 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     sub.Popen(f"./voxcraft-sim -i /fitnessFiles/{run_directory}/{run_name}/ -o /fitnessFiles/{run_directory}/{run_name}/output.xml > /fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
 
     #TODO Read results from history file and set the CPPNs fitness to that value
-    #results = read_sim_output("../fitnessFiles/{run_directory}/{run_name}/output") #TODO Change directory to be correct dir
+    #results = read_sim_output("/fitnessFiles/{run_directory}/{run_name}/output") #TODO Change directory to be correct dir
     
     #TODO Change fitness to be a pqueue
-    # for indv in results:
-    #     fitness.append(indv["fitness"])
+    # for n, indv in enumerate(results):
+    #     population[n].fitness = float(indv["fitness"]) 
 
     time_taken = time.time() - start #Time taken to evaluate one generation
     logging.info(f"Evaluation complete. Time taken: {time_taken}.")
-    
-    return fitness

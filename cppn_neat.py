@@ -25,40 +25,41 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
     #Calculates the initial fitness of the population
 
     #TODO ADD LINE BELLOW BACK IN
-    #fit_population = evaluate_pop(population, run_directory, generations_complete, truncation_rate)
+    #evaluate_pop(population, run_directory, generations_complete, truncation_rate)
     
     generations_complete = 0 #Counter of number of completed generations
     while generations_complete < generations:
 
         #TODO Add back in bellow
-        #population = select_population(population, fit_population, population_size, truncation_rate) #Selects the top fit trunction_rate% of the population
+        #population = select_population(population, population_size, truncation_rate) #Selects the top fit trunction_rate% of the population
 
         print(generations_complete)
-
-        #TODO Add back in bellow
-        #population = select_population(population, fit_population)
 
         crossover_pop(population, population_size) #Crosses over the population
         mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate) #Mutates the population
        
         #TODO Add speciation (Different groups of populations, use historical markings)
+        #TODO Change trunctation of population to fit with speciation
+        #species = speciate(population) #TODO Add back in
 
         #Evaluates the population using voxcraft-sim to find fitness of each solution
+        #TODO Add lines back in bellow
+        #for population in species:
+            #evaluate_pop(population, run_directory, generations_complete, fitness_function)
 
-        #TODO Add back in bellow
-        #fit_population = evaluate_pop(population, run_directory, generations_complete, fitness_function)
-                
         #Checks to see if a new overall fittest individual was produced
-        
-        # for individual in population:
-        #     if fittest == None or individual.fitness > fittest.fitness:
-        #         fittest = individual
+        # for population in species:
+            # for individual in population:
+            #     if fittest == None or individual.fitness > fittest.fitness:
+            #         fittest = individual
         
         generations_complete+=1 #Increments generations counter
     
     #TODO Prune the population of nodes
     for cppn in population:
         cppn.prune()
+    
+    print(CPPN.innovation_counter)
     
     #fittest.prune()
     return population, fittest #Returns the fittest individual and the population
@@ -72,18 +73,17 @@ def create_population(population_size: int, size_params: List) -> None:
     """
     return [CPPN(size_params) for _ in range(population_size)] #Generates a list containing the population of CPPNs
 
-def select_population(population: list, fit_population: list, population_size: int, truncation_rate: float) -> List:
+def select_population(population: list, population_size: int, truncation_rate: float) -> List:
     """
     Function to select the suitably fit individuals in the population.
 
     :param population: population of CPPNs
-    :param fit_population: list of fitness of each phenotype produced by each CPPN
     :param population_size: size of population to generate
     :param truncation_rate: rate at which the population is truncated (higher rate means fewer, fitter, individuals are chosen)
     :rtype: List 
     :return: List containing the top fittest individuals in the population
     """
-    sorted_pop = sorted(zip(population, fit_population), key=lambda fitness: fitness[1]) #Sorts the population by their phenotypes respective fitness scores
+    sorted_pop = sorted(population, key=lambda indv: indv.fitness) #Sorts the population by their phenotypes respective fitness scores
     return [individual for individual, _ in sorted_pop[:int(population_size*truncation_rate)]] #Gets the top fittest individuals of the population and adds them to a list
 
 def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> None:
@@ -97,15 +97,24 @@ def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> None:
     """
     #Compares each weight in each connection in each network and crosses over the weights if the innovation numbers match
 
+    fittest = None
+    #TODO USE THIS!
+    # if cppn_a.fitness >= cppn_b.fitness:
+    #     fittest = cppn_a
+    # elif cppn_b.fitness > cppn_a.fitness:
+    #     fittest = cppn_b
+
+    #TODO Change to include disjoint and excess weights of more fit parent
     for connection_a in cppn_a.connections: #Iterates through all connections in the first cppn
         historical_marking = connection_a.historical_marking #Gets the historical marking of the connection
         for connection_b in cppn_b.connections: #Iterates through all connections in the second cppn
             if historical_marking == connection_b.historical_marking: #Compares the two connections historical markings
-                #If the markings match then the weights are swapped
-                temp = connection_a.weight
-                connection_a.weight = connection_b.weight
-                connection_b.weight = temp
-                break
+                #If the markings match and the crossover threshold is met then the weights are swapped
+                if uniform(0,1) >= 0.5:
+                    temp = connection_a.weight
+                    connection_a.weight = connection_b.weight
+                    connection_b.weight = temp
+                    break
 
 def crossover_pop(population: List, population_size: int) -> None:
     """
@@ -326,6 +335,14 @@ def remove_nodes(population: List, rate: float) -> None:
                     #This is done by re-enabling the connection which the node was previously added to the middle of
                     if connection.out is node.previous_out and connection.input is node.previous_in:
                         connection.set_enabled(True)
+
+def cppn_distance(cppn1, cppn2):
+    #TODO
+    pass
+
+def speciate(population) -> List[List]:
+    #TODO Create function to speciate a population
+    pass
                 
 
 def mutate_population(population: List, add_node_rate: float, mutate_node_rate: float, remove_node_rate: float, add_edge_rate: float, 
@@ -360,7 +377,6 @@ if __name__ == "__main__":
 
     settings = read_settings("settings")
     evolution_params = settings["evolution_paramaters"]
-    print(evolution_params)
 
     pop_size = int(evolution_params["population_size"])
     generations = int(evolution_params["generations"])
@@ -382,9 +398,6 @@ if __name__ == "__main__":
     draw_cppn(first, show_weights= True)
  
     print(first.connection_types())
-
-    for layer in first.nodes:
-        print(len(layer))
 
     b = first.to_phenotype()
 

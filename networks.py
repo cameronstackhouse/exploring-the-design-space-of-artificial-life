@@ -45,6 +45,7 @@ class Node:
         self.previous_out = None
         self.previous_in = None
         self.name = None
+        self.position = 0
         outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
     
     def set_activation_function(self, activation_function) -> None:
@@ -94,6 +95,8 @@ class CPPN:
     interconnected nodes with varying activation functions for use in the
     design of reconfigurable organisms
     """
+    innovation_counter = 0 #Innovation counter for adding new connections to the network using NEAT
+    connections = []
     def __init__(self, xyz_size: List) -> None:
         """
         Function to initilise a basic CPPN for designing reconfigurable organsims,
@@ -106,7 +109,6 @@ class CPPN:
         self.activation_functions = [np.sin, np.abs, neg_abs, np.square, neg_square, sqrt_abs, neg_sqrt_abs] #List of possible activation functions for each node in the network
         self.nodes = [[], []] #List of nodes in the network
         self.connections = [] #List of connections between nodes in the network
-        self.innovation_counter = 0 #Innovation counter for adding new connections to the network using NEAT
         self.material = None #Output indicating what type of material is present at a given location
         self.presence = None #Output indicating if material is present at a given location
         self.phenotype = None
@@ -235,8 +237,20 @@ class CPPN:
         :param node: node to be added to the CPPN
         :param layer: layer of the CPPN to add the node into
         """
+        #TODO Add comments
+        position = 0
+
+        for layer_pos in self.nodes[:layer+1]:
+            position += len(layer_pos)
+        
+        node.position = position
         self.nodes[layer].append(node) #Adds node to the list of nodes in the CPPN
-    
+
+        for layer in self.nodes[layer+1:]:
+            for node in layer:
+                node.position = position
+                position+=1
+
     def remove_node(self, node: Node) -> None:
         """
         Function to remove a node from a CPPN
@@ -247,9 +261,25 @@ class CPPN:
         if node.type is NodeType.HIDDEN:
             for n, layer in enumerate(self.nodes): #Iterates through layers of CPPN
                 if node in layer: #Checks if node is in the layer
+                    node_pos = node.position
+                    index = layer.index(node)
                     layer.remove(node) #Removes node from the layer
                     if len(layer) == 0: #Checks if layer is now empty, if so the layer is removed
                         self.nodes.pop(n)
+                        for layer in self.nodes[n:]:
+                            for node in layer:
+                                node.position = node_pos
+                                node_pos+=1
+                    
+                    for node in layer[index:]:
+                        node.position = node_pos
+                        node_pos+=1
+                    
+                    for layer in self.nodes[n+1:]:
+                        for node in layer:
+                            node.position = node_pos
+                            node_pos+=1
+                    
                     break
 
     def reset(self) -> None:
@@ -265,6 +295,7 @@ class CPPN:
         self.presence = None 
     
     def create_connection(self, out: Node, input: Node, weight: float) -> bool:
+        #TODO STOP INNOV EXPANSION - GIVE SAME CONNECTIONS SAME INNOV NUMBERS
         """
         Method to create a connection between two nodes
         with a given weight
@@ -276,13 +307,19 @@ class CPPN:
         for connection in self.connections:
             if connection.out is out and connection.input is input:
                 return False
+        
+        exists = False
+        for connection in CPPN.connections:
+            if connection.out.position == out.position and connection.input.position == input.position:
+                new_connection = self.Connection(out, input, weight, connection.historical_marking) #Creates a new connection
+                self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
+                exists = True
 
-        new_connection = self.Connection(out, input, weight, self.innovation_counter) #Creates a new connection
-        self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
-        # if self.has_cycles(): #Checks if the CPPN with the new connection has cycles
-        #     self.connections.remove(new_connection) #If so remove the new connection
-        #     return False
-        self.innovation_counter+=1 #Adds one to the innovation counter of the CPPN
+        if not exists:
+            new_connection = self.Connection(out, input, weight, CPPN.innovation_counter) #Creates a new connection
+            CPPN.connections.append(new_connection)
+            self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
+            CPPN.innovation_counter += 1
 
         return True
     
