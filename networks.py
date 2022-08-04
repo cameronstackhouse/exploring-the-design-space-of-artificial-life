@@ -237,15 +237,16 @@ class CPPN:
         :param node: node to be added to the CPPN
         :param layer: layer of the CPPN to add the node into
         """
-        #TODO Add comments
         position = 0
 
+        #Finds the position as to where the new node is going to be
         for layer_pos in self.nodes[:layer+1]:
             position += len(layer_pos)
         
         node.position = position
         self.nodes[layer].append(node) #Adds node to the list of nodes in the CPPN
 
+        #Updates all the positions of the nodes infront of the inserted node
         for layer in self.nodes[layer+1:]:
             for node in layer:
                 node.position = position
@@ -295,7 +296,6 @@ class CPPN:
         self.presence = None 
     
     def create_connection(self, out: Node, input: Node, weight: float) -> bool:
-        #TODO STOP INNOV EXPANSION - GIVE SAME CONNECTIONS SAME INNOV NUMBERS
         """
         Method to create a connection between two nodes
         with a given weight
@@ -304,23 +304,25 @@ class CPPN:
         :param input: input node
         :param weight: weight associated with the connection
         """
+        #Makes sure the connection does not exist in the topology
         for connection in self.connections:
             if connection.out is out and connection.input is input:
                 return False
-        
+
+        #Check if a connection between two nodes in the same position exists in another topology
         exists = False
         for connection in CPPN.total_cons:
-            if connection.out.position == out.position and connection.input.position == input.position:
-                new_connection = self.Connection(out, input, weight, connection.historical_marking) #Creates a new connection
+            if connection.out.position == out.position and connection.input.position == input.position: #Checks that the node positions match the connection node positions
+                new_connection = self.Connection(out, input, weight, connection.historical_marking) #Creates a new connection using the existing historical marking (prevents historical marking explosion)
                 self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
                 exists = True
                 break
 
-        if not exists:
-            new_connection = self.Connection(out, input, weight, CPPN.innovation_counter) #Creates a new connection
+        if not exists: #If there isn't an already existing matching connection in a different topology
+            new_connection = self.Connection(out, input, weight, CPPN.innovation_counter) #Creates a new connection using innovation counter
             CPPN.total_cons.append(new_connection)
             self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
-            CPPN.innovation_counter += 1
+            CPPN.innovation_counter += 1 #Increments innovation counter
 
         return True
     
@@ -472,7 +474,7 @@ class CPPN:
     
     def prune(self) -> None:
         """
-        
+        Method to prune a CPPN to remove redundant nodes and connections from the CPPN
         """
         #TODO Add comments
         #TODO Complete

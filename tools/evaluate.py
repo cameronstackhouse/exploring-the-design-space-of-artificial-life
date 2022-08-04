@@ -15,6 +15,8 @@ from voxcraftpython.VoxcraftVXD import VXD
 class FitnessFunction(Enum):
     MAX_DISTANCE = 1
     VERTICAL_DISTANCE = 2
+    INTERACTION = 3
+    OBJECT_EXPULSION = 4
     #TODO Add more fitness func values here
 
 def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function: FitnessFunction):
@@ -63,11 +65,10 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     sub.Popen(f"./voxcraft-sim -i /fitnessFiles/{run_directory}/{run_name}/ -o /fitnessFiles/{run_directory}/{run_name}/output.xml > /fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
 
     #TODO Read results from history file and set the CPPNs fitness to that value
-    #results = read_sim_output("/fitnessFiles/{run_directory}/{run_name}/output") #TODO Change directory to be correct dir
+    results = read_sim_output(f"/fitnessFiles/{run_directory}/{run_name}/output") #TODO Change directory to be correct dir
     
-    #TODO Change fitness to be a pqueue
-    # for n, indv in enumerate(results):
-    #     population[n].fitness = float(indv["fitness"]) 
+    for n, indv in enumerate(results):
+        pop[n].fitness = float(indv["fitness"]) 
 
     time_taken = time.time() - start #Time taken to evaluate one generation
     logging.info(f"Evaluation complete. Time taken: {time_taken}.")

@@ -29,7 +29,6 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
     
     generations_complete = 0 #Counter of number of completed generations
     while generations_complete < generations:
-
         #TODO Add back in bellow
         #population = select_population(population, population_size, truncation_rate) #Selects the top fit trunction_rate% of the population
 
@@ -336,11 +335,44 @@ def remove_nodes(population: List, rate: float) -> None:
                     if connection.out is node.previous_out and connection.input is node.previous_in:
                         connection.set_enabled(True)
 
-def cppn_distance(cppn1, cppn2):
-    #TODO
-    pass
+def cppn_distance(cppn1, cppn2) -> float:
+    """
+    Function to find the "distance" between two cppns to determine
+    which species a geneotype belongs in
+    """
+    #TODO Add comments
+    disjoint_counter = 0
+    excess_counter = 0
+    weight_value_one = 0
+    weight_value_two = 0
 
-def speciate(population) -> List[List]:
+    max_cppn2_innov = 0
+
+    for connection in cppn1.connections:
+        if connection.historical_marking > max_cppn2_innov:
+            max_cppn2_innov = connection.historical_marking
+    
+    for connection in cppn1.connections:
+        if connection.historical_marking > max_cppn2_innov:
+            excess_counter+=1
+        
+    for connection1 in cppn1.connections:
+        shared = False
+        for connection2 in cppn2.connections:
+            if connection1.historical_marking == connection2.historical_marking:
+                shared = True
+                weight_value_one += connection1.weight
+                weight_value_two += connection2.weight
+                break
+        
+        if not shared:
+            disjoint_counter+=1
+    
+    print(disjoint_counter)
+    print(f"weight vals: {weight_value_one} {weight_value_two}")
+    #TODO Return function val
+
+def speciate(population: List) -> List[List]:
     #TODO Create function to speciate a population
     pass
                 
@@ -394,6 +426,12 @@ if __name__ == "__main__":
     generations, "a", size_params, "FITNESS PLACEHOLDER")
 
     first = a[8]
+
+    print("LOOK HERE")
+
+    cppn_distance(a[1], a[78])
+    
+    print("------")
 
     draw_cppn(first, show_weights= True)
  
