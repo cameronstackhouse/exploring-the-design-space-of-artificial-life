@@ -29,15 +29,13 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     :param run_name: name of the evaluation run
     :param fitness_function: fitness function to be used for evaluation
     """
-    #TODO Add speciation using compatibility distance function
     #Initilises logging
     logging.basicConfig(filename=f"{run_name}_evaluation.log", format='%(levelname)s:%(message)s', encoding="utf-8", level=logging.DEBUG)
 
-    #TODO Make it return a list of fitness for each phenotype
-    start = time.time() 
+    start = time.time() #Starts a timer
 
     #TODO look at MathTree to see how to create fitness function!
-    vxa = VXA() # pass vxa tags in here
+    vxa = VXA() #TODO pass vxa tags in here
     
     #Adds both cardiac and skin cells to the simulation
     vxa.add_material(RGBA=(255,0,255), E=5e4, RHO=1e4)
@@ -60,15 +58,17 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
 
         logging.info(f"Writing vxd file for individual: {n}")
 
-    #TODO Evaluate using voxcraft-sim, checking for errors
+    #TODO Check for errors maybe?
     #TODO Ensure this works!
-    sub.Popen(f"./voxcraft-sim -i /fitnessFiles/{run_directory}/{run_name}/ -o /fitnessFiles/{run_directory}/{run_name}/output.xml > /fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
 
-    #TODO Read results from history file and set the CPPNs fitness to that value
-    results = read_sim_output(f"/fitnessFiles/{run_directory}/{run_name}/output") #TODO Change directory to be correct dir
+    #Uses voxcraft-sim to evaluate populations fitness
+    sub.Popen(f"./voxcraft-sim -i /fitnessFiles/{run_directory}/{run_name}/ -o /fitnessFiles/{run_directory}/{run_name}/output.xml > /fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
     
+    results = read_sim_output(f"/fitnessFiles/{run_directory}/{run_name}/output") #Reads sim results from output file
+    
+    #Sets the fitness of each phenotype using results obtained
     for n, indv in enumerate(results):
         pop[n].fitness = float(indv["fitness"]) 
 
     time_taken = time.time() - start #Time taken to evaluate one generation
-    logging.info(f"Evaluation complete. Time taken: {time_taken}.")
+    logging.info(f"Evaluation complete. Time taken: {time_taken}.") 

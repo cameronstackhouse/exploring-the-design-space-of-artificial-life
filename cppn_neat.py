@@ -239,15 +239,17 @@ def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
     :param cppn: CPPN to remove connection from
     :param conenction: Connection to be removed
     """
+    #TODO GET TO WORK! (THINK ITS TO DO WITH DISABLED CONNECTIONS BETWEEN INPUT AND OUTPUT NODES BEING DELETED!) PRUNE NODE BEFORE ACTIVATION!!
     #TODO Add comments
-    #TODO works but not computationally feasable!
-    cppn.connections.remove(connection)
+    if connection.enabled:
+        cppn.connections.remove(connection)
 
-    cppn.run(0)
-    if cppn.material == 0.5 or cppn.presence == 0.5:
-        cppn.connections.append(connection)
-  
-    cppn.connections.append(connection)
+        try:
+            cppn.run(0)
+            if cppn.material == 0.5 or cppn.presence == 0.5 or cppn.presence is None or cppn.material is None:
+                cppn.connections.append(connection)
+        except:
+            cppn.connections.append(connection)
 
 def remove_connections(population: List, rate: float) -> None:
     """
@@ -258,9 +260,9 @@ def remove_connections(population: List, rate: float) -> None:
     """
     #Iterates through CPPNs in the population
     for cppn in population:
-        for connection in cppn.connections:
-            if rate >= uniform(0,1): #Checks if a random number is less than or equal to the removal rate
-                remove_connection(cppn, connection) #If so the connection is removed from the CPPN
+        if rate >= uniform(0,1): #Checks if a random number is less than or equal to the removal rate
+            connection = choice(cppn.connections)
+            remove_connection(cppn, connection) #If so the connection is removed from the CPPN
 
 def add_connection(cppn: CPPN) -> None:
     """
@@ -427,17 +429,19 @@ if __name__ == "__main__":
 
     first = a[8]
 
-    print("LOOK HERE")
+    for indv in a:
+        indv.to_phenotype()
+        print(indv.num_cells())
 
     cppn_distance(a[1], a[78])
-    
-    print("------")
 
     draw_cppn(first, show_weights= True)
  
     print(first.connection_types())
 
+    print("---------------")
     b = first.to_phenotype()
+    print("---------------")
 
     newarr = b.reshape(8,8,7)
 
@@ -447,6 +451,9 @@ if __name__ == "__main__":
         print(f"{x}: {na[x]}")
     
     print(first.num_cells())
+
+    for node in first.nodes[0]:
+        print(node.activation_function.__name__)
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")

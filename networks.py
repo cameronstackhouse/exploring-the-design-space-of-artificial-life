@@ -69,25 +69,27 @@ class Node:
         Function to sum the input values into the node and 
         pass the total into the nodes activation function
         """
-        total = 0 #Summation of input values
 
-        for value in self.inputs:
-            total += value #Sums the input values
-        
-        self.output = self.activation_function(total) #Sets the output value to the activation function applied on the summation of input values
+        if len(self.inputs) > 0:
+            total = 0 #Summation of input values
 
-        #Check for connections to other nodes and feed (output * weight) to that node
-        for connection in self.outer.connections:
-            if connection.out is self and connection.enabled:
-                connection.input.add_input(self.output * connection.weight)
+            for value in self.inputs:
+                total += value #Sums the input values
         
-        #If the node is a presence output node then update the CPPN presence output value
-        if self.type == NodeType.PRESENCE_OUTPUT:
-            self.outer.presence = self.output
+            self.output = self.activation_function(total) #Sets the output value to the activation function applied on the summation of input values
+
+            #Check for connections to other nodes and feed (output * weight) to that node
+            for connection in self.outer.connections:
+                if connection.out is self and connection.enabled:
+                    connection.input.add_input(self.output * connection.weight)
         
-        #If the node is a material output node then update the CPPN material output value
-        if self.type == NodeType.MATERIAL_OUTPUT:
-            self.outer.material = self.output
+            #If the node is a presence output node then update the CPPN presence output value
+            if self.type == NodeType.PRESENCE_OUTPUT:
+                self.outer.presence = self.output
+        
+            #If the node is a material output node then update the CPPN material output value
+            if self.type == NodeType.MATERIAL_OUTPUT:
+                self.outer.material = self.output
 
 class CPPN:
     """
@@ -218,16 +220,9 @@ class CPPN:
         for layer in self.nodes[1:]: #Iterates through all nodes and activates all non input nodes (as they have already been activated)
             for node in layer:
                 node.activate()
-            
-        if self.material == 0.5 or self.presence == 0.5:
-            for node in self.nodes[-1]:
-                if len(node.inputs) == 0:
-                    count = 0
-                    for connection in self.connections:
-                        if connection.enabled and connection.input is node:
-                            count +=1
-                    print(f"NUM CONNECTIONS: {count}")
         
+        print(f"material: {self.material} presence: {self.presence}")
+            
         return self.material_produced() #Returns an integer indicating the material at that voxel
 
     def add_node(self, node: Node, layer: int) -> None:
@@ -367,9 +362,9 @@ class CPPN:
         #TODO Ask chico about this!
         presence = self.presence #Gets presence output of CPPN
         material = self.material #Gets material output of CPPN
-        if presence < 0.3: #Checks if presence output is less than 0.3
+        if presence < 0.5: #Checks if presence output is less than 0.3
             return 0 #If so there is no material in the location
-        elif material < 0.7: #Checks if material output is less than 0.7
+        elif material < 0.5: #Checks if material output is less than 0.7
             return 1 #If so there is skin in the location
         else:
             return 2 #Else there is a cardiac cell in the location
@@ -478,6 +473,7 @@ class CPPN:
         """
         #TODO Add comments
         #TODO Complete
+            
         for connection in self.connections:
             if connection.enabled:
                 out_exists = False
@@ -491,7 +487,8 @@ class CPPN:
             
                 if not (out_exists and in_exists):
                     self.connections.remove(connection)
-
+        
+        
     class Connection:
         """
         Class defining a connection between two nodes in a CPPN network

@@ -32,7 +32,8 @@ def test_basic_cppn() -> None:
 
 def test_create_node() -> None:
     """
-    
+    Function to test creating a new node and adding it to
+    a CPPN
     """
     cppn = networks.CPPN([1,1,1]) #Creates a basic CPPN
     networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0) #Adds node to the first layer in the CPPN
