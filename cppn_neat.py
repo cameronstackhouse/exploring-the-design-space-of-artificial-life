@@ -166,7 +166,6 @@ def add_node_between_con(cppn: CPPN) -> None:
         if connection.enabled:
             enabled_connections.append(connection)
 
-    
     connection = choice(enabled_connections) #Chooses a random connection from enabled connections
     
     #Gets the input and output nodes of the connection
@@ -239,17 +238,37 @@ def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
     :param cppn: CPPN to remove connection from
     :param conenction: Connection to be removed
     """
-    #TODO GET TO WORK! (THINK ITS TO DO WITH DISABLED CONNECTIONS BETWEEN INPUT AND OUTPUT NODES BEING DELETED!) PRUNE NODE BEFORE ACTIVATION!!
     #TODO Add comments
-    if connection.enabled:
-        cppn.connections.remove(connection)
+    if connection.enabled: #Checks that the connection is enabled
+        valid = True
+        for node in cppn.nodes[-1]:
+            connection_counter = 0
+            for connection_check in cppn.connections:
+                if connection_check.input is node and connection_check.input is connection.input:
+                    connection_counter+=1
+            
+            if connection_counter == 1:
+                valid = False
+                break
+        
+        input_output_connection_counter = 0
 
+        valid_io_counter = False
+        for connection in cppn.connections:
+            if connection.input.type in [NodeType.PRESENCE_OUTPUT, NodeType.MATERIAL_OUTPUT] and connection.out.type in [NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z, NodeType.INPUT_B, NodeType.INPUT_D]:
+                input_output_connection_counter += 1
+        
+        if input_output_connection_counter > 2:
+            valid_io_counter = True
+        
+        if valid and valid_io_counter:
+            cppn.connections.remove(connection) #If so the connection can be removed
         try:
-            cppn.run(0)
-            if cppn.material == 0.5 or cppn.presence == 0.5 or cppn.presence is None or cppn.material is None:
+            cppn.run(0) #Tries to run the cppn
+            if cppn.material == 0.5 or cppn.presence == 0.5 or cppn.material is None or cppn.presence is None:
                 cppn.connections.append(connection)
-        except:
-            cppn.connections.append(connection)
+        except Exception as e:
+            cppn.connections.append(connection) #Catches if none is produced for either of the outputs
 
 def remove_connections(population: List, rate: float) -> None:
     """
@@ -423,15 +442,12 @@ if __name__ == "__main__":
     truncation_rate = float(evolution_params["truncation_rate"])
     size_params = list(evolution_params["size_paramaters"])
 
+
     a, b = evolve(pop_size, add_node_rate, mutate_node_rate, delete_node_rate,
     add_connection_rate, mutate_connection_rate, remove_connection_rate, truncation_rate,
     generations, "a", size_params, "FITNESS PLACEHOLDER")
 
     first = a[8]
-
-    for indv in a:
-        indv.to_phenotype()
-        print(indv.num_cells())
 
     cppn_distance(a[1], a[78])
 
