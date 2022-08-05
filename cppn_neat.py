@@ -251,14 +251,17 @@ def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
                 valid = False
                 break
         
-        input_output_connection_counter = 0
+        input_output_connection_counter_material = 0
+        input_output_connection_counter_presence = 0
 
         valid_io_counter = False
         for connection in cppn.connections:
-            if connection.input.type in [NodeType.PRESENCE_OUTPUT, NodeType.MATERIAL_OUTPUT] and connection.out.type in [NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z, NodeType.INPUT_B, NodeType.INPUT_D]:
-                input_output_connection_counter += 1
+            if connection.input.type is NodeType.PRESENCE_OUTPUT and connection.out.type in [NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z, NodeType.INPUT_B, NodeType.INPUT_D] and not connection.enabled:
+                input_output_connection_counter_presence += 1
+            elif connection.input.type is NodeType.MATERIAL_OUTPUT and connection.out.type in [NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z, NodeType.INPUT_B, NodeType.INPUT_D] and not connection.enabled:
+                input_output_connection_counter_material += 1
         
-        if input_output_connection_counter > 2:
+        if not (input_output_connection_counter_material <= 1 and connection.input.type is NodeType.MATERIAL_OUTPUT) and not (input_output_connection_counter_presence <= 1 and connection.input.type is NodeType.PRESENCE_OUTPUT):
             valid_io_counter = True
         
         if valid and valid_io_counter:
@@ -267,7 +270,7 @@ def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
             cppn.run(0) #Tries to run the cppn
             if cppn.material == 0.5 or cppn.presence == 0.5 or cppn.material is None or cppn.presence is None:
                 cppn.connections.append(connection)
-        except Exception as e:
+        except:
             cppn.connections.append(connection) #Catches if none is produced for either of the outputs
 
 def remove_connections(population: List, rate: float) -> None:
@@ -442,12 +445,13 @@ if __name__ == "__main__":
     truncation_rate = float(evolution_params["truncation_rate"])
     size_params = list(evolution_params["size_paramaters"])
 
-
+ 
     a, b = evolve(pop_size, add_node_rate, mutate_node_rate, delete_node_rate,
     add_connection_rate, mutate_connection_rate, remove_connection_rate, truncation_rate,
     generations, "a", size_params, "FITNESS PLACEHOLDER")
 
     first = a[8]
+
 
     cppn_distance(a[1], a[78])
 

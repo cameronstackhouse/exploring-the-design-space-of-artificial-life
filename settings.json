@@ -4,12 +4,12 @@
         "generations": 100,
         "run_directory": "placeholder",
         "size_paramaters": [8,8,7],
-        "node_add_rate": 0.7,
-        "node_removal_rate": 0.3,
+        "node_add_rate": 1,
+        "node_removal_rate": 0.0,
         "mutate_node_rate": 0.3,
-        "connection_addition_rate": 0.5,
-        "connection_removal_rate": 0.3,
-        "mutate_connection_rate": 0.3,
+        "connection_addition_rate": 0.4,
+        "connection_removal_rate": 1,
+        "mutate_connection_rate": 1,
         "truncation_rate": 0.3
     },
     
