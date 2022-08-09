@@ -11,7 +11,7 @@ from tools.draw_cppn import draw_cppn
 from tools.read_outputs import read_settings
 
 #TODO ADD LINE BACK IN
-#from tools.evaluate import evaluate_pop
+from tools.evaluate import evaluate_pop
 
 def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, 
     remove_edge_rate, truncation_rate, generations, run_directory, size_params, fitness_function):
@@ -22,15 +22,14 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
     fittest = None #Fittest individual
     population = create_population(population_size, size_params) #Generates an initial population of CPPNs
 
-    #Calculates the initial fitness of the population
-
-    #TODO ADD LINE BELLOW BACK IN
-    #evaluate_pop(population, run_directory, generations_complete, truncation_rate)
-    
     generations_complete = 0 #Counter of number of completed generations
+    #Calculates the initial fitness of the population
+    #TODO ADD LINE BELLOW BACK IN
+    evaluate_pop(population, run_directory, generations_complete, truncation_rate)
+    
     while generations_complete < generations:
         #TODO Add back in bellow
-        #population = select_population(population, population_size, truncation_rate) #Selects the top fit trunction_rate% of the population
+        population = select_population(population, population_size, truncation_rate) #Selects the top fit trunction_rate% of the population
 
         print(generations_complete)
 
@@ -43,14 +42,15 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
 
         #Evaluates the population using voxcraft-sim to find fitness of each solution
         #TODO Add lines back in bellow
-        #for population in species:
-            #evaluate_pop(population, run_directory, generations_complete, fitness_function)
+        # for population in species:
+        
+        evaluate_pop(population, run_directory, generations_complete, fitness_function)
 
         #Checks to see if a new overall fittest individual was produced
         # for population in species:
-            # for individual in population:
-            #     if fittest == None or individual.fitness > fittest.fitness:
-            #         fittest = individual
+        for individual in population:
+            if fittest == None or individual.fitness > fittest.fitness:
+                fittest = individual
         
         generations_complete+=1 #Increments generations counter
     
@@ -446,6 +446,7 @@ if __name__ == "__main__":
     size_params = list(evolution_params["size_paramaters"])
 
  
+
     a, b = evolve(pop_size, add_node_rate, mutate_node_rate, delete_node_rate,
     add_connection_rate, mutate_connection_rate, remove_connection_rate, truncation_rate,
     generations, "a", size_params, "FITNESS PLACEHOLDER")

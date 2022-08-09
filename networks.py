@@ -220,8 +220,6 @@ class CPPN:
         for layer in self.nodes[1:]: #Iterates through all nodes and activates all non input nodes (as they have already been activated)
             for node in layer:
                 node.activate()
-        
-        print(f"material: {self.material} presence: {self.presence}")
             
         return self.material_produced() #Returns an integer indicating the material at that voxel
 
