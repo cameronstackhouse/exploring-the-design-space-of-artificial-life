@@ -33,7 +33,7 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     start = time.time() #Starts a timer
 
     #TODO look at MathTree to see how to create fitness function!
-    vxa = VXA(SimTime=3) #TODO pass vxa tags in here INCREASE STEP TIME!
+    vxa = VXA(SimTime=2, RecordStepSize=1000, RecordLink=0, DtFrac=0.5) #TODO pass vxa tags in here INCREASE STEP TIME!
     
     #Adds both cardiac and skin cells to the simulation
     vxa.add_material(RGBA=(255,0,255), E=5e4, RHO=1e4)
@@ -41,7 +41,7 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
 
     #TODO Change linux commands for creating/deleting directories
 
-    sub.call(f"rm -r fitnessFiles/{run_directory}/{run_name}/", shell=True) #Deletes contents of run directory if exists
+    sub.call(f"rm -rf fitnessFiles/{run_directory}/{run_name}/", shell=True) #Deletes contents of run directory if exists
 
     sub.call(f"mkdir -p fitnessFiles/{run_directory}/{run_name}/", shell=True)
 
@@ -73,6 +73,7 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     #Uses voxcraft-sim to evaluate populations fitness
     sub.call(f"./voxcraft-sim -i fitnessFiles/{run_directory}/{run_name}/ -o fitnessFiles/{run_directory}/{run_name}/output.xml -f > fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
 
+    print("FINISHED SIM")
     results = read_sim_output(f"fitnessFiles/{run_directory}/{run_name}/output") #Reads sim results from output file
     
     #Sets the fitness of each phenotype using results obtained
