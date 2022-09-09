@@ -4,63 +4,62 @@ CPPNs
 """
 
 from random import randint, uniform, choice
-from typing import List
+from typing import List, Tuple
 from networks import CPPN, NodeType, Node
 from matplotlib import pyplot as plt
 from tools.draw_cppn import draw_cppn
 from tools.read_outputs import read_settings
-
-#TODO ADD LINE BACK IN
 from tools.evaluate import evaluate_pop
 
 def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, 
-    remove_edge_rate, truncation_rate, generations, run_directory, size_params, fitness_function):
-    #TODO Write description
+    remove_edge_rate, truncation_rate, generations, run_directory, size_params, fitness_function) -> Tuple(List[CPPN], CPPN):
     """
-    
+    Function to evolve a population of CPPNs using CPPN-NEAT to design xenobots.
+
+    :param population_size: Size of population of CPPNs
+    :param add_node_rate: Rate at which a node is added to a CPPN
+    :param mutate_node_rate: Rate at which a node is mutated in a CPPN
+    :param remove_node_rate: Rate at which a node is removed from a CPPN
+    :param add_edge_rate: Rate at which an edge is added to a CPPN
+    :param mutate_edge_rate: Rate at which an edge is mutated in a CPPN
+    :param remove_edge_rate: Rate at which an edge is removed from a CPPN
+    :param truncation_rate: Rate at which the population is truncated (rate at which the population converges on its fittest designs)
+    :param generations: Number of generations to evolve the population of CPPNs for
+    :param run_directory: Directory to save generated history files from voxcraft-sim to
+    :param size_params: Size dimentions of the xenobot being created
+    :param fitness_function: Fitness function to evaluate each individual in the population
+    :rtype: Tuple -> (List of CPPNs, CPPN)
+    :return: Tuple containing a list of all CPPNs in the population at the end of evolution and the individual with the highest fitness score
     """
     fittest = None #Fittest individual
     population = create_population(population_size, size_params) #Generates an initial population of CPPNs
 
     generations_complete = 0 #Counter of number of completed generations
-    #Calculates the initial fitness of the population
-    #TODO ADD LINE BELLOW BACK IN
-    evaluate_pop(population, run_directory, generations_complete, truncation_rate)
+    evaluate_pop(population, run_directory, generations_complete, truncation_rate)  #Calculates the initial fitness of the population
     
-    while generations_complete < generations:
-        #TODO Add back in bellow
+    while generations_complete < generations: #Repeats until the number of generations specified is reached
         population = select_population(population, population_size, truncation_rate) #Selects the top fit trunction_rate% of the population
 
-        print(generations_complete)
+        print(generations_complete) #Displays how many generations have been completed
 
         crossover_pop(population, population_size) #Crosses over the population
         mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate) #Mutates the population
        
+        #Evaluates the population using voxcraft-sim to find fitness of each solution 
         #TODO Add speciation (Different groups of populations, use historical markings)
-        #TODO Change trunctation of population to fit with speciation
-        #species = speciate(population) #TODO Add back in
-
-        #Evaluates the population using voxcraft-sim to find fitness of each solution
-        #TODO Add lines back in bellow
-        # for population in species:
-        
         evaluate_pop(population, run_directory, generations_complete, fitness_function)
 
         #Checks to see if a new overall fittest individual was produced
-        # for population in species:
         for individual in population:
             if fittest == None or individual.fitness > fittest.fitness:
                 fittest = individual
         
         generations_complete+=1 #Increments generations counter
     
-    #TODO Prune the population of nodes
+    #Prunes the population of redundant nodes
     for cppn in population:
         cppn.prune()
     
-    print(CPPN.innovation_counter)
-    
-    #fittest.prune()
     return population, fittest #Returns the fittest individual and the population
 
 def create_population(population_size: int, size_params: List) -> None:
@@ -97,13 +96,14 @@ def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> None:
     #Compares each weight in each connection in each network and crosses over the weights if the innovation numbers match
 
     fittest = None
-    #TODO USE THIS!
-    # if cppn_a.fitness >= cppn_b.fitness:
-    #     fittest = cppn_a
-    # elif cppn_b.fitness > cppn_a.fitness:
-    #     fittest = cppn_b
+    if cppn_a.fitness >= cppn_b.fitness:
+        fittest = cppn_a
+    elif cppn_b.fitness > cppn_a.fitness:
+        fittest = cppn_b
 
     #TODO Change to include disjoint and excess weights of more fit parent
+
+    #TODO CHANGE TO RETURN NEW CROSSED OVER INDIVIDUAL!
     for connection_a in cppn_a.connections: #Iterates through all connections in the first cppn
         historical_marking = connection_a.historical_marking #Gets the historical marking of the connection
         for connection_b in cppn_b.connections: #Iterates through all connections in the second cppn
@@ -451,29 +451,26 @@ if __name__ == "__main__":
     add_connection_rate, mutate_connection_rate, remove_connection_rate, truncation_rate,
     generations, "a", size_params, "FITNESS PLACEHOLDER")
 
-    first = a[8]
-
-
     cppn_distance(a[1], a[78])
 
-    draw_cppn(first, show_weights= True)
+    draw_cppn(b, show_weights= True)
  
-    print(first.connection_types())
+    print(b.connection_types())
 
     print("---------------")
-    b = first.to_phenotype()
+    c = b.to_phenotype()
     print("---------------")
 
-    newarr = b.reshape(8,8,7)
+    newarr = c.reshape(8,8,7)
 
-    na = first.num_activation_functions()
+    na = b.num_activation_functions()
 
     for x in na:
         print(f"{x}: {na[x]}")
     
-    print(first.num_cells())
+    print(b.num_cells())
 
-    for node in first.nodes[0]:
+    for node in b.nodes[0]:
         print(node.activation_function.__name__)
 
     fig = plt.figure()
