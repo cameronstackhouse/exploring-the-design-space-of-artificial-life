@@ -42,11 +42,13 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
 
         print(generations_complete) #Displays how many generations have been completed
 
-        crossover_pop(population, population_size) #Crosses over the population
+        population = crossover_pop(population, population_size) #Crosses over the population
         mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate) #Mutates the population
        
         #Evaluates the population using voxcraft-sim to find fitness of each solution 
-        #TODO Add speciation (Different groups of populations, use historical markings)
+
+        #TODO Add speciation
+
         evaluate_pop(population, run_directory, generations_complete, fitness_function)
 
         #Checks to see if a new overall fittest individual was produced
@@ -84,47 +86,49 @@ def select_population(population: list, population_size: int, truncation_rate: f
     sorted_pop = sorted(population, key=lambda indv: indv.fitness) #Sorts the population by their phenotypes respective fitness scores
     return [individual for individual, _ in sorted_pop[:int(population_size*truncation_rate)]] #Gets the top fittest individuals of the population and adds them to a list
 
-def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> None:
+def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> CPPN:
     """
-    Function to crossover weights of two CPPNs.
-    Only weights with the same innovation number are crossed over
-    using a Pseudo uniform crossover.
+    Function to crossover connections of two CPPNs.
+    Only connections with the same innovation number are crossed over
+    using a Pseudo uniform crossover. The excess and disjoint connections
+    are maintained from the fitter CPPN.
 
     :param cppn_a: first CPPN to be crossed over
     :param cppn_b: second CPPN to be crossed over
+    :rtype: CPPN
+    :return: Crossed over CPPN
     """
     #Compares each weight in each connection in each network and crosses over the weights if the innovation numbers match
 
+    #Determines which CPPN is the fittest to keep its disjoint and excess connections
     fittest = None
     if cppn_a.fitness >= cppn_b.fitness:
         fittest = cppn_a
+        less_fit = cppn_b
     elif cppn_b.fitness > cppn_a.fitness:
         fittest = cppn_b
+        less_fit = cppn_a
 
-    #TODO Change to include disjoint and excess weights of more fit parent
+    #Iterates through all connections in the two CPPNs
+    for fit_connection in fittest.connections:
+        for less_fit_connection in less_fit.connections:
+            if fit_connection.historical_marking == less_fit_connection.historical_marking and uniform(0,1) >= 0.5: #Checks if historical markings match and if random crossover threshold reached
+                fit_connection.weight = less_fit_connection.weight #Sets the connection weight to be the weight of the connection from the less fit CPPN
+                fit_connection.enabled = less_fit_connection.enabled #Sets the connection enabled status to be the status of the connection from the less fit CPPN
+        
+    return fittest
 
-    #TODO CHANGE TO RETURN NEW CROSSED OVER INDIVIDUAL!
-    for connection_a in cppn_a.connections: #Iterates through all connections in the first cppn
-        historical_marking = connection_a.historical_marking #Gets the historical marking of the connection
-        for connection_b in cppn_b.connections: #Iterates through all connections in the second cppn
-            if historical_marking == connection_b.historical_marking: #Compares the two connections historical markings
-                #If the markings match and the crossover threshold is met then the weights are swapped
-                if uniform(0,1) >= 0.5:
-                    temp = connection_a.weight
-                    connection_a.weight = connection_b.weight
-                    connection_b.weight = temp
-                    break
-
-def crossover_pop(population: List, population_size: int) -> None:
+def crossover_pop(population: List, population_size: int) -> List(CPPN):
     """
-    Function to crossover the weights of connections in 
+    Function to crossover the connections in CPPNs in
     a population.
 
-    :param population: population of CPPNs
+    :param population: population of CPPNsx
     :param population_size: size of population to generate
+    :rtype: List of CPPNs
+    :return: List of CPPNs with weights crossed over
     """
-    for _ in range(population_size): #Iterates through population size
-        crossover_indv(choice(population), choice(population)) #Crosses over two random individuals from the population
+    return [crossover_indv(choice(population), choice(population)) for _ in range(population_size)]
 
 def mutate_node(node: Node) -> None:
     """
@@ -236,40 +240,47 @@ def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
     Function to remove a given connection from a CPPN
 
     :param cppn: CPPN to remove connection from
-    :param conenction: Connection to be removed
+    :param connection: Connection to be removed
     """
-    #TODO Add comments
     if connection.enabled: #Checks that the connection is enabled
         valid = True
-        for node in cppn.nodes[-1]:
+        for node in cppn.nodes[-1]: #Iterates through all output nodes in the CPPN
             connection_counter = 0
+            #Checks if the connection being deleted is one that goes into an output node and, if so, checks if it is the only connection going into it
             for connection_check in cppn.connections:
                 if connection_check.input is node and connection_check.input is connection.input:
                     connection_counter+=1
             
+            #If the connection being deleted is going into an output node and is the only connection then the deletion is invalid
             if connection_counter == 1:
                 valid = False
                 break
         
-        input_output_connection_counter_material = 0
+        #Counters for the number of disabled connections going into the output nodes from input nodes
+        input_output_connection_counter_material = 0 
         input_output_connection_counter_presence = 0
 
         valid_io_counter = False
-        for connection in cppn.connections:
+        for connection in cppn.connections: #Iterates through connections in the CPPN
+            #Checks if the connection is going into the presence output node and is disabled and is coming from an input node
             if connection.input.type is NodeType.PRESENCE_OUTPUT and connection.out.type in [NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z, NodeType.INPUT_B, NodeType.INPUT_D] and not connection.enabled:
                 input_output_connection_counter_presence += 1
+            #Checks if the connection is going into the material output node and is disabled and is coming from an input node
             elif connection.input.type is NodeType.MATERIAL_OUTPUT and connection.out.type in [NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z, NodeType.INPUT_B, NodeType.INPUT_D] and not connection.enabled:
                 input_output_connection_counter_material += 1
         
+        #Ensures that there is always one connection (enabled or disabled) that links directly from an input node to an output node.
+        #This is done to ensure that in the event of node or connection deletions, there is always a way to reconnect a pathway from the 
+        #input nodes to the output nodes, maintaining a valid topology
         if not (input_output_connection_counter_material <= 1 and connection.input.type is NodeType.MATERIAL_OUTPUT) and not (input_output_connection_counter_presence <= 1 and connection.input.type is NodeType.PRESENCE_OUTPUT):
             valid_io_counter = True
         
-        if valid and valid_io_counter:
+        if valid and valid_io_counter: #Checks if the connection is deemed to be valid to be removed
             cppn.connections.remove(connection) #If so the connection can be removed
         try:
-            cppn.run(0) #Tries to run the cppn
+            cppn.run(0) #Tries to run the cppn to ensure that the topology is valid (there is at least one pathway to each of the output nodes)
             if cppn.material == 0.5 or cppn.presence == 0.5 or cppn.material is None or cppn.presence is None:
-                cppn.connections.append(connection)
+                cppn.connections.append(connection) #If fails, then re-add the connection as the CPPN is not properly connected and the output nodes are unreachable
         except:
             cppn.connections.append(connection) #Catches if none is produced for either of the outputs
 
@@ -362,7 +373,7 @@ def remove_nodes(population: List, rate: float) -> None:
 def cppn_distance(cppn1, cppn2) -> float:
     """
     Function to find the "distance" between two cppns to determine
-    which species a geneotype belongs in
+    which species a geneotype belongs in for the CPPN NEAT algorithm
     """
     #TODO Add comments
     disjoint_counter = 0

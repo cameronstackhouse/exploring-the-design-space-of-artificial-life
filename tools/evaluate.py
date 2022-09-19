@@ -81,4 +81,4 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
         pop[n].fitness = float(indv["fitness"]) 
 
     time_taken = time.time() - start #Time taken to evaluate one generation
-    logging.info(f"Evaluation complete. Time taken: {time_taken}.") 
+    logging.info(f"Evaluation complete for generation {run_name}. Time taken: {time_taken}.") 

@@ -35,3 +35,6 @@ class FitnessLandscape:
                 self.phenotype_fitness_map[phenotype_fitness].append(key)
             else:
                 self.phenotype_fitness_map[phenotype_fitness] = [key]
+    
+    def visualize(self) -> None:
+        pass
