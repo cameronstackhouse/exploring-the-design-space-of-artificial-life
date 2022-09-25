@@ -25,3 +25,4 @@ Based on:
 
 ## License
 [MIT License](https://github.com/cameronstackhouse/exploring-the-design-space-of-artificial-life/blob/main/LICENSE)
+Copyright (c) 2022 cameronstackhouse
