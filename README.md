@@ -24,4 +24,4 @@ Based on:
 ## Further Readings
 
 ## License
-MIT License
+[MIT License](https://github.com/cameronstackhouse/exploring-the-design-space-of-artificial-life/blob/main/LICENSE)
