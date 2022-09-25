@@ -4,6 +4,7 @@
 [Cameron Stackhouse](https://github.com/cameronstackhouse)
 
 ## Description
+This project is exploring the design space of xenobots created using an [evolutionary pipeline proposed by Kriegman et al](https://github.com/skriegman/reconfigurable_organisms)
 
 Based on: 
 * https://github.com/voxcraft/voxcraft-sim 
