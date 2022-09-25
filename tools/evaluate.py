@@ -13,6 +13,9 @@ from voxcraftpython.VoxcraftVXD import VXD
 #TODO Add input option to specify what is being tested for (Locomotion, Object Movement, Object Transport)
 
 class FitnessFunction(Enum):
+    """
+    List of fitness functions to test a population for fitness
+    """
     MAX_DISTANCE = 1
     VERTICAL_DISTANCE = 2
     INTERACTION = 3
@@ -60,9 +63,9 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
         vxd.set_tags(RecordVoxel=1) # pass vxd tags in here to overwite vxa tags
         vxd.set_data(body) #Sets the data to be written as the phenotype generated
 
-        vxd.write(f"id{n}.vxd") 
-        sub.call(f"cp id{n}.vxd fitnessFiles/{run_directory}/{run_name}/", shell=True) #TODO Ensure works!
-        sub.call(f"rm id{n}.vxd", shell=True)
+        vxd.write(f"id{n}.vxd") #Writes vxd file for individual
+        sub.call(f"cp id{n}.vxd fitnessFiles/{run_directory}/{run_name}/", shell=True) #TODO Ensure works! #Copies vxd file of individual to correct directory
+        sub.call(f"rm id{n}.vxd", shell=True) #Removes the old non-copied vxd file
 
         logging.info(f"Writing vxd file for individual: {n}")
 
@@ -70,7 +73,7 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     #TODO Ensure this works!
 
     print("SIMULATING!")
-    #Uses voxcraft-sim to evaluate populations fitness
+    #Uses voxcraft-sim to evaluate populations fitness, producing an output xml file and a history file, which can be visualised by voxcraft-viz
     sub.call(f"./voxcraft-sim -i fitnessFiles/{run_directory}/{run_name}/ -o fitnessFiles/{run_directory}/{run_name}/output.xml -f > fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
 
     print("FINISHED SIM")

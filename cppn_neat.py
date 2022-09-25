@@ -370,23 +370,29 @@ def remove_nodes(population: List, rate: float) -> None:
                     if connection.out is node.previous_out and connection.input is node.previous_in:
                         connection.set_enabled(True)
 
-def cppn_distance(cppn1, cppn2) -> float:
+def cppn_distance(cppn1: CPPN, cppn2: CPPN) -> float:
     """
     Function to find the "distance" between two cppns to determine
     which species a geneotype belongs in for the CPPN NEAT algorithm
+
+    :param cppn1: first cppn to compare
+    :param cppn2: second cppn to compate
+    :rtype: float
+    :return: distance between the two cppns
     """
-    #TODO Add comments
-    disjoint_counter = 0
-    excess_counter = 0
-    weight_value_one = 0
-    weight_value_two = 0
+    disjoint_counter = 0 #Counter of disjoint connections
+    excess_counter = 0 #Counter of excess connections
+    weight_value_one = 0 #Summation value of matching weights in the first cppn
+    weight_value_two = 0 #Summation value of matching weights in the second cppn
 
-    max_cppn2_innov = 0
+    max_cppn2_innov = 0 #Max innovation number of connections in cppn2
 
-    for connection in cppn1.connections:
+    #Finds the maximum innovation number connection in the second cppn
+    for connection in cppn2.connections:
         if connection.historical_marking > max_cppn2_innov:
             max_cppn2_innov = connection.historical_marking
     
+    #Iterates through connections in the first cppn, incrementing the excess counter if the innovation number is higher than the max historical marking in the second cppn
     for connection in cppn1.connections:
         if connection.historical_marking > max_cppn2_innov:
             excess_counter+=1

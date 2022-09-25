@@ -504,7 +504,7 @@ class CPPN:
             self.out = out 
             self.input = input
             self.weight = weight
-            self.historical_marking = innov
+            self.historical_marking = innov 
             self.enabled = True #Automatically enables the connection
         
         def set_enabled(self, option: bool) -> None:
