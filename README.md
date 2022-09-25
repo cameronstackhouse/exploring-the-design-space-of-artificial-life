@@ -24,3 +24,4 @@ Based on:
 ## Further Readings
 
 ## License
+MIT License
