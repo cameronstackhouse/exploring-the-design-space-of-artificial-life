@@ -15,6 +15,10 @@ Based on:
 
 ## How to use
 
+### Installation
+
+### Settings File
+
 ## Further Readings
 
 ## License
