@@ -4,7 +4,7 @@ CPPNs
 """
 
 from random import randint, uniform, choice
-from typing import List, Tuple
+from typing import List
 from networks import CPPN, NodeType, Node
 from matplotlib import pyplot as plt
 from tools.draw_cppn import draw_cppn

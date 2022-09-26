@@ -6,6 +6,8 @@ compositional pattern-producing networks
 from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp
+import pickle
+from tokenize import String
 from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
@@ -251,6 +253,7 @@ class CPPN:
 
         :param node: Node to be removed
         """
+        #TODO FINISH COMMENTS
         #Checks if the node is a hidden node, only hidden nodes can be deleted
         if node.type is NodeType.HIDDEN:
             for n, layer in enumerate(self.nodes): #Iterates through layers of CPPN
@@ -259,15 +262,17 @@ class CPPN:
                     index = layer.index(node)
                     layer.remove(node) #Removes node from the layer
                     if len(layer) == 0: #Checks if layer is now empty, if so the layer is removed
-                        self.nodes.pop(n)
-                        for layer in self.nodes[n:]:
-                            for node in layer:
+                        self.nodes.pop(n) #Pops the layer
+                        for layer in self.nodes[n:]: #Iterates through all layers after the removed layer
+                            for node in layer: #Iterates through all nodes in the next layers, updating the position value of each node
                                 node.position = node_pos
                                 node_pos+=1
                     
-                    for node in layer[index:]:
+                    #Updates node positions of nodes in the layer which the node has been popped from
+                    for node in layer[index:]: 
                         node.position = node_pos
                         node_pos+=1
+                    
                     
                     for layer in self.nodes[n+1:]:
                         for node in layer:
@@ -326,6 +331,7 @@ class CPPN:
         indicates if there is material at that point and, if so, what
         type of material it is (skin cell or cardiac cell)
         """
+        #TODO maybe change to not just 3d space?
         results = np.zeros(self.xyz_size) #Empty numpy array to store material results at each point
         
         try:
@@ -415,6 +421,23 @@ class CPPN:
     def phenotype_symmetry(self):
         #TODO Determines the "symmetry" of the phenotype on each axis (x,y,z)
         pass
+
+    def lz_phenotype(self) -> String:
+        """
+        Function to compress the phenotype produced by the CPPN using 
+        lempel-ziv. The size of the generated compression can be used as a measurement
+        of phenotypic complexity.
+
+        :rtype string
+        :return: lempel-ziv compressed string representation of the CPPN
+        """
+        #TODO lempel-ziv compression of phenotype
+        #Gets phenotype of the CPPN genotype
+        phenotype = self.to_phenotype()
+        str_cells = [str(num) for num in phenotype]
+        string_phenoype = "".join(str_cells)
+
+        #Compress string phenotype and return        
 
     def valid_connections(self) -> bool:
         """
@@ -522,6 +545,28 @@ class CPPN:
             :param value: weight of the connection
             """
             self.weight = value
+        
+        def save(self, filename: String) -> None:
+            """
+            Function to use pickle to save a CPPN object
+
+            :param filename:
+            """
+            f = open(filename, "wb")
+            pickle.dump(self.__dict__, f, 2)
+            f.close()
+        
+        def load(self, filename: String) -> None:
+            """
+            Function to use pickle to load a CPPN object
+
+            :param filename: 
+            """
+            f = open(filename, 'rb')
+            temp_dictionary = pickle.load(f)
+            f.close()
+
+            self.__dict__.update(temp_dictionary)
 
     
 if __name__ == "__main__":
@@ -538,6 +583,8 @@ if __name__ == "__main__":
     print(a.valid_connections())
    
     b = a.to_phenotype()
+
+    print(b)
 
     newarr = b.reshape(8,8,7)
 
