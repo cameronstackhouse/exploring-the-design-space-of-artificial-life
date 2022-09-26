@@ -12,7 +12,7 @@ from tools.read_outputs import read_settings
 from tools.evaluate import evaluate_pop
 
 def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, 
-    remove_edge_rate, truncation_rate, generations, run_directory, size_params, fitness_function) -> Tuple(List[CPPN], CPPN):
+    remove_edge_rate, truncation_rate, generations, run_directory, size_params, fitness_function) -> tuple[list[CPPN], CPPN]:
     """
     Function to evolve a population of CPPNs using CPPN-NEAT to design xenobots.
 
@@ -64,7 +64,7 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
     
     return population, fittest #Returns the fittest individual and the population
 
-def create_population(population_size: int, size_params: List) -> None:
+def create_population(population_size: int, size_params: list) -> None:
     """
     Function to create a population of CPPNs.
 
@@ -73,7 +73,7 @@ def create_population(population_size: int, size_params: List) -> None:
     """
     return [CPPN(size_params) for _ in range(population_size)] #Generates a list containing the population of CPPNs
 
-def select_population(population: list, population_size: int, truncation_rate: float) -> List:
+def select_population(population: list, population_size: int, truncation_rate: float) -> list[CPPN]:
     """
     Function to select the suitably fit individuals in the population.
 
@@ -118,7 +118,7 @@ def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> CPPN:
         
     return fittest
 
-def crossover_pop(population: List, population_size: int) -> List(CPPN):
+def crossover_pop(population: List, population_size: int) -> list[CPPN]:
     """
     Function to crossover the connections in CPPNs in
     a population.
@@ -397,6 +397,7 @@ def cppn_distance(cppn1: CPPN, cppn2: CPPN) -> float:
         if connection.historical_marking > max_cppn2_innov:
             excess_counter+=1
         
+    #Iterates through connections in both cppns, summing the value of weights of matching connections and incrementing the disjoint counter if they don't match
     for connection1 in cppn1.connections:
         shared = False
         for connection2 in cppn2.connections:

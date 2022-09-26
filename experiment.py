@@ -1,4 +1,4 @@
-from cppn_neat import evolve
+import cppn_neat
 from tools.evaluate import FitnessFunction
 
 #TODO X/Y Movement using CPPN NEAT (AND AFPO, HYPERNEAT)
