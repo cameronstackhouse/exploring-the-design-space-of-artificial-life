@@ -1,6 +1,6 @@
 """
 Module to test the functionality of the classes and methods in networks.py.
-Run using py.test.
+Run using pytest.
 """
 
 import os, sys
@@ -12,7 +12,6 @@ sys.path.insert(1, p)
 import networks
 from tools.activation_functions import sigmoid
 
-#TODO Add tests to test the functionality of networks.py
 def test_basic_cppn() -> None:
     """
     Method to test that a CPPN is initilised correctly with the
@@ -38,12 +37,12 @@ def test_create_node() -> None:
     cppn = networks.CPPN([1,1,1]) #Creates a basic CPPN
     networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0) #Adds node to the first layer in the CPPN
 
-    assert len(cppn.nodes) == 2
-    assert len(cppn.nodes[0]) == 6
+    assert len(cppn.nodes) == 2 #Asserts that there are only two layers
+    assert len(cppn.nodes[0]) == 6 #Asserts that the first layer now has six nodes
 
 def test_create_connection() -> None:
     """
-    
+    Function to test creating a connection in the CPPN
     """
     cppn = networks.CPPN([1,1,1])
     a = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0) #Adds node to the first layer in the CPPN
@@ -53,35 +52,35 @@ def test_create_connection() -> None:
 
 def test_activate_basic_cppn() -> None:
     """
-
+    Tests activating a basic initilized CPPN
     """
-    #TODO
+    cppn = networks.CPPN([1,1,1]) #Creates the CPPN
+    a = cppn.to_phenotype()
+    assert a is not None #Asserts that a phenotype is produced
+
+def test_activate_after_unconnected_node() -> None:
+    """
+    Tests activating the CPPN after adding a non-connected node
+    """
     cppn = networks.CPPN([1,1,1])
     a = cppn.to_phenotype()
-    assert a is not None
 
-def test_activate_after_unconnected_node():
-    """
-    
-    """
-    #TODO
-    cppn = networks.CPPN([1,1,1])
-    a = cppn.to_phenotype()
-
-    networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0)
+    networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0) #Adds new node which is unconnected
 
     b = cppn.to_phenotype()
-    assert a == b
+    assert a == b #Asserts that the new phenotype is the same as the old, as the node added is not connected to any others
 
-def test_activate_after_nodes_and_connection():
+def test_activate_after_nodes_and_connection() -> None:
     """
-    
+    Function to test the activation of nodes after adding an extra node 
+    and adding extra connections. The phenotype produced should be different
+    to the one produced before the addition of the node and connections
     """
-    #TODO
-    cppn = networks.CPPN([1,1,1])
-    a = cppn.to_phenotype()
+    cppn = networks.CPPN([1,1,1]) #Creates a basic CPPN
+    a = cppn.to_phenotype() #Converts the CPPN to phenotype
 
-    a = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0)
+    a = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0) #Adds a new node to the CPPN at layer 0
+    #Creates new connections between nodes
     cppn.create_connection(cppn.nodes[0][1], a, 0.3)
     cppn.create_connection(a, cppn.nodes[1][0], 0.2)
 
@@ -91,9 +90,9 @@ def test_activate_after_nodes_and_connection():
 
 def test_reset() -> None:
     """
-    
+    Tests the reset function for the CPPN, ensuring
+    that each nodes output has been reset back to having no value
     """
-    #TODO
     cppn = networks.CPPN([1,1,1])
     cppn.to_phenotype()
     cppn.reset()

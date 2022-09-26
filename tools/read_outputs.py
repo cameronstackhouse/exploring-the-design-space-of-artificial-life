@@ -1,6 +1,6 @@
 """
 Module containing I/O functions for reading/writing
-to various different files
+to various different files required for running simulations and experiments
 """
 
 import json

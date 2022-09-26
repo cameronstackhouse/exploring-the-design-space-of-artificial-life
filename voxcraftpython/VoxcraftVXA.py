@@ -2,6 +2,8 @@ import numpy as np
 from lxml import etree
 import os
 
+from tools.evaluate import FitnessFunction
+
 '''
 Does not yet include signaling parameters
 '''
@@ -180,6 +182,7 @@ class VXA:
         with open(filename, 'w+') as f:
             f.write(etree.tostring(self.tree, encoding="unicode", pretty_print=True))
 
-    def set_fitness_function(self):
+    def set_fitness_function(self, function: FitnessFunction):
         #TODO To complete!!
-        pass
+        simulator = etree.SubElement(self.tree, "Simulator")
+        stopCondition = etree.SubElement(simulator, "StopCondition")
