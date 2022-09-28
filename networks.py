@@ -124,8 +124,7 @@ class CPPN:
         self.b_inputs = []
         self.fitness = None
         self.xyz_size = xyz_size #Dimentions of the design space
-        self.temp_mark = []
-        self.unmarked = []
+        self.neighbours = [] #Neighbours in Genotype-Phenotype map
         self.set_initial_graph() #Sets the initial graph
     
     def set_input_states(self) -> None:

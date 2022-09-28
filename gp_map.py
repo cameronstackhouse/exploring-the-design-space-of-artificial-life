@@ -1,19 +1,30 @@
 import pickle
+from cppn_neat import mutate_connection, mutate_node, remove_connection, add_connection, add_node_between_con
+from networks import CPPN
+from graphviz import Digraph
 #TODO Use graphviz
 
 class GenotypePhenotypeMap:
     """
-    
+    Class to represent a genotype-phenotype map
     """
 
     def __init__(self, num_genotypes) -> None:
+        """
+        
+        """
         self.gp_map = {}
         #NOTE Probably mapped phenotype: [genotypes]
 
         #TODO Generate Genotypes
         genotypes = 0
+        initial_genotype = CPPN([8,8,7]) #Creates a random starting genotype
+        current = initial_genotype
         while genotypes < num_genotypes:
-            pass
+            #6 Potential genotypes to be generated from different mutations
+            if len(current.nodes) > 2:
+                #TODO CAN REMOVE NODE!
+                pass
 
         #TODO Map neutral network
 
@@ -22,7 +33,8 @@ class GenotypePhenotypeMap:
 
 class FitnessLandscape:
     """
-    
+    Class to represent a fitness landscape, including a genotype-phenotype map
+    and a mapping of phenotype to fitness
     """
     def __init__(self, num_genotypes) -> None:
         self.gp_map = GenotypePhenotypeMap(num_genotypes) #Generates genotype-phenotype map
