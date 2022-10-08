@@ -156,6 +156,7 @@ def mutate_nodes(population: List, rate: float) -> None:
                     mutate_node(node) #Mutate the current node
 
 def add_node_between_con(cppn: CPPN) -> None:
+    #TODO THIS IS WRONG! NODE SHOULD JUST BE ADDED ON ITS OWN! EASY FIX
     """
     Function to add a node in the middle of an enabled 
     connection in a CPPN.
@@ -242,6 +243,9 @@ def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
     :param cppn: CPPN to remove connection from
     :param connection: Connection to be removed
     """
+
+    #TODO CHANGE THIS TO USE DFS TO CHECK!! MUCH FASTER. 
+
     if connection.enabled: #Checks that the connection is enabled
         valid = True
         for node in cppn.nodes[-1]: #Iterates through all output nodes in the CPPN
@@ -303,7 +307,7 @@ def add_connection(cppn: CPPN) -> None:
 
     :param cppn: CPPN to add connection to
     """
-
+    #NOTE No need to check for cycles due to the layer system employed by the code
     output_layer_index = randint(0,len(cppn.nodes) - 2) #Chooses a random layer to get the output node from
     output = choice(cppn.nodes[output_layer_index]) #Chooses a random node from that layer
 

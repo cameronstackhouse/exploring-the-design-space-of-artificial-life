@@ -190,6 +190,9 @@ class CPPN:
         
         #TODO Add 10 random verticies, then select 10 random pairs of unconnected
         #Verticies and add edge, weight of which is drawn from a uniform distribution between -1 and 1 
+        #Five randomly selected edges are removed
+        #100 edges randomly selected and their weights mutated
+        #100 vertices selected and activation functions randomly chosen from sin, abs, square, sqrt(abs)
     
     def run(self, pixel: int) -> int:
         """
