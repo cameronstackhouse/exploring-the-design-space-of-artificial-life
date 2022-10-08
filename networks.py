@@ -185,8 +185,11 @@ class CPPN:
         #Connects the input nodes with the two output nodes
         for node in self.nodes[0]:
             #Connect the node to the two output nodes
-            self.create_connection(node, material, uniform(0,1))
-            self.create_connection(node, presence, uniform(0,1))
+            self.create_connection(node, material, uniform(-1,1))
+            self.create_connection(node, presence, uniform(-1,1))
+        
+        #TODO Add 10 random verticies, then select 10 random pairs of unconnected
+        #Verticies and add edge, weight of which is drawn from a uniform distribution between -1 and 1 
     
     def run(self, pixel: int) -> int:
         """

@@ -201,8 +201,8 @@ def add_node_between_con(cppn: CPPN) -> None:
     connection.set_enabled(False) #Disables the old connection
 
     #Creates two new connection, emulating the node being placed in the middle of the old connection
-    cppn.create_connection(connection_out, new_node, uniform(0,1)) 
-    cppn.create_connection(new_node, connection_input, uniform(0,1))
+    cppn.create_connection(connection_out, new_node, uniform(-1,1)) 
+    cppn.create_connection(new_node, connection_input, uniform(-1,1))
 
 def add_node_pop(population: List, rate: float) -> None:
     """
@@ -221,7 +221,7 @@ def mutate_connection(connection: CPPN.Connection) -> None:
 
     :param connection: connection to mutate
     """
-    connection.weight = uniform(0,1) #Changes the weight to a random value between 0 and 1
+    connection.weight = uniform(-1,1) #Changes the weight to a random value between 0 and 1
 
 def mutate_connections(population: List, rate: float) -> None:
     """
@@ -316,11 +316,11 @@ def add_connection(cppn: CPPN) -> None:
     for connection in cppn.connections: #Iterates through connections
         if connection.out is output and connection.input is input: #Checks to ensure a connection between the two nodes does not already exist
             connection_exists = True
-            connection.weight = uniform(0,1)
+            connection.weight = uniform(-1,1)
             break
 
         if not connection_exists:
-            weight = uniform(0,1) #Get the weight for the new connection
+            weight = uniform(-1,1) #Get the weight for the new connection
             cppn.create_connection(output, input, weight) #Create the new connection and add it to the CPPN
 
 
@@ -416,6 +416,7 @@ def cppn_distance(cppn1: CPPN, cppn2: CPPN) -> float:
 
 def speciate(population: List) -> List[List]:
     #TODO Create function to speciate a population
+    #Read kenneth stanleys augmenting neural networks paper for notes on changing fitness + speciation
     pass
                 
 
