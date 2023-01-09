@@ -37,6 +37,7 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     start = time.time() #Starts a timer
 
     #TODO look at MathTree to see how to create fitness function!
+    #TODO SEE WHY THIS ISN'T WORKING!
     vxa = VXA(SimTime=2, RecordStepSize=1000, RecordLink=0, DtFrac=0.5) #TODO pass vxa tags in here INCREASE STEP TIME!
     
     #Adds both cardiac and skin cells to the simulation

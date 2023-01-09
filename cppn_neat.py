@@ -47,7 +47,7 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
        
         #Evaluates the population using voxcraft-sim to find fitness of each solution 
 
-        #TODO Add speciation
+        #TODO Add speciation (CAN BE DONE IN UPDATING FITNESS SCORES AFTER CALCULATION!!)
 
         evaluate_pop(population, run_directory, generations_complete, fitness_function)
 

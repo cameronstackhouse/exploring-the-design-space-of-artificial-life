@@ -125,6 +125,7 @@ class CPPN:
         self.fitness = None
         self.xyz_size = xyz_size #Dimentions of the design space
         self.neighbours = [] #Neighbours in Genotype-Phenotype map
+        self.species = None #Species xenbot belongs to in speciation process
         self.set_initial_graph() #Sets the initial graph
     
     def set_input_states(self) -> None:
@@ -277,7 +278,6 @@ class CPPN:
                     for node in layer[index:]: 
                         node.position = node_pos
                         node_pos+=1
-                    
                     
                     for layer in self.nodes[n+1:]:
                         for node in layer:
@@ -436,13 +436,33 @@ class CPPN:
         :rtype string
         :return: lempel-ziv compressed string representation of the CPPN
         """
-        #TODO lempel-ziv compression of phenotype
+        #TODO lempel-ziv compression of phenotype. Does not work :( 
         #Gets phenotype of the CPPN genotype
         phenotype = self.to_phenotype()
         str_cells = [str(num) for num in phenotype]
         string_phenoype = "".join(str_cells)
 
-        #Compress string phenotype and return        
+        # Create codewords dictionary
+        codewords = dict() # Codeword table
+        word =  ""
+        counter = 0
+        for i in range(len(string_phenoype)):
+            word += string_phenoype[i]
+            if word not in codewords:
+                codewords[word] = chr(counter)
+                word = string_phenoype[i]
+                counter+=1
+
+        #Compress string phenotype using codewords and return 
+        compressed = ""  
+        word = ""
+        for i in range(len(string_phenoype)):
+            word += string_phenoype[i]
+            if word not in codewords:
+                compressed += codewords[word[:-1]]
+                word = ""
+        
+        return compressed
 
     def valid_connections(self) -> bool:
         """
@@ -513,6 +533,28 @@ class CPPN:
             
                 if not (out_exists and in_exists):
                     self.connections.remove(connection)
+    
+    def save(self, filename: String) -> None:
+        """
+        Function to use pickle to save a CPPN object
+
+        :param filename:
+        """
+        f = open(filename, "wb")
+        pickle.dump(self.__dict__, f, 2)
+        f.close()
+        
+    def load(self, filename: String) -> None:
+        """
+        Function to use pickle to load a CPPN object
+
+        :param filename: 
+        """
+        f = open(filename, 'rb')
+        temp_dictionary = pickle.load(f)
+        f.close()
+
+        self.__dict__.update(temp_dictionary)
         
         
     class Connection:
@@ -551,28 +593,6 @@ class CPPN:
             """
             self.weight = value
         
-        def save(self, filename: String) -> None:
-            """
-            Function to use pickle to save a CPPN object
-
-            :param filename:
-            """
-            f = open(filename, "wb")
-            pickle.dump(self.__dict__, f, 2)
-            f.close()
-        
-        def load(self, filename: String) -> None:
-            """
-            Function to use pickle to load a CPPN object
-
-            :param filename: 
-            """
-            f = open(filename, 'rb')
-            temp_dictionary = pickle.load(f)
-            f.close()
-
-            self.__dict__.update(temp_dictionary)
-
     
 if __name__ == "__main__":
     """
@@ -583,30 +603,39 @@ if __name__ == "__main__":
     """
     a = CPPN([8,8,7])
 
-    draw_cppn(a, show_weights=True)
+    print("------------LEMPEL-ZIV------------")
+    test = a.lz_phenotype()
+    print(len(test))
 
-    print(a.valid_connections())
+
+    dec = input("Want to see it?")
+
+    if dec.lower() == "yes":
+
+        draw_cppn(a, show_weights=True)
+
+        print(a.valid_connections())
    
-    b = a.to_phenotype()
+        b = a.to_phenotype()
 
-    print(b)
+        print(b)
 
-    newarr = b.reshape(8,8,7)
+        newarr = b.reshape(8,8,7)
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection="3d")
-    data = newarr
-    z,x,y = data.nonzero()
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        data = newarr
+        z,x,y = data.nonzero()
 
-    ax.scatter(x, y, z, cmap='coolwarm', alpha=1)
-    plt.show()
+        ax.scatter(x, y, z, cmap='coolwarm', alpha=1)
+        plt.show()
 
-    nc = a.num_cells()
-    na = a.num_activation_functions()
+        nc = a.num_cells()
+        na = a.num_activation_functions()
 
-    for x in nc:
-        print(f"{x}: {nc[x]}")
+        for x in nc:
+            print(f"{x}: {nc[x]}")
     
-    for x in na:
-        print(f"{x}: {na[x]}")
+        for x in na:
+            print(f"{x}: {na[x]}")
     
