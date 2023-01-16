@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 from tools.draw_cppn import draw_cppn
 from tools.read_outputs import read_settings
 from tools.evaluate import evaluate_pop
+from tools.speciate import speciate 
 
 def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, 
     remove_edge_rate, truncation_rate, generations, run_directory, size_params, fitness_function) -> tuple[list[CPPN], CPPN]:
@@ -374,56 +375,7 @@ def remove_nodes(population: List, rate: float) -> None:
                     if connection.out is node.previous_out and connection.input is node.previous_in:
                         connection.set_enabled(True)
 
-def cppn_distance(cppn1: CPPN, cppn2: CPPN) -> float:
-    """
-    Function to find the "distance" between two cppns to determine
-    which species a geneotype belongs in for the CPPN NEAT algorithm
-
-    :param cppn1: first cppn to compare
-    :param cppn2: second cppn to compate
-    :rtype: float
-    :return: distance between the two cppns
-    """
-    disjoint_counter = 0 #Counter of disjoint connections
-    excess_counter = 0 #Counter of excess connections
-    weight_value_one = 0 #Summation value of matching weights in the first cppn
-    weight_value_two = 0 #Summation value of matching weights in the second cppn
-
-    max_cppn2_innov = 0 #Max innovation number of connections in cppn2
-
-    #Finds the maximum innovation number connection in the second cppn
-    for connection in cppn2.connections:
-        if connection.historical_marking > max_cppn2_innov:
-            max_cppn2_innov = connection.historical_marking
-    
-    #Iterates through connections in the first cppn, incrementing the excess counter if the innovation number is higher than the max historical marking in the second cppn
-    for connection in cppn1.connections:
-        if connection.historical_marking > max_cppn2_innov:
-            excess_counter+=1
-        
-    #Iterates through connections in both cppns, summing the value of weights of matching connections and incrementing the disjoint counter if they don't match
-    for connection1 in cppn1.connections:
-        shared = False
-        for connection2 in cppn2.connections:
-            if connection1.historical_marking == connection2.historical_marking:
-                shared = True
-                weight_value_one += connection1.weight
-                weight_value_two += connection2.weight
-                break
-        
-        if not shared:
-            disjoint_counter+=1
-    
-    print(disjoint_counter)
-    print(f"weight vals: {weight_value_one} {weight_value_two}")
-    #TODO Return function val
-
-def speciate(population: List) -> List[List]:
-    #TODO Create function to speciate a population
-    #Read kenneth stanleys augmenting neural networks paper for notes on changing fitness + speciation
-    pass
                 
-
 def mutate_population(population: List, add_node_rate: float, mutate_node_rate: float, remove_node_rate: float, add_edge_rate: float, 
     mutate_edge_rate: float, remove_edge_rate: float) -> None:
     """
@@ -473,8 +425,6 @@ if __name__ == "__main__":
     a, b = evolve(pop_size, add_node_rate, mutate_node_rate, delete_node_rate,
     add_connection_rate, mutate_connection_rate, remove_connection_rate, truncation_rate,
     generations, "a", size_params, "FITNESS PLACEHOLDER")
-
-    cppn_distance(a[1], a[78])
 
     draw_cppn(b, show_weights= True)
  
