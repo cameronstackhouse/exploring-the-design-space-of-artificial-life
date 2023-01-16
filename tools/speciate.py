@@ -80,20 +80,27 @@ def share(cppn_distance: float, threshold: float) -> int:
     else:
         return 1 #Otherwise the CPPNs are in the same species
 
-def distance(cppn1, cppn2):
+def distance(cppn1, cppn2, c1: float, c2: float, c3: float) -> float:
     """
-    
+    Function to determine the distance between two CPPNs, measuring their similarity.
+
+    :param cppn1: first CPPN to compare
+    :param cppn2: second CPPN to compare
+    :param c1: weight of excess genes
+    :param c2: weight of disjoint genes
+    :param c3: weight of average weight differences of matching genes
+
+    :return: distance between the two CPPNs using the function defined by Stanley in the NEAT paper
     """
-    # N: Number of genes in larger genome (connections)
     # E: Number of excess genes
     # D: Number of disjoint genes
     # W: Average weight differences of matching genes (Including disabled genes!)
     # distance = c1*E / N + c2*D / N + c3 * W
 
-    N = max(len(cppn1.connections), len(cppn2.connections)) 
-    excess = 0
-    disjoint = 0
-    avg_weight = 0
+    N = max(len(cppn1.connections), len(cppn2.connections)) # Gets the number of genes in the larger genome
+    excess = 0 # Initilises excess genes counter
+    disjoint = 0 # Initilises disjoint genes counter
+    avg_weight = 0 
 
     # Gets the number of excess genes
 
@@ -101,4 +108,4 @@ def distance(cppn1, cppn2):
 
     # Gets the average weight of matching connections
 
-    return (excess/N) + (disjoint/N) + avg_weight
+    return (c1*excess/N) + (c2*disjoint/N) + c3*avg_weight
