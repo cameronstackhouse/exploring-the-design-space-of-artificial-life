@@ -2,9 +2,7 @@
 Module to get information from phenotypes for use in clustering, 
 """
 
-from tokenize import String
-
-def lz_phenotype(phenotype) -> String:
+def lz_phenotype(phenotype) -> str:
     """
     Function to compress the phenotype produced by the CPPN using 
     lempel-ziv. The size of the generated compression can be used as a measurement
@@ -27,7 +25,7 @@ def movement_frequency_components(CPPN) -> list:
     #TODO
     return []
 
-def motif_vectorisation(phenotype: String) -> list:
+def motif_vectorisation(phenotype: str) -> list:
     """
     Function to summarize a phenotype by motifs in its structure into
     a vector to be used in clustering.

@@ -7,7 +7,6 @@ from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp
 import pickle
-from tokenize import String
 from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
@@ -466,7 +465,7 @@ class CPPN:
                 if not (out_exists and in_exists):
                     self.connections.remove(connection)
     
-    def save(self, filename: String) -> None:
+    def save(self, filename: str) -> None:
         """
         Function to use pickle to save a CPPN object
 
@@ -476,7 +475,7 @@ class CPPN:
         pickle.dump(self.__dict__, f, 2)
         f.close()
         
-    def load(self, filename: String) -> None:
+    def load(self, filename: str) -> None:
         """
         Function to use pickle to load a CPPN object
 
