@@ -1,5 +1,5 @@
 """
-Module to implement the k-means algorithm for clustering of data 
+Module to implement various clustering algorithms for clustering of data 
 using unsupervied machine learning
 """
 
@@ -8,12 +8,14 @@ from math import sqrt
 from typing import List, Tuple
 import numpy as np
 from matplotlib import pyplot as plt
+from sklearn.cluster import AgglomerativeClustering # Maybe use
 
 class Centroid:
     """
     Class to represent a centroid in the k-means
     algorithm
     """
+    label = 0 # Label for centroid
     def __init__(self, coordinate_size: int, axis_sizes: List[int]) -> None:
         """
         Method to initilise a centroid with a random coordinate position
@@ -26,6 +28,9 @@ class Centroid:
         #Populates new empty vector with random values
         for i in range(len(self.coords)):
             self.coords[i] = randint(0, axis_sizes[i]) #Chooses a random number between 0 and the max size of the current axis
+        
+        self.label = Centroid.label # Sets the centroid label
+        Centroid.label+=1 # Increments the centroid label
     
     def set_coords(self, coordinates: List[int]) -> None:
         """
@@ -122,6 +127,20 @@ def k_means(vectors: np.array, axis_sizes: List[int], num_centroids: int) -> Tup
         print(dif)
     
     return centroids, vector_objects #Returns a list of Centroids and list of Vectors
+
+def k_means_plus(vectors: np.array):
+    """
+    
+    """
+    #TODO
+    pass
+
+def agglom_hierarchical(vectors: np.array):
+    """
+    
+    """
+    #TODO
+    pass
         
 
 def find_distance(a: np.array, b: np.array) -> int:
@@ -191,6 +210,10 @@ def plot(centroids: np.array, vectors: np.array, three_dimensional: bool = False
 
 if __name__ == "__main__":
     #TODO Delete for release
-    vectors = np.array([np.array([randint(0, 100), randint(0, 100)]) for _ in range(100)])
+    vectors = np.array([np.array([randint(0, 100), randint(0, 100)]) for _ in range(5)])
     centroids, vectors = k_means(vectors, [100,100], 3)
-    plot(centroids, vectors, False)
+    #plot(centroids, vectors, False)
+
+
+    for vector in vectors:
+        print(vector.belongs_to.label)

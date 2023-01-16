@@ -4,48 +4,38 @@ Module to get information from phenotypes for use in clustering,
 
 from tokenize import String
 
-def lz_phenotype(self) -> String:
-        """
-        Function to compress the phenotype produced by the CPPN using 
-        lempel-ziv. The size of the generated compression can be used as a measurement
-        of phenotypic complexity.
+def lz_phenotype(phenotype) -> String:
+    """
+    Function to compress the phenotype produced by the CPPN using 
+    lempel-ziv. The size of the generated compression can be used as a measurement
+    of phenotypic complexity.
 
-        :rtype string
-        :return: lempel-ziv compressed string representation of the CPPN
-        """
-        #TODO lempel-ziv compression of phenotype. Does not work :( 
-        #Gets phenotype of the CPPN genotype
-        phenotype = self.to_phenotype()
-        str_cells = [str(num) for num in phenotype]
-        string_phenoype = "".join(str_cells)
-
-        # Create codewords dictionary
-        codewords = dict() # Codeword table
-        word =  ""
-        counter = 0
-        for i in range(len(string_phenoype)):
-            word += string_phenoype[i]
-            if word not in codewords:
-                codewords[word] = chr(counter)
-                word = string_phenoype[i]
-                counter+=1
-
-        #Compress string phenotype using codewords and return 
-        compressed = ""  
-        word = ""
-        for i in range(len(string_phenoype)):
-            word += string_phenoype[i]
-            if word not in codewords:
-                compressed += codewords[word[:-1]]
-                word = ""
-        
-        return compressed
-
-def movement_frequency_components():
+    :rtype string
+    :return: lempel-ziv compressed string representation of the CPPN
+    """
     pass
 
-def motif_vectorisation():
-    pass
+def movement_frequency_components(CPPN) -> list:
+    """
+    Function to get the frequency components of a xenobot movement path to use in clustering.
+    This is done using discrete Fourier transform on the X, Y, and Z movement coordinates of the 
+    xenobot.
+
+    :param: CPPN which produces the xenobot
+    :return: List of frequency components of the movement path of the xenobot
+    """
+    #TODO
+    return []
+
+def motif_vectorisation(phenotype: String) -> list:
+    """
+    Function to summarize a phenotype by motifs in its structure into
+    a vector to be used in clustering.
+
+    :param phenotype: 
+    """
+    #TODO
+    return []
 
 def num_cells(phenotype) -> dict:
     """
