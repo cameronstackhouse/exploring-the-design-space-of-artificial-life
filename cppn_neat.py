@@ -8,12 +8,24 @@ from typing import List
 from networks import CPPN, NodeType, Node
 from matplotlib import pyplot as plt
 from tools.draw_cppn import draw_cppn
-from tools.read_outputs import read_settings
+from tools.read_files import read_settings
 from tools.evaluate import evaluate_pop
 from tools.speciate import speciate 
+from tools.fitness_functions import FitnessFunction
 
-def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, 
-    remove_edge_rate, truncation_rate, generations, run_directory, size_params, fitness_function) -> tuple[list[CPPN], CPPN]:
+def evolve(
+    population_size: int, 
+    add_node_rate: float, 
+    mutate_node_rate: float, 
+    remove_node_rate: float, 
+    add_edge_rate: float, 
+    mutate_edge_rate: float, 
+    remove_edge_rate: float, 
+    truncation_rate: float, 
+    generations: int, 
+    run_directory: str, 
+    size_params: list, 
+    fitness_function: FitnessFunction) -> tuple[list[CPPN], CPPN]:
     """
     Function to evolve a population of CPPNs using CPPN-NEAT to design xenobots.
 
@@ -25,7 +37,7 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
     :param mutate_edge_rate: Rate at which an edge is mutated in a CPPN
     :param remove_edge_rate: Rate at which an edge is removed from a CPPN
     :param truncation_rate: Rate at which the population is truncated (rate at which the population converges on its fittest designs)
-    :param generations: Number of generations to evolve the population of CPPNs for
+    :param generations: Number of generations to evolve the population of CPPNs
     :param run_directory: Directory to save generated history files from voxcraft-sim to
     :param size_params: Size dimentions of the xenobot being created
     :param fitness_function: Fitness function to evaluate each individual in the population
@@ -47,10 +59,11 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
         mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate) #Mutates the population
        
         #Evaluates the population using voxcraft-sim to find fitness of each solution 
-
-        #TODO Add speciation (CAN BE DONE IN UPDATING FITNESS SCORES AFTER CALCULATION!!)
-
         evaluate_pop(population, run_directory, generations_complete, fitness_function)
+
+        #Speciates the population, adjusting fitness of individuals so that topological innovation is protected
+        #TODO Check if speciating in right place
+        speciate(population, 5)
 
         #Checks to see if a new overall fittest individual was produced
         for individual in population:
@@ -59,22 +72,41 @@ def evolve(population_size, add_node_rate, mutate_node_rate, remove_node_rate, a
         
         generations_complete+=1 #Increments generations counter
     
-    #Prunes the population of redundant nodes
-    for cppn in population:
-        cppn.prune()
+    #TODO Add pruning maybe
     
     return population, fittest #Returns the fittest individual and the population
 
-def create_population(population_size: int, size_params: list) -> None:
+def initial_mutations(population: List):
+    """
+    Performs initial mutations on the 
+    """
+    for individual in population:
+        #TODO Check how they add nodes :)
+        #TODO Add 10 random verticies, then select 10 random pairs of unconnected
+        #Verticies and add edge, weight of which is drawn from a uniform distribution between -1 and 1 
+        #Five randomly selected edges are removed
+        #100 edges randomly selected and their weights mutated
+        #100 vertices selected and activation functions randomly chosen from sin, abs, square, sqrt(abs)
+        #NOTE THIS IS DONE USING MUTATE FUNCTION IN INITIAL CODE
+        pass
+
+def create_population(
+    population_size: int, 
+    size_params: list) -> None:
     """
     Function to create a population of CPPNs.
 
     :param population_size: number of CPPNs in the population
     :param size_params: list representing the dimentions of the design space
     """
-    return [CPPN(size_params) for _ in range(population_size)] #Generates a list containing the population of CPPNs
+    population = [CPPN(size_params) for _ in range(population_size)] #Generates a list containing the population of CPPNs
+    initial_mutations(population) #Performs initial mutations on the population of cppns
+    return population
 
-def select_population(population: list, population_size: int, truncation_rate: float) -> list[CPPN]:
+def select_population(
+    population: list, 
+    population_size: int, 
+    truncation_rate: float) -> list[CPPN]:
     """
     Function to select the suitably fit individuals in the population.
 
@@ -87,7 +119,9 @@ def select_population(population: list, population_size: int, truncation_rate: f
     sorted_pop = sorted(population, key=lambda indv: indv.fitness) #Sorts the population by their phenotypes respective fitness scores
     return [individual for individual, _ in sorted_pop[:int(population_size*truncation_rate)]] #Gets the top fittest individuals of the population and adds them to a list
 
-def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> CPPN:
+def crossover_indv(
+    cppn_a: CPPN, 
+    cppn_b: CPPN) -> CPPN:
     """
     Function to crossover connections of two CPPNs.
     Only connections with the same innovation number are crossed over
@@ -119,7 +153,9 @@ def crossover_indv(cppn_a: CPPN, cppn_b: CPPN) -> CPPN:
         
     return fittest
 
-def crossover_pop(population: List, population_size: int) -> list[CPPN]:
+def crossover_pop(
+    population: List, 
+    population_size: int) -> list[CPPN]:
     """
     Function to crossover the connections in CPPNs in
     a population.
@@ -143,7 +179,9 @@ def mutate_node(node: Node) -> None:
         activation_function = choice(node.outer.activation_functions)
         node.activation_function = activation_function #Sets its activation function as a random activation function
 
-def mutate_nodes(population: List, rate: float) -> None:
+def mutate_nodes(
+    population: List, 
+    rate: float) -> None:
     """
     Function to mutate nodes within a population.
 
@@ -206,7 +244,9 @@ def add_node_between_con(cppn: CPPN) -> None:
     cppn.create_connection(connection_out, new_node, uniform(-1,1)) 
     cppn.create_connection(new_node, connection_input, uniform(-1,1))
 
-def add_node_pop(population: List, rate: float) -> None:
+def add_node_pop(
+    population: List, 
+    rate: float) -> None:
     """
     Function to add nodes to a population
 
@@ -237,7 +277,9 @@ def mutate_connections(population: List, rate: float) -> None:
             if rate >= uniform(0,1): #Checks if a random number is less than or equal to the mutation rate
                 mutate_connection(connection) #Mutates the connection
 
-def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
+def remove_connection(
+    cppn: CPPN, connection: 
+    CPPN.Connection) -> None:
     """
     Function to remove a given connection from a CPPN
 
@@ -289,7 +331,9 @@ def remove_connection(cppn: CPPN, connection: CPPN.Connection) -> None:
         except:
             cppn.connections.append(connection) #Catches if none is produced for either of the outputs
 
-def remove_connections(population: List, rate: float) -> None:
+def remove_connections(
+    population: List, 
+    rate: float) -> None:
     """
     Function to remove connections from population
 
@@ -329,7 +373,9 @@ def add_connection(cppn: CPPN) -> None:
             cppn.create_connection(output, input, weight) #Create the new connection and add it to the CPPN
 
 
-def add_connections(population: List, rate: float) -> None:
+def add_connections(
+    population: List, 
+    rate: float) -> None:
     """
     Function to add connections to a population of CPPNs
 
@@ -340,7 +386,9 @@ def add_connections(population: List, rate: float) -> None:
         if rate >= uniform(0,1): #Checks if the random number is less than or equal to the addition rate
             add_connection(cppn) #Adds a connection to the CPPN
 
-def remove_nodes(population: List, rate: float) -> None:
+def remove_nodes(
+    population: List, 
+    rate: float) -> None:
     """
     Function to remove nodes from a population of CPPNs
 
@@ -376,8 +424,14 @@ def remove_nodes(population: List, rate: float) -> None:
                         connection.set_enabled(True)
 
                 
-def mutate_population(population: List, add_node_rate: float, mutate_node_rate: float, remove_node_rate: float, add_edge_rate: float, 
-    mutate_edge_rate: float, remove_edge_rate: float) -> None:
+def mutate_population(
+    population: List, 
+    add_node_rate: float,
+    mutate_node_rate: float, 
+    remove_node_rate: float, 
+    add_edge_rate: float, 
+    mutate_edge_rate: float, 
+    remove_edge_rate: float) -> None:
     """
     Function to mutate a population of CPPNs
 

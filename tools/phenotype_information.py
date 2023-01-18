@@ -1,6 +1,9 @@
 """
-Module to get information from phenotypes for use in clustering, 
+Module to get information from phenotypes for use in clustering and comparing.
 """
+
+from scipy.fft import fftn # Fourier transform 
+import numpy as np
 
 def lz_phenotype(phenotype) -> str:
     """
@@ -13,22 +16,24 @@ def lz_phenotype(phenotype) -> str:
     """
     pass
 
-def movement_frequency_components(CPPN) -> list:
+def movement_frequency_components(CPPN) -> np.ndarray:
     """
-    Function to get the frequency components of a xenobot movement path to use in clustering.
-    This is done using discrete Fourier transform on the X, Y, and Z movement coordinates of the 
-    xenobot.
+    Function to get the frequency components of a xenobot movement path to use in clustering of xenobot behaviour.
+    This is done using discrete 3-Dimensional Fourier transform on the X, Y, and Z movement coordinates of the 
+    xenobot. 
 
     :param: CPPN which produces the xenobot
-    :return: List of frequency components of the movement path of the xenobot
+    :return: List of frequency components of the movement path of the xenobot, describing the behaviour of the xenobot
     """
-    #TODO
-    return []
+    
+    frequency_components = fftn(CPPN.movement)
+
+    return frequency_components
 
 def motif_vectorisation(phenotype: str) -> list:
     """
-    Function to summarize a phenotype by motifs in its structure into
-    a vector to be used in clustering.
+    Function to summarize a phenotype by motifs in its structure into a vector to be used in 
+    clustering of structure.
 
     :param phenotype: 
     """

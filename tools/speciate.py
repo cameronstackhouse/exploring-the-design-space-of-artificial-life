@@ -6,7 +6,8 @@ Xenobots using functions defined by Stanley in the
 "Evolving Neural Networks through Augmenting Topologies" paper.
 """
 
-def speciate(pop: List, threshold) -> None:
+def speciate(pop: List, 
+    threshold: float) -> None:
     """
     Function to speciate a population, updating fitness scores of xenobots accordingly
     based on which species they belong in, protecting early topological innovation.
@@ -66,7 +67,8 @@ def cppn_distance(cppn1, cppn2) -> float:
     print(f"weight vals: {weight_value_one} {weight_value_two}")
     #TODO Return function val
 
-def share(cppn_distance: float, threshold: float) -> int:
+def share(cppn_distance: float, 
+    threshold: float) -> int:
     """
     Share function defined by Stanley to measure if two networks are in the 
     same species for the NEAT algorithm.

@@ -17,6 +17,7 @@ def test_basic_cppn() -> None:
     Method to test that a CPPN is initilised correctly with the
     correct number of nodes, layers, connections, and valid weights
     """
+    #TODO Change this when you change initilisation 
     cppn = networks.CPPN([1,1,1])
     assert len(cppn.nodes) == 2 #Checks that there are 2 layers in the CPPN
     assert len(cppn.nodes[0]) == 5 #Checks that there are 5 input nodes
@@ -24,7 +25,7 @@ def test_basic_cppn() -> None:
     assert len(cppn.connections) == 10 #Checks that there are 10 connections
 
     for connection in cppn.connections:
-        assert (connection.weight >= 0 and connection.weight <= 1) #Checks that the connection weights are valid
+        assert (connection.weight >= -1 and connection.weight <= 1) #Checks that the connection weights are valid
     
     for node in cppn.nodes[1]:
         assert node.activation_function is sigmoid #Checks that the output nodes have sigmoid functions as there activation functions
@@ -104,7 +105,28 @@ def test_reset() -> None:
             assert node.output is None
 
 def test_to_phenotype() -> None:
-    #TODO
-    pass
+    """
+    Tests the to_phenotype() function which activates
+    a CPPN to produce the xenobot phenotype, ensuring that 
+    the xenobot produced is of the correct size and has the correct
+    type of cells
+    """
+    cppn = networks.CPPN([8,8,7])
+    cppn2 = networks.CPPN([2,2,2])
+
+    assert len(cppn.to_phenotype()) == 448
+    assert len(cppn2.to_phenotype()) == 8
+
+    valid = True
+    for cell in cppn.to_phenotype():
+        if cell not in [0,1,2]:
+            valid = False
+            break
+    
+    assert valid is True
+        
+    
+
+
 
 

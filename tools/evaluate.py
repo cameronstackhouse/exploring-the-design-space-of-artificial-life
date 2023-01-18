@@ -2,8 +2,8 @@ import time
 import logging #TODO Use this
 import subprocess as sub
 from typing import List
-from enum import Enum
-from tools.read_outputs import read_sim_output
+from tools.read_files import read_sim_output
+from tools.fitness_functions import FitnessFunction
 
 #Imports an interface for writing VXA and VXD files
 from voxcraftpython.VoxcraftVXA import VXA
@@ -11,17 +11,6 @@ from voxcraftpython.VoxcraftVXD import VXD
 
 #TODO Finish function to evaluate a population of organisms
 #TODO Add input option to specify what is being tested for (Locomotion, Object Movement, Object Transport)
-
-class FitnessFunction(Enum):
-    """
-    List of fitness functions to test a population for fitness
-    """
-    MAX_DISTANCE = 1
-    VERTICAL_DISTANCE = 2
-    INTERACTION = 3
-    OBJECT_EXPULSION = 4
-    TOTAL_DISTANCE = 5
-    #TODO Add more fitness func values here
 
 def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function: FitnessFunction):
     """
@@ -78,7 +67,6 @@ def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function:
     
     #Sets the fitness of each phenotype using results obtained
     for n, indv in enumerate(results):
-        #TODO THIS IS WHERE YOU SPECIATE!
         pop[n].fitness = float(indv["fitness"]) 
 
     time_taken = time.time() - start #Time taken to evaluate one generation

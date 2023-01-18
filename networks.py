@@ -6,7 +6,6 @@ compositional pattern-producing networks
 from random import choice, uniform
 from enum import Enum
 import multiprocessing as mp
-import pickle
 from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
@@ -71,7 +70,7 @@ class Node:
         pass the total into the nodes activation function
         """
 
-        if len(self.inputs) > 0:
+        if len(self.inputs) > 0: # Checks to make sure the number of inputs is greater than 0
             total = 0 #Summation of input values
 
             for value in self.inputs:
@@ -99,7 +98,7 @@ class CPPN:
     design of reconfigurable organisms
     """
     innovation_counter = 0 #Innovation counter for adding new connections to the network using NEAT
-    total_cons = []
+    total_cons = [] #List of all connections created between nodes of all CPPNs 
     def __init__(self, xyz_size: List) -> None:
         """
         Function to initilise a basic CPPN for designing reconfigurable organsims,
@@ -122,6 +121,7 @@ class CPPN:
         self.d_inputs = []
         self.b_inputs = []
         self.fitness = None
+        self.movement = [] #List describing the movement of the xenobot in the x, y, and z direction
         self.xyz_size = xyz_size #Dimentions of the design space
         self.neighbours = [] #Neighbours in Genotype-Phenotype map
         self.set_initial_graph() #Sets the initial graph
@@ -169,7 +169,7 @@ class CPPN:
         paramater in a 3D coordinate space (i, j, k, and distance from middle)
 
         Also sets the two output nodes, one to indicate the presence of material
-        at a given coordinate and one to indicate the material of that node
+        at a given coordinate and one to indicate the material of that node.
         """
         self.set_input_states()
         #Creates an input node for each paramater: i, j, k, d, and b
@@ -186,13 +186,7 @@ class CPPN:
             #Connect the node to the two output nodes
             self.create_connection(node, material, uniform(-1,1))
             self.create_connection(node, presence, uniform(-1,1))
-        
-        #TODO Add 10 random verticies, then select 10 random pairs of unconnected
-        #Verticies and add edge, weight of which is drawn from a uniform distribution between -1 and 1 
-        #Five randomly selected edges are removed
-        #100 edges randomly selected and their weights mutated
-        #100 vertices selected and activation functions randomly chosen from sin, abs, square, sqrt(abs)
-    
+
     def run(self, pixel: int) -> int:
         """
         Method to run the CPPN with given input paramaters,
@@ -443,50 +437,6 @@ class CPPN:
                 disabled_counter+=1
         
         return {"enabled": enabled_counter, "disabled": disabled_counter}
-    
-    def prune(self) -> None:
-        """
-        Method to prune a CPPN to remove redundant nodes and connections from the CPPN
-        """
-        #TODO Add comments
-        #TODO Complete
-            
-        for connection in self.connections:
-            if connection.enabled:
-                out_exists = False
-                in_exists = False
-                for layer in self.nodes:
-                    for node in layer:
-                        if connection.out is node:
-                            out_exists = True
-                        elif connection.input is node:
-                            in_exists = True
-            
-                if not (out_exists and in_exists):
-                    self.connections.remove(connection)
-    
-    def save(self, filename: str) -> None:
-        """
-        Function to use pickle to save a CPPN object
-
-        :param filename:
-        """
-        f = open(filename, "wb")
-        pickle.dump(self.__dict__, f, 2)
-        f.close()
-        
-    def load(self, filename: str) -> None:
-        """
-        Function to use pickle to load a CPPN object
-
-        :param filename: 
-        """
-        f = open(filename, 'rb')
-        temp_dictionary = pickle.load(f)
-        f.close()
-
-        self.__dict__.update(temp_dictionary)
-        
         
     class Connection:
         """
@@ -534,10 +484,6 @@ if __name__ == "__main__":
     """
     a = CPPN([8,8,7])
 
-    print("------------LEMPEL-ZIV------------")
-    test = a.lz_phenotype()
-    print(len(test))
-
 
     dec = input("Want to see it?")
 
@@ -560,13 +506,4 @@ if __name__ == "__main__":
 
         ax.scatter(x, y, z, cmap='coolwarm', alpha=1)
         plt.show()
-
-        nc = a.num_cells()
-        na = a.num_activation_functions()
-
-        for x in nc:
-            print(f"{x}: {nc[x]}")
-    
-        for x in na:
-            print(f"{x}: {na[x]}")
     
