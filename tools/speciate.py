@@ -6,8 +6,10 @@ Xenobots using functions defined by Stanley in the
 "Evolving Neural Networks through Augmenting Topologies" paper.
 """
 
-def speciate(pop: List, 
-    threshold: float) -> None:
+def speciate(
+    pop: List, 
+    threshold: float
+    ) -> None:
     """
     Function to speciate a population, updating fitness scores of xenobots accordingly
     based on which species they belong in, protecting early topological innovation.
@@ -20,7 +22,10 @@ def speciate(pop: List,
         # TODO Add comments
         individual.fitness = individual.fitness / sum([share(cppn_distance(individual, compare), threshold) for compare in pop])
 
-def cppn_distance(cppn1, cppn2) -> float:
+def cppn_distance(
+    cppn1, 
+    cppn2
+    ) -> float:
     """
     Function to find the "distance" between two cppns to determine
     which species a geneotype belongs in for the CPPN NEAT algorithm
@@ -67,8 +72,10 @@ def cppn_distance(cppn1, cppn2) -> float:
     print(f"weight vals: {weight_value_one} {weight_value_two}")
     #TODO Return function val
 
-def share(cppn_distance: float, 
-    threshold: float) -> int:
+def share(
+    cppn_distance: float, 
+    threshold: float
+    ) -> int:
     """
     Share function defined by Stanley to measure if two networks are in the 
     same species for the NEAT algorithm.
@@ -82,7 +89,13 @@ def share(cppn_distance: float,
     else:
         return 1 #Otherwise the CPPNs are in the same species
 
-def distance(cppn1, cppn2, c1: float, c2: float, c3: float) -> float:
+def distance(
+    cppn1, 
+    cppn2, 
+    c1: float, 
+    c2: float, 
+    c3: float
+    ) -> float:
     """
     Function to determine the distance between two CPPNs, measuring their similarity.
 

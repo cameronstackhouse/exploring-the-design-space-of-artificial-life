@@ -25,7 +25,8 @@ def evolve(
     generations: int, 
     run_directory: str, 
     size_params: list, 
-    fitness_function: FitnessFunction) -> tuple[list[CPPN], CPPN]:
+    fitness_function: FitnessFunction
+    ) -> tuple[list[CPPN], CPPN]:
     """
     Function to evolve a population of CPPNs using CPPN-NEAT to design xenobots.
 
@@ -76,23 +77,40 @@ def evolve(
     
     return population, fittest #Returns the fittest individual and the population
 
-def initial_mutations(population: List):
+def initial_mutations(population: List) -> None:
     """
-    Performs initial mutations on the 
+    Performs initial mutations on the beginning population as done by
+    Kriegman et al. in the source code for reconfigurable organisms 
+    (https://github.com/skriegman/reconfigurable_organisms)
+
+    :param population: Population of CPPNs
     """
+    #TODO Add comments :)
     for individual in population:
+
+        for _ in range(10):
+            #TODO Add 10 random verticies, then select 10 random pairs of unconnected
+            #Verticies and add edge, weight of which is drawn from a uniform distribution between -1 and 1 
+            pass
+    
+        for _ in range(5):
+            #Five randomly selected edges are removed
+            pass
+
+        for _ in range(100):
+            #100 edges randomly selected and their weights mutated
+            #100 vertices selected and activation functions randomly chosen from sin, abs, square, sqrt(abs)
+            connection = choice(individual.connections)
+            node = choice(individual.nodes[:-1])
+            mutate_connection(connection)
+            mutate_node(node)
+
         #TODO Check how they add nodes :)
-        #TODO Add 10 random verticies, then select 10 random pairs of unconnected
-        #Verticies and add edge, weight of which is drawn from a uniform distribution between -1 and 1 
-        #Five randomly selected edges are removed
-        #100 edges randomly selected and their weights mutated
-        #100 vertices selected and activation functions randomly chosen from sin, abs, square, sqrt(abs)
-        #NOTE THIS IS DONE USING MUTATE FUNCTION IN INITIAL CODE
-        pass
 
 def create_population(
     population_size: int, 
-    size_params: list) -> None:
+    size_params: list
+    ) -> None:
     """
     Function to create a population of CPPNs.
 
@@ -106,7 +124,8 @@ def create_population(
 def select_population(
     population: list, 
     population_size: int, 
-    truncation_rate: float) -> list[CPPN]:
+    truncation_rate: float
+    ) -> list[CPPN]:
     """
     Function to select the suitably fit individuals in the population.
 
@@ -121,7 +140,8 @@ def select_population(
 
 def crossover_indv(
     cppn_a: CPPN, 
-    cppn_b: CPPN) -> CPPN:
+    cppn_b: CPPN
+    ) -> CPPN:
     """
     Function to crossover connections of two CPPNs.
     Only connections with the same innovation number are crossed over
@@ -246,7 +266,8 @@ def add_node_between_con(cppn: CPPN) -> None:
 
 def add_node_pop(
     population: List, 
-    rate: float) -> None:
+    rate: float
+    ) -> None:
     """
     Function to add nodes to a population
 
@@ -265,7 +286,10 @@ def mutate_connection(connection: CPPN.Connection) -> None:
     """
     connection.weight = uniform(-1,1) #Changes the weight to a random value between 0 and 1
 
-def mutate_connections(population: List, rate: float) -> None:
+def mutate_connections(
+    population: List, 
+    rate: float
+    ) -> None:
     """
     Function to mutate connections in a population
 
@@ -278,8 +302,9 @@ def mutate_connections(population: List, rate: float) -> None:
                 mutate_connection(connection) #Mutates the connection
 
 def remove_connection(
-    cppn: CPPN, connection: 
-    CPPN.Connection) -> None:
+    cppn: CPPN, 
+    connection: CPPN.Connection
+    ) -> None:
     """
     Function to remove a given connection from a CPPN
 
@@ -333,7 +358,8 @@ def remove_connection(
 
 def remove_connections(
     population: List, 
-    rate: float) -> None:
+    rate: float
+    ) -> None:
     """
     Function to remove connections from population
 
@@ -375,7 +401,8 @@ def add_connection(cppn: CPPN) -> None:
 
 def add_connections(
     population: List, 
-    rate: float) -> None:
+    rate: float
+    ) -> None:
     """
     Function to add connections to a population of CPPNs
 
@@ -388,7 +415,8 @@ def add_connections(
 
 def remove_nodes(
     population: List, 
-    rate: float) -> None:
+    rate: float
+    ) -> None:
     """
     Function to remove nodes from a population of CPPNs
 

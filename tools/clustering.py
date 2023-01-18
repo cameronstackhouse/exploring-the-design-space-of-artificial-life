@@ -16,7 +16,11 @@ class Centroid:
     algorithm
     """
     label = 0 # Label for centroid
-    def __init__(self, coordinate_size: int, axis_sizes: List[int]) -> None:
+    def __init__(
+        self, 
+        coordinate_size: int, 
+        axis_sizes: List[int]
+        ) -> None:
         """
         Method to initilise a centroid with a random coordinate position
 
@@ -32,7 +36,10 @@ class Centroid:
         self.label = Centroid.label # Sets the centroid label
         Centroid.label+=1 # Increments the centroid label
     
-    def set_coords(self, coordinates: List[int]) -> None:
+    def set_coords(
+        self, 
+        coordinates: List[int]
+        ) -> None:
         """
         Method to set the coordinates of a centroid
 
@@ -45,7 +52,10 @@ class Vector:
     Class to represent a vector to plot in the k-means
     algorithm
     """
-    def __init__(self, coordinates: np.array) -> None:
+    def __init__(
+        self, 
+        coordinates: np.array
+        ) -> None:
         """
         Method to initilise a vector with a set of coordinates
         and no initial centroid that it belongs to
@@ -55,7 +65,10 @@ class Vector:
         self.coords = coordinates
         self.belongs_to = None
     
-    def set_belongs_to(self, centroid: Centroid) -> None:
+    def set_belongs_to(
+        self, 
+        centroid: Centroid
+        ) -> None:
         """
         Sets the belongs_to attribute, changing the Centroid that
         a given vector belongs to
@@ -64,7 +77,11 @@ class Vector:
         """
         self.belongs_to = centroid
         
-def k_means(vectors: np.array, axis_sizes: List[int], num_centroids: int) -> Tuple[List[Centroid], List[Vector]]:
+def k_means(
+    vectors: np.array, 
+    axis_sizes: List[int], 
+    num_centroids: int
+    ) -> Tuple[List[Centroid], List[Vector]]:
     """
     Function to find centroid positions given a list of vectors,
     a coordinate space, and a given number of centroids using 
@@ -143,7 +160,10 @@ def agglom_hierarchical(vectors: np.array):
     pass
         
 
-def find_distance(a: np.array, b: np.array) -> int:
+def find_distance(
+    a: np.array, 
+    b: np.array
+    ) -> int:
     """
     Function to find the euclidian distance between two vectors
 
@@ -163,7 +183,11 @@ def find_distance(a: np.array, b: np.array) -> int:
         
         return sqrt(total)
 
-def plot(centroids: np.array, vectors: np.array, three_dimensional: bool = False) -> None:
+def plot(
+    centroids: np.array, 
+    vectors: np.array, 
+    three_dimensional: bool = False
+    ) -> None:
     """
     Function to plot centroids and vectors using matplotlib
 

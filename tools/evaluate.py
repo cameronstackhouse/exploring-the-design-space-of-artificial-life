@@ -12,7 +12,12 @@ from voxcraftpython.VoxcraftVXD import VXD
 #TODO Finish function to evaluate a population of organisms
 #TODO Add input option to specify what is being tested for (Locomotion, Object Movement, Object Transport)
 
-def evaluate_pop(pop: List, run_directory: str, run_name: str, fitness_function: FitnessFunction):
+def evaluate_pop(
+    pop: List, 
+    run_directory: str, 
+    run_name: str, 
+    fitness_function: FitnessFunction
+    )-> None:
     """
     Function to evaluate a population of computer-designed organisms generated
     by a population of CPPNs using voxcraft-sim

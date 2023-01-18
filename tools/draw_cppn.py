@@ -4,7 +4,12 @@ Module to draw a CPPN using graphviz
 
 from graphviz import Digraph
 
-def draw_cppn(cppn, show_disabled_connections: bool = False, show_weights: bool = False, out_dir: str = "analysis") -> None:   
+def draw_cppn(
+    cppn, 
+    show_disabled_connections: bool = False, 
+    show_weights: bool = False, 
+    out_dir: str = "analysis"
+    ) -> None:   
     """
     Function to draw a CPPN using graphviz
 
