@@ -277,6 +277,7 @@ class CPPN:
         :param node: Node to be removed
         """
         #TODO FINISH COMMENTS
+        #TODO Make sure works too :)
         #Checks if the node is a hidden node, only hidden nodes can be deleted
         if node.type is NodeType.HIDDEN:
             for n, layer in enumerate(self.nodes): #Iterates through layers of CPPN

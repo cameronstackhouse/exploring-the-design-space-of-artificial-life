@@ -70,8 +70,8 @@ def normalize(x: np.array) -> np.array:
     :rtype: numpy array
     :return: normalized data (between -1 and 1)
     """
-    x -= np.min(x)
-    x /= np.max(x)
+    x = x - np.min(x)
+    x = x / np.max(x)
     x = np.nan_to_num(x)
     x *= 2
     x -= 1

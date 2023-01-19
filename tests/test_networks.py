@@ -10,7 +10,7 @@ p = os.path.abspath('.')
 sys.path.insert(1, p)
 
 import networks
-from tools.activation_functions import sigmoid
+from tools.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs, normalize
 
 def test_basic_cppn() -> None:
     """
@@ -28,6 +28,15 @@ def test_basic_cppn() -> None:
     
     for node in cppn.nodes[1]:
         assert node.activation_function is sigmoid #Checks that the output nodes have sigmoid functions as there activation functions
+
+def test_set_activation_function() -> None:
+    """
+    
+    """
+    cppn = networks.CPPN([1,1,1])
+    node = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0)
+    node.set_activation_function(neg_abs)
+    assert node.activation_function is not sigmoid
 
 def test_add_node() -> None:
     """
