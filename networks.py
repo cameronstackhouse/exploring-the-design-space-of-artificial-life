@@ -29,7 +29,13 @@ class Node:
     """
     Class defining a node in a compositional pattern-producing network
     """
-    def __init__(self, activation_function, type, outer_cppn, layer) -> None:
+    def __init__(
+        self, 
+        activation_function, 
+        type, 
+        outer_cppn, 
+        layer
+        ) -> None:
         """
         Initilization method for creating a CPPN node
 
@@ -45,10 +51,13 @@ class Node:
         self.previous_out = None
         self.previous_in = None
         self.name = None
-        self.position = 0
+        self.position = 0 # TODO MAKE SURE THIS WORKS!
         outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
     
-    def set_activation_function(self, activation_function) -> None:
+    def set_activation_function(
+        self, 
+        activation_function
+        ) -> None:
         """
         Function to set the activation function of a node
 
@@ -56,7 +65,10 @@ class Node:
         """
         self.activation_function = activation_function
     
-    def add_input(self, value: float) -> None:
+    def add_input(
+        self, 
+        value: float
+        ) -> None:
         """
         Function to add a value to the input values into a node
 
@@ -187,7 +199,10 @@ class CPPN:
             self.create_connection(node, material, uniform(-1,1))
             self.create_connection(node, presence, uniform(-1,1))
 
-    def run(self, pixel: int) -> int:
+    def run(
+        self, 
+        pixel: int
+        ) -> int:
         """
         Method to run the CPPN with given input paramaters,
         updating the CPPN with two output values, one indicating
@@ -223,7 +238,11 @@ class CPPN:
             
         return self.material_produced() #Returns an integer indicating the material at that voxel
 
-    def add_node(self, node: Node, layer: int) -> None:
+    def add_node(
+        self, 
+        node: Node, 
+        layer: int
+        ) -> None:
         """
         Method to add a node to the CPPN
 
@@ -231,7 +250,7 @@ class CPPN:
         :param layer: layer of the CPPN to add the node into
         """
         position = 0
-
+        # TODO ensure this works: Just count where the node should be starting at first layer?
         #Finds the position as to where the new node is going to be
         for layer_pos in self.nodes[:layer+1]:
             position += len(layer_pos)
@@ -242,10 +261,16 @@ class CPPN:
         #Updates all the positions of the nodes infront of the inserted node
         for layer in self.nodes[layer+1:]:
             for node in layer:
-                node.position = position
+                node.position = position+1
                 position+=1
+        
+        #TODO have we got to then update connections? Lets find out lads (Do not think so but we will make sure
+        # )
 
-    def remove_node(self, node: Node) -> None:
+    def remove_node(
+        self, 
+        node: Node
+        ) -> None:
         """
         Function to remove a node from a CPPN
 
@@ -290,7 +315,12 @@ class CPPN:
         self.material = None
         self.presence = None 
     
-    def create_connection(self, out: Node, input: Node, weight: float) -> bool:
+    def create_connection(
+        self, 
+        out: Node, 
+        input: Node, 
+        weight: float
+        ) -> bool:
         """
         Method to create a connection between two nodes
         with a given weight
@@ -442,7 +472,13 @@ class CPPN:
         """
         Class defining a connection between two nodes in a CPPN network
         """
-        def __init__(self, out: Node, input: Node, weight: float, innov: int) -> None:
+        def __init__(
+            self, 
+            out: Node, 
+            input: Node, 
+            weight: float, 
+            innov: int
+            ) -> None:
             """
             Initilization method to create a basic connection
             between two nodes
@@ -458,7 +494,10 @@ class CPPN:
             self.historical_marking = innov 
             self.enabled = True #Automatically enables the connection
         
-        def set_enabled(self, option: bool) -> None:
+        def set_enabled(
+            self, 
+            option: bool
+            ) -> None:
             """
             Method to set if a connection is enabled
 
@@ -466,7 +505,10 @@ class CPPN:
             """
             self.enabled = option
         
-        def set_weight(self, value: float) -> None:
+        def set_weight(
+            self, 
+            value: float
+            ) -> None:
             """
             Method to set the weight associated with a connection
 

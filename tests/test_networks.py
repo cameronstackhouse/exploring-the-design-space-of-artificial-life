@@ -17,7 +17,6 @@ def test_basic_cppn() -> None:
     Method to test that a CPPN is initilised correctly with the
     correct number of nodes, layers, connections, and valid weights
     """
-    #TODO Change this when you change initilisation 
     cppn = networks.CPPN([1,1,1])
     assert len(cppn.nodes) == 2 #Checks that there are 2 layers in the CPPN
     assert len(cppn.nodes[0]) == 5 #Checks that there are 5 input nodes
@@ -30,16 +29,21 @@ def test_basic_cppn() -> None:
     for node in cppn.nodes[1]:
         assert node.activation_function is sigmoid #Checks that the output nodes have sigmoid functions as there activation functions
 
-def test_create_node() -> None:
+def test_add_node() -> None:
     """
     Function to test creating a new node and adding it to
     a CPPN
     """
     cppn = networks.CPPN([1,1,1]) #Creates a basic CPPN
-    networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0) #Adds node to the first layer in the CPPN
+    node = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0) #Adds node to the first layer in the CPPN
 
     assert len(cppn.nodes) == 2 #Asserts that there are only two layers
     assert len(cppn.nodes[0]) == 6 #Asserts that the first layer now has six nodes
+    assert node.position == 5 #Asserts that the position of the node has been properly set
+
+    # Asserts the positions of the upper level nodes have been updated
+    assert cppn.nodes[-1][0].position == 6
+    assert cppn.nodes[-1][1].position == 7
 
 def test_create_connection() -> None:
     """

@@ -2,6 +2,7 @@
 Module to simulate CPPN-NEAT evolution on a population of
 CPPNs
 """
+#TODO maticulously go through this, ensure everything works as intended
 
 from random import randint, uniform, choice
 from typing import List
@@ -101,7 +102,7 @@ def initial_mutations(population: List) -> None:
             #100 edges randomly selected and their weights mutated
             #100 vertices selected and activation functions randomly chosen from sin, abs, square, sqrt(abs)
             connection = choice(individual.connections)
-            node = choice(individual.nodes[:-1])
+            node = choice(choice(individual.nodes[:-1]))
             mutate_connection(connection)
             mutate_node(node)
 
@@ -136,7 +137,7 @@ def select_population(
     :return: List containing the top fittest individuals in the population
     """
     sorted_pop = sorted(population, key=lambda indv: indv.fitness) #Sorts the population by their phenotypes respective fitness scores
-    return [individual for individual, _ in sorted_pop[:int(population_size*truncation_rate)]] #Gets the top fittest individuals of the population and adds them to a list
+    return [individual for individual in sorted_pop[:int(population_size*truncation_rate)]] #Gets the top fittest individuals of the population and adds them to a list
 
 def crossover_indv(
     cppn_a: CPPN, 
