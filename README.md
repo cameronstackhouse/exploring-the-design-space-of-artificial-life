@@ -17,9 +17,28 @@ Based on:
 
 ### Installation
 
+Install all python requirements:
+    
+    pip install -r requirements
+
+Install voxcraft-sim for xenobot simulations following the instructuons for local installation specified on the Github:
+
+    https://github.com/voxcraft/voxcraft-sim
+
 ### Settings File
 
 ### Running Experiments
+
+### Running Tests
+Navigate to the exploring-the-design-space-of-artificial-life file:
+
+    cd exploring-the-design-space-of-artificial-life
+
+and run the following command:
+
+    pytest
+
+This will run the tests found in the tests folder on the source code.
 
 ## Further Readings
 

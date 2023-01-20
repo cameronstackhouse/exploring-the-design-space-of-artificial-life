@@ -31,12 +31,20 @@ def test_basic_cppn() -> None:
 
 def test_set_activation_function() -> None:
     """
-    
+    Tests changing the activation function of a node
     """
+    cppn = networks.CPPN([1,1,1]) # Creates a CPPN for the node to be added to
+    node = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0) # Creates a new node with a sigmoid activation function
+    node.set_activation_function(neg_abs) # Changes the activation function to negative absolute
+    assert node.activation_function is not sigmoid and node.activation_function is neg_abs # Checks activation function has been changed
+
+def test_activate() -> None:
+    """
+    Tests activating a singular node to see if an output is produced
+    """
+    #TODO
     cppn = networks.CPPN([1,1,1])
-    node = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0)
-    node.set_activation_function(neg_abs)
-    assert node.activation_function is not sigmoid
+    node = networks
 
 def test_add_node() -> None:
     """
@@ -54,15 +62,55 @@ def test_add_node() -> None:
     assert cppn.nodes[-1][0].position == 6
     assert cppn.nodes[-1][1].position == 7
 
+def test_remove_node() -> None:
+    """
+    
+    """
+    #TODO FINISH THIS!
+    cppn = networks.CPPN([8,8,7])
+    node = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 1)
+
+def test_remove_node_invalid() -> None:
+    cppn = networks.CPPN([8,8,7])
+
+    cppn.remove_node(cppn.nodes[0][0])
+
+    assert len(cppn.nodes[0]) == 5
+
+
 def test_create_connection() -> None:
     """
     Function to test creating a connection in the CPPN
     """
     cppn = networks.CPPN([1,1,1])
+    cppn_2 = networks.CPPN([1,1,1])
+
     a = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 0) #Adds node to the first layer in the CPPN
     b = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 1) #Adds node to the second layer in the CPPN
-    cppn.create_connection(a, b, 0.5)
-    assert len(cppn.connections) == 11
+
+    a_2 = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn_2, 0)
+    b_2 = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn_2, 1)
+
+    cppn.create_connection(a, b, 0.5) # Adds a connection between the two nodes with a weight of 0.5
+    assert len(cppn.connections) == 11 # Asserts that a connection has been successfully created
+
+    #TODO Assert that it is in the collection of connections
+    #TODO Add the same connection in CPPN and assert that it is not added to list of conenctions as already exists
+    #TODO Also check to make sure the innovation numbers are the same
+
+def test_set_input_states() -> None:
+    """
+    Tests the set_input_states function to set the correct
+    range of inputs to the CPPN
+    """
+    cppn = networks.CPPN([1,1,1])
+
+    # Asserts that the CPPN has the correct inputs
+    assert len(cppn.x_inputs) > 0
+    assert len(cppn.y_inputs) > 0
+    assert len(cppn.z_inputs) > 0
+    assert len(cppn.d_inputs) > 0
+    assert len(cppn.b_inputs) > 0
 
 def test_activate_basic_cppn() -> None:
     """
@@ -107,12 +155,15 @@ def test_reset() -> None:
     Tests the reset function for the CPPN, ensuring
     that each nodes output has been reset back to having no value
     """
-    cppn = networks.CPPN([1,1,1])
-    cppn.to_phenotype()
-    cppn.reset()
+    cppn = networks.CPPN([1,1,1]) # Creates a CPPN
+    cppn.to_phenotype() # Activates the CPPN by 
+    cppn.reset() # Resets the CPPN
+
+    # Asserts that the CPPN output is none
     assert cppn.presence is None
     assert cppn.material is None
 
+    # Asserts that the node output for each node is none
     for layer in cppn.nodes:
         for node in layer:
             assert node.output is None
@@ -124,12 +175,16 @@ def test_to_phenotype() -> None:
     the xenobot produced is of the correct size and has the correct
     type of cells
     """
-    cppn = networks.CPPN([8,8,7])
+
+    # Creates two CPPNs with different design space sizes
+    cppn = networks.CPPN([8,8,7]) 
     cppn2 = networks.CPPN([2,2,2])
 
+    # Asserts that the phenotype of each is the correct size 
     assert len(cppn.to_phenotype()) == 448
     assert len(cppn2.to_phenotype()) == 8
 
+    # Asserts that the phenotypes produced have only contain valid cells
     valid = True
     for cell in cppn.to_phenotype():
         if cell not in [0,1,2]:
@@ -137,6 +192,19 @@ def test_to_phenotype() -> None:
             break
     
     assert valid is True
+
+def test_run() -> None:
+    """
+    Tests the running of a compositional pattern producing network to ensure
+    material and presence output values are produced.
+    """
+    cppn = networks.CPPN([8,8,7])
+    cppn.run(0) # Runs the CPPN taking the 0th pixels coordinates as input
+    
+    # Asserts that an output is produced in both material and presence of 
+    # a cell in the given pixel location (0)
+    assert cppn.material is not None 
+    assert cppn.presence is not None
         
     
 

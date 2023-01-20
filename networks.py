@@ -359,7 +359,6 @@ class CPPN:
         indicates if there is material at that point and, if so, what
         type of material it is (skin cell or cardiac cell)
         """
-        #TODO maybe change to not just 3d space?
         results = np.zeros(self.xyz_size) #Empty numpy array to store material results at each point
         
         try:
