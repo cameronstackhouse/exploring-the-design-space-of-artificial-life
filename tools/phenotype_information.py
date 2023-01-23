@@ -14,7 +14,24 @@ def lz_phenotype(phenotype) -> str:
     :rtype string
     :return: lempel-ziv compressed string representation of the CPPN
     """
-    pass
+    dictionary = {"0": "0", "1": "1", "2": "2"}
+    index = 0
+    counter = 3
+    current = ""
+    output = ""
+
+    #TODO Change to longest
+
+    while index < len(phenotype)-1:
+        current += str(phenotype[index])
+        if current + str(phenotype[index+1]) not in dictionary:
+            output += dictionary[current]
+            dictionary[current + str(phenotype[index+1])] = str(counter)
+            counter += 1
+            current = ""
+        index += 1
+    
+    return output, dictionary
 
 def movement_frequency_components(CPPN) -> np.ndarray:
     """
@@ -61,3 +78,10 @@ def num_cells(phenotype) -> dict:
             muscle+=1
         
     return {"none": none, "skin": skin, "muscle": muscle}
+
+def possible_motifs() -> list:
+    """
+    
+    """
+    two_cell_motifs = []
+    three_cell_motifs = []

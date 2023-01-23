@@ -287,15 +287,11 @@ class CPPN:
                     layer.remove(node) #Removes node from the layer
                     if len(layer) == 0: #Checks if layer is now empty, if so the layer is removed
                         self.nodes.pop(n) #Pops the layer
-                        for layer in self.nodes[n:]: #Iterates through all layers after the removed layer
-                            for node in layer: #Iterates through all nodes in the next layers, updating the position value of each node
-                                node.position = node_pos
-                                node_pos+=1
-                    
-                    #Updates node positions of nodes in the layer which the node has been popped from
-                    for node in layer[index:]: 
-                        node.position = node_pos
-                        node_pos+=1
+                    else:
+                        #Updates node positions of nodes in the layer which the node has been popped from
+                        for node in layer[index:]: 
+                            node.position = node_pos
+                            node_pos+=1
                     
                     for layer in self.nodes[n+1:]:
                         for node in layer:

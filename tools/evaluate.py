@@ -32,7 +32,9 @@ def evaluate_pop(
 
     #TODO look at MathTree to see how to create fitness function!
     #TODO SEE WHY THIS ISN'T WORKING!
-    vxa = VXA(SimTime=2, RecordStepSize=1000, RecordLink=0, DtFrac=0.5) #TODO pass vxa tags in here INCREASE STEP TIME!
+    vxa = VXA(SimTime=1, GravEnabled=1, VaryTempEnabled=0, TempEnabled=0, HeapSize=0.65,
+    RecordStepSize=1000, DtFrac=0.5) 
+    #TODO pass vxa tags in here INCREASE STEP TIME!
     
     #Adds both cardiac and skin cells to the simulation
     vxa.add_material(RGBA=(0,255,0), E=1e9, RHO=1e3) # passive
@@ -69,6 +71,8 @@ def evaluate_pop(
 
     logging.info("Finished simulation")
     results = read_sim_output(f"fitnessFiles/{run_directory}/{run_name}/output") #Reads sim results from output file
+
+    print(results)
     
     #Sets the fitness of each phenotype using results obtained
     for n, indv in enumerate(results):

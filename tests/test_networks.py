@@ -9,6 +9,7 @@ import os, sys
 p = os.path.abspath('.')
 sys.path.insert(1, p)
 
+import numpy as np
 import networks
 from tools.activation_functions import sigmoid, neg_abs, neg_square, sqrt_abs, neg_sqrt_abs, normalize
 
@@ -64,19 +65,40 @@ def test_add_node() -> None:
 
 def test_remove_node() -> None:
     """
-    
+    Tests the removal of a node, ensuring that the node has successfully been removed 
+    and that positions of other nodes have not been changed
     """
-    #TODO FINISH THIS!
     cppn = networks.CPPN([8,8,7])
     node = networks.Node(sigmoid, networks.NodeType.HIDDEN, cppn, 1)
 
+    before = cppn.to_phenotype()
+
+    assert node.position == 7
+
+    cppn.remove_node(node)
+
+    assert len(cppn.nodes[1]) == 2
+
+    # Ensures the positions have been updated of surrounding nodes accordingly 
+    for i in range(5):
+        assert cppn.nodes[0][i].position == i
+    
+    for i in range(2):
+        assert cppn.nodes[1][i].position == i + 5
+    
+    after = cppn.to_phenotype()
+
+    assert np.array_equal(before, after)
+
 def test_remove_node_invalid() -> None:
+    """
+    Tests the removal of a node 
+    """
     cppn = networks.CPPN([8,8,7])
 
     cppn.remove_node(cppn.nodes[0][0])
 
     assert len(cppn.nodes[0]) == 5
-
 
 def test_create_connection() -> None:
     """
@@ -205,9 +227,3 @@ def test_run() -> None:
     # a cell in the given pixel location (0)
     assert cppn.material is not None 
     assert cppn.presence is not None
-        
-    
-
-
-
-
