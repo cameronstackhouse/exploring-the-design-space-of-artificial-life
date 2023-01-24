@@ -68,7 +68,8 @@ def evaluate_pop(
 
     #Uses voxcraft-sim to evaluate populations fitness, producing an output xml file and a history file, which can be visualised by voxcraft-viz
     logging.info("Simulating...")
-    os.system(f"voxcraft-sim/build/./voxcraft-sim -i fitnessFiles/{run_directory}/{run_name}/ -o fitnessFiles/{run_directory}/{run_name}/output.xml -f > fitnessFiles/{run_directory}/{run_name}/{run_name}.history")
+    #TODO Maybe add cd :)
+    os.system(f"voxcraft-sim/build/./voxcraft-sim -i fitnessFiles/{run_directory}/{run_name}/ -o fitnessFiles/{run_directory}/{run_name}/output.xml -f > fitnessFiles/{run_directory}/{run_name}/{run_name}.history") #TODO This does not work :)
 
     logging.info("Finished simulation")
     results = read_sim_output(f"fitnessFiles/{run_directory}/{run_name}/output") #Reads sim results from output file

@@ -1,0 +1,20 @@
+Running simulation locally by default.
+Need an executable worker but nothing found.
+
+Thank you for using Voxelyze3. This program should be run on a computer that has GPUs.
+Typical Usage:
+Voxelyze -i <data_path> -o <report_path> -l -f 
+
+Allowed options:
+  -h [ --help ]         produce help message
+  -l [ --locally ]      If this machine already has GPUs, locally run tasks on 
+                        this machine.
+  -n [ --nodes ] arg    The number of nodes you want to start simultaneously. 
+                        (Not implemented.)
+  -i [ --input ] arg    Set input directory path which contains a generation of
+                        VXA files.
+  -o [ --output ] arg   Set output file path for report. (e.g. report_1.xml)
+  -w [ --worker ] arg   Specify which worker you want to use. vx3_node_worker 
+                        by default.
+  -f [ --force ]        Overwrite output file if exists.
+
