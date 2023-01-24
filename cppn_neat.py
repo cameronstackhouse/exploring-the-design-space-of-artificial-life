@@ -27,7 +27,7 @@ def evolve(
     run_directory: str, 
     size_params: list, 
     fitness_function: FitnessFunction
-    ) -> tuple[list[CPPN], CPPN]:
+    ): #TODO
     """
     Function to evolve a population of CPPNs using CPPN-NEAT to design xenobots.
 
@@ -126,7 +126,7 @@ def select_population(
     population: list, 
     population_size: int, 
     truncation_rate: float
-    ) -> list[CPPN]:
+    ) -> List[CPPN]:
     """
     Function to select the suitably fit individuals in the population.
 
@@ -176,7 +176,7 @@ def crossover_indv(
 
 def crossover_pop(
     population: List, 
-    population_size: int) -> list[CPPN]:
+    population_size: int) -> List[CPPN]:
     """
     Function to crossover the connections in CPPNs in
     a population.

@@ -1,6 +1,6 @@
 {
     "evolution_paramaters": {
-        "population_size": 100,
+        "population_size": 10,
         "generations": 100,
         "run_directory": "placeholder",
         "size_paramaters": [8,8,7],
@@ -9,7 +9,7 @@
         "mutate_node_rate": 0.3,
         "connection_addition_rate": 0.4,
         "connection_removal_rate": 0.2,
-        "mutate_connection_rate": 1,
+        "mutate_connection_rate": 0.5,
         "truncation_rate": 0.3
     },
     

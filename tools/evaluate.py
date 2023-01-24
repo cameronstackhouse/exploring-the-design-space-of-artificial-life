@@ -37,8 +37,8 @@ def evaluate_pop(
     #TODO pass vxa tags in here INCREASE STEP TIME!
     
     #Adds both cardiac and skin cells to the simulation
-    vxa.add_material(RGBA=(0,255,0), E=1e9, RHO=1e3) # passive
-    vxa.add_material(RGBA=(255,0,0), E=1e7, RHO=1e6, CTE=0.01) # active
+    vxa.add_material(RGBA=(0,255,0), E=5000000, RHO=1000000, P= 0.35, uDynamic=0.5, uStatic=1) # passive soft
+    vxa.add_material(RGBA=(255,0,0), E=5000000, RHO=1000000, P= 0.35, uDynamic=0.5, uStatic=1, CTE=0.01) # active
 
     sub.call(f"rm -rf fitnessFiles/{run_directory}/{run_name}/", shell=True) #Deletes contents of run directory if exists
 
@@ -67,7 +67,7 @@ def evaluate_pop(
 
     #Uses voxcraft-sim to evaluate populations fitness, producing an output xml file and a history file, which can be visualised by voxcraft-viz
     logging.info("Simulating...")
-    sub.call(f"./voxcraft-sim -i fitnessFiles/{run_directory}/{run_name}/ -o fitnessFiles/{run_directory}/{run_name}/output.xml -f > fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
+    sub.call(f"/voxcraft-sim/build/./voxcraft-sim -i fitnessFiles/{run_directory}/{run_name}/ -o fitnessFiles/{run_directory}/{run_name}/output.xml -f > fitnessFiles/{run_directory}/{run_name}/{run_name}.history", shell=True)
 
     logging.info("Finished simulation")
     results = read_sim_output(f"fitnessFiles/{run_directory}/{run_name}/output") #Reads sim results from output file
