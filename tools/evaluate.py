@@ -68,14 +68,17 @@ def evaluate_pop(
 
     #Uses voxcraft-sim to evaluate populations fitness, producing an output xml file and a history file, which can be visualised by voxcraft-viz
     logging.info("Simulating...")
-    #TODO Maybe add cd :)
-    os.system(f"voxcraft-sim/build/./voxcraft-sim -i fitnessFiles/{run_directory}/{run_name}/ -o fitnessFiles/{run_directory}/{run_name}/output.xml -f > fitnessFiles/{run_directory}/{run_name}/{run_name}.history") #TODO This does not work :)
+
+    os.chdir("voxcraft-sim/build") # Changes directory to the voxcraft directory TODO change to be taken from settings file
+    os.system(f"./voxcraft-sim -i ../../fitnessFiles/{run_directory}/{run_name}/ -o ../../fitnessFiles/{run_directory}/{run_name}/output.xml -f > ../../fitnessFiles/{run_directory}/{run_name}/{run_name}.history")
+    os.chdir("../../") # Return to project directory
 
     logging.info("Finished simulation")
     results = read_sim_output(f"fitnessFiles/{run_directory}/{run_name}/output") #Reads sim results from output file
 
     print(results)
     
+    #TODO Fix this :)
     #Sets the fitness of each phenotype using results obtained
     for n, indv in enumerate(results):
         pop[n].fitness = float(indv["fitness"]) 
