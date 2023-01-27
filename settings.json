@@ -1,6 +1,6 @@
 {
     "evolution_paramaters": {
-        "population_size": 10,
+        "population_size": 50,
         "generations": 100,
         "run_directory": "placeholder",
         "size_paramaters": [8,8,7],

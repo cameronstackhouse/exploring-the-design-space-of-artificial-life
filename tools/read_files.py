@@ -34,9 +34,9 @@ def read_sim_output(filename: str) -> List[dict]:
         total_distance_of_all_voxels = robot[8].text 
         
         result["fitness"] = fitness
-        result["x_movement"] = int(current_x) - int(robot[6][0].text) #Finds the distance the voxel has moved along the x axis
-        result["y_movement"] = int(current_y) - int(robot[6][1].text) #Finds the distance the voxel has moved along the y axis
-        result["z_movement"] = int(current_z) - int(robot[6][2].text) #Finds the distance the voxel has moved along the z axis
+        result["x_movement"] = float(current_x) - float(robot[6][0].text) #Finds the distance the voxel has moved along the x axis
+        result["y_movement"] = float(current_y) - float(robot[6][1].text) #Finds the distance the voxel has moved along the y axis
+        result["z_movement"] = float(current_z) - float(robot[6][2].text) #Finds the distance the voxel has moved along the z axis
         result["total_distance"] = float(total_distance_of_all_voxels)
 
         results.append(result) #Adds the results of the individual to a list of results

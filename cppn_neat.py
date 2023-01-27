@@ -3,6 +3,7 @@ Module to simulate CPPN-NEAT evolution on a population of
 CPPNs
 """
 #TODO maticulously go through this, ensure everything works as intended
+#TODO Job for 27th of Jan. Read this: https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf Page 11 for implementation details
 
 from random import randint, uniform, choice
 from typing import List
@@ -27,7 +28,7 @@ def evolve(
     run_directory: str, 
     size_params: list, 
     fitness_function: FitnessFunction
-    ): #TODO
+    ):
     """
     Function to evolve a population of CPPNs using CPPN-NEAT to design xenobots.
 
@@ -50,7 +51,7 @@ def evolve(
     population = create_population(population_size, size_params) #Generates an initial population of CPPNs
 
     generations_complete = 0 #Counter of number of completed generations
-    evaluate_pop(population, run_directory, generations_complete, truncation_rate)  #Calculates the initial fitness of the population
+    evaluate_pop(population, run_directory, "Initial", truncation_rate)  #Calculates the initial fitness of the population
     
     while generations_complete < generations: #Repeats until the number of generations specified is reached
         population = select_population(population, population_size, truncation_rate) #Selects the top fit trunction_rate% of the population
@@ -65,7 +66,7 @@ def evolve(
 
         #Speciates the population, adjusting fitness of individuals so that topological innovation is protected
         #TODO Check if speciating in right place
-        speciate(population, 5)
+        speciate(population, 2)
 
         #Checks to see if a new overall fittest individual was produced
         for individual in population:
@@ -137,12 +138,12 @@ def select_population(
     :return: List containing the top fittest individuals in the population
     """
     sorted_pop = sorted(population, key=lambda indv: indv.fitness) #Sorts the population by their phenotypes respective fitness scores
-    return [individual for individual in sorted_pop[:int(population_size*truncation_rate)]] #Gets the top fittest individuals of the population and adds them to a list
+    return sorted_pop[:int(population_size*truncation_rate)] #Gets the top fittest individuals of the population and adds them to a list
 
 def crossover_indv(
     cppn_a: CPPN, 
     cppn_b: CPPN
-    ) -> CPPN:
+    ):
     """
     Function to crossover connections of two CPPNs.
     Only connections with the same innovation number are crossed over
@@ -154,25 +155,38 @@ def crossover_indv(
     :rtype: CPPN
     :return: Crossed over CPPN
     """
+    #TODO This doesn't work lads
     #Compares each weight in each connection in each network and crosses over the weights if the innovation numbers match
 
     #Determines which CPPN is the fittest to keep its disjoint and excess connections
-    fittest = None
-    if cppn_a.fitness >= cppn_b.fitness:
-        fittest = cppn_a
-        less_fit = cppn_b
-    elif cppn_b.fitness > cppn_a.fitness:
-        fittest = cppn_b
-        less_fit = cppn_a
 
-    #Iterates through all connections in the two CPPNs
-    for fit_connection in fittest.connections:
-        for less_fit_connection in less_fit.connections:
-            if fit_connection.historical_marking == less_fit_connection.historical_marking and uniform(0,1) >= 0.5: #Checks if historical markings match and if random crossover threshold reached
-                fit_connection.weight = less_fit_connection.weight #Sets the connection weight to be the weight of the connection from the less fit CPPN
-                fit_connection.enabled = less_fit_connection.enabled #Sets the connection enabled status to be the status of the connection from the less fit CPPN
+    #-----------------------------------------------------------------------------------
+    #NOTE: OLD CODE 
+    # fittest = None
+    # if cppn_a.fitness >= cppn_b.fitness:
+    #     fittest = cppn_a
+    #     less_fit = cppn_b
+    # elif cppn_b.fitness > cppn_a.fitness:
+    #     fittest = cppn_b
+    #     less_fit = cppn_a
+
+    # #Iterates through all connections in the two CPPNs
+    # for fit_connection in fittest.connections:
+    #     for less_fit_connection in less_fit.connections:
+    #         if fit_connection.historical_marking == less_fit_connection.historical_marking and uniform(0,1) >= 0.5: #Checks if historical markings match and if random crossover threshold reached
+    #             fit_connection.weight = less_fit_connection.weight #Sets the connection weight to be the weight of the connection from the less fit CPPN
+    #             fit_connection.enabled = less_fit_connection.enabled #Sets the connection enabled status to be the status of the connection from the less fit CPPN
+    #-----------------------------------------------------------------------------------
+
+    #NOTE: Test new code
+    for connection in cppn_a:
+        for other_connection in cppn_b:
+            if connection.historical_marking == other_connection.historical_marking:
+                #Swaps weights of matching historical marking connections
+                temp = connection.weight
+                connection.weight = other_connection.weight
+                other_connection.weight = temp
         
-    return fittest
 
 def crossover_pop(
     population: List, 
@@ -186,7 +200,7 @@ def crossover_pop(
     :rtype: List of CPPNs
     :return: List of CPPNs with weights crossed over
     """
-    return [crossover_indv(choice(population), choice(population)) for _ in range(population_size)]
+    crossover_indv(choice(population), choice(population)) for _ in range(population_size)
 
 def mutate_node(node: Node) -> None:
     """
@@ -216,7 +230,6 @@ def mutate_nodes(
                     mutate_node(node) #Mutate the current node
 
 def add_node_between_con(cppn: CPPN) -> None:
-    #TODO THIS IS WRONG! NODE SHOULD JUST BE ADDED ON ITS OWN! EASY FIX
     """
     Function to add a node in the middle of an enabled 
     connection in a CPPN.
@@ -347,6 +360,8 @@ def remove_connection(
         #input nodes to the output nodes, maintaining a valid topology
         if not (input_output_connection_counter_material <= 1 and connection.input.type is NodeType.MATERIAL_OUTPUT) and not (input_output_connection_counter_presence <= 1 and connection.input.type is NodeType.PRESENCE_OUTPUT):
             valid_io_counter = True
+
+        #TODO MAYBE CHANGE THIS!
         
         if valid and valid_io_counter: #Checks if the connection is deemed to be valid to be removed
             cppn.connections.remove(connection) #If so the connection can be removed

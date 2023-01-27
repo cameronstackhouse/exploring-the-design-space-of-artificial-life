@@ -463,6 +463,36 @@ class CPPN:
                 disabled_counter+=1
         
         return {"enabled": enabled_counter, "disabled": disabled_counter}
+    
+    def has_cycles(self) -> bool:
+        """
+        Function determining if a CPPN contains cycles.
+
+        :rtype: boolean
+        :return: boolean describing if a graph has cycles
+        """
+        cycles = False
+        
+        # Iterates through all input nodes, checking for cycles at each
+        for node in self.nodes[0]:
+            visited = set() # Keeps a visited set
+            stack = [node]
+
+            while len(stack) != 0:
+                current = stack.pop()
+                if current in visited:
+                    cycles = True
+                    break
+                else:
+                    visited.add(current)
+                    for connection in self.connections:
+                        if connection.out is current and connection.enabled:
+                            stack.append(connection.input)
+            
+            if cycles:
+                break
+                
+        return cycles
         
     class Connection:
         """

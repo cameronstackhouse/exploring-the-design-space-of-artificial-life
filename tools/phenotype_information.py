@@ -21,6 +21,7 @@ def lz_phenotype(phenotype) -> str:
     output = ""
 
     #TODO Change to longest
+    #TODO Make sure this works and add comments
 
     while index < len(phenotype)-1:
         current += str(phenotype[index])

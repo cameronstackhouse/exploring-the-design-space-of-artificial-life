@@ -227,3 +227,20 @@ def test_run() -> None:
     # a cell in the given pixel location (0)
     assert cppn.material is not None 
     assert cppn.presence is not None
+
+def test_has_cycles() -> None:
+    """
+    
+    """
+    cppn = networks.CPPN([8,8,7])
+    with_cycle = networks.CPPN([8,8,7])
+    disabled_cycle = networks.CPPN([8,8,7])
+
+    with_cycle.create_connection(with_cycle.nodes[1][0], with_cycle.nodes[0][0], 0.5)
+    disabled_cycle.create_connection(with_cycle.nodes[1][0], with_cycle.nodes[0][0], 0.5)
+
+    disabled_cycle.connections[-1].enabled = False
+
+    assert with_cycle.has_cycles()
+    assert not disabled_cycle.has_cycles()
+    assert not cppn.has_cycles()
