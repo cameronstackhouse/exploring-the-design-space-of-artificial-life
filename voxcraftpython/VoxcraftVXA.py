@@ -75,15 +75,16 @@ class VXA:
         etree.SubElement(sub, "mtVAR").text = 't'
         etree.SubElement(sub, "mtCONST").text = str(self.SimTime)
 
+        #NOTE Where fitness function is added
         fitness = etree.SubElement(simulator, "FitnessFunction") # default - maximum x distance
-        add = etree.SubElement(fitness, "mtADD")
+        sqrt = etree.SubElement(fitness, "mtSQRT")
+        add = etree.SubElement(sqrt, "mtADD")
         mul = etree.SubElement(add, 'mtMUL')
         etree.SubElement(mul, "mtVAR").text = 'x'
         etree.SubElement(mul, "mtVAR").text = 'x'
         mul2 = etree.SubElement(add, 'mtMUL')
         etree.SubElement(mul2, "mtVAR").text = 'y'
         etree.SubElement(mul2, "mtVAR").text = 'y'
-
 
         history = etree.SubElement(simulator, "RecordHistory")
         etree.SubElement(history, "RecordStepSize").text = str(self.RecordStepSize) #Capture image every 100 time steps

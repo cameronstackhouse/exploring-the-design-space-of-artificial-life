@@ -4,6 +4,7 @@ CPPNs
 """
 #TODO maticulously go through this, ensure everything works as intended
 #TODO Job for 27th of Jan. Read this: https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf Page 11 for implementation details
+#TODO SUNDAY HAS TO BE DONE! THIS IS FUNDAMENTAL
 
 from random import randint, uniform, choice
 from typing import List
@@ -160,33 +161,29 @@ def crossover_indv(
 
     #Determines which CPPN is the fittest to keep its disjoint and excess connections
 
-    #-----------------------------------------------------------------------------------
-    #NOTE: OLD CODE 
-    # fittest = None
-    # if cppn_a.fitness >= cppn_b.fitness:
-    #     fittest = cppn_a
-    #     less_fit = cppn_b
-    # elif cppn_b.fitness > cppn_a.fitness:
-    #     fittest = cppn_b
-    #     less_fit = cppn_a
+    fittest = None
+    if cppn_a.fitness >= cppn_b.fitness:
+        fittest = cppn_a
+        less_fit = cppn_b
+    elif cppn_b.fitness > cppn_a.fitness:
+        fittest = cppn_b
+        less_fit = cppn_a
 
-    # #Iterates through all connections in the two CPPNs
-    # for fit_connection in fittest.connections:
-    #     for less_fit_connection in less_fit.connections:
-    #         if fit_connection.historical_marking == less_fit_connection.historical_marking and uniform(0,1) >= 0.5: #Checks if historical markings match and if random crossover threshold reached
-    #             fit_connection.weight = less_fit_connection.weight #Sets the connection weight to be the weight of the connection from the less fit CPPN
-    #             fit_connection.enabled = less_fit_connection.enabled #Sets the connection enabled status to be the status of the connection from the less fit CPPN
-    #-----------------------------------------------------------------------------------
-
-    #NOTE: Test new code
-    for connection in cppn_a:
-        for other_connection in cppn_b:
-            if connection.historical_marking == other_connection.historical_marking:
-                #Swaps weights of matching historical marking connections
-                temp = connection.weight
-                connection.weight = other_connection.weight
-                other_connection.weight = temp
-        
+    # TODO Add case for equal fitness
+    
+    for connection in fittest.connections:
+        for connection_2 in less_fit.connections:
+            if connection.historical_marking == connection_2.historical_marking:
+                # Chooses weight from matching connections at random from the two
+                if uniform(0,1) >= 0.5:
+                    connection.weight = connection_2.weight
+                
+                if not connection.enabled or not connection_2.enabled:
+                    if uniform(0,1) >= 0.3:
+                        connection.enabled = False
+    
+    return fittest
+                
 
 def crossover_pop(
     population: List, 
@@ -200,7 +197,7 @@ def crossover_pop(
     :rtype: List of CPPNs
     :return: List of CPPNs with weights crossed over
     """
-    crossover_indv(choice(population), choice(population)) for _ in range(population_size)
+    return [crossover_indv(choice(population), choice(population)) for _ in range(population_size)]
 
 def mutate_node(node: Node) -> None:
     """

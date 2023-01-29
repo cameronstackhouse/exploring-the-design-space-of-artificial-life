@@ -58,6 +58,12 @@ def read_settings(filename: str) -> dict:
 
     return data
 
+def read_history(filename: str) -> dict:
+    """
+    """
+    #TODO Add read_history function to read 
+    pass
+
 
 if __name__ == "__main__":
     #TODO DELETE FOR RELEASE

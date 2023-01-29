@@ -34,11 +34,13 @@ def evaluate_pop(
     """
 
     #TODO look at MathTree to see how to create fitness function!
-    vxa = VXA(SimTime=1, HeapSize=0.65, RecordStepSize=1000, DtFrac=0.5, EnableExpansion=1) 
+    #TODO Check if fitness func is apropriate
+    #TODO Check if limitations should be placed on number of active cells
+    vxa = VXA(SimTime=2, HeapSize=0.65, RecordStepSize=100, DtFrac=0.95, EnableExpansion=1) 
     
     #Adds both cardiac and skin cells to the simulation
-    passive = vxa.add_material(RGBA=(0,255,0)) # passive soft
-    active = vxa.add_material(RGBA=(255,0,0), CTE=0.01) # active
+    passive = vxa.add_material(RGBA=(0,255,0), E=5000000, RHO=1000000) # passive soft
+    active = vxa.add_material(RGBA=(255,0,0), CTE=0.01, E=5000000, RHO=1000000) # active
 
     os.system(f"rm -rf fitnessFiles/{run_directory}/{run_name}/") #Deletes contents of run directory if exists
 

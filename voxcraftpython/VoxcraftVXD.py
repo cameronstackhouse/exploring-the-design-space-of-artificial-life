@@ -1,4 +1,5 @@
 import numpy as np
+from random import uniform
 from lxml import etree
 import os
 
@@ -43,7 +44,14 @@ class VXD:
         for i in range(Z_Voxels):
             string = "".join([f"{c}" for c in body_flatten[:,i]])
             etree.SubElement(data_tag, "Layer").text = etree.CDATA(string)
+        
+        # set PhaseOffset Data
+        phase_offset_tag = etree.SubElement(structure, "PhaseOffset")
+        for i in range(Z_Voxels):
+            #TODO Check to see if works
+            string = "".join(f"{uniform(0,1)}, " for _ in range(len(body_flatten[:,i])))
+            etree.SubElement(phase_offset_tag, "Layer").text = etree.CDATA(string)
 
     def write(self, filename='robot.vxd'):
         with open(filename, 'w+') as f:
-            f.write(etree.tostring(self.tree, encoding="unicode", pretty_print=True))    
+            f.write(etree.tostring(self.tree, encoding="unicode", pretty_print=True))
