@@ -87,8 +87,11 @@ class Node:
 
             for value in self.inputs:
                 total += value #Sums the input values
-        
-            self.output = self.activation_function(total) #Sets the output value to the activation function applied on the summation of input values
+            
+            if self.activation_function is not None:
+                self.output = self.activation_function(total) #Sets the output value to the activation function applied on the summation of input values
+            else:
+                self.output = total
 
             #Check for connections to other nodes and feed (output * weight) to that node
             for connection in self.outer.connections:
@@ -186,7 +189,7 @@ class CPPN:
         self.set_input_states()
         #Creates an input node for each paramater: i, j, k, d, and b
         for type in [NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z, NodeType.INPUT_D, NodeType.INPUT_B]:
-            activation_function = choice(self.activation_functions) #Chooses a random activation function
+            activation_function = None
             Node(activation_function, type, self, 0) #Creates the new node, automatically adding it to the first layer in the CPPN
 
         #Creates an output node for material and presence and adds both to the output layer

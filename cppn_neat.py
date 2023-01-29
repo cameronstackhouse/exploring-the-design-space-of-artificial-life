@@ -3,7 +3,6 @@ Module to simulate CPPN-NEAT evolution on a population of
 CPPNs
 """
 #TODO maticulously go through this, ensure everything works as intended
-#TODO Job for 27th of Jan. Read this: https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf Page 11 for implementation details
 #TODO SUNDAY HAS TO BE DONE! THIS IS FUNDAMENTAL
 
 from random import randint, uniform, choice
@@ -121,7 +120,7 @@ def create_population(
     :param size_params: list representing the dimentions of the design space
     """
     population = [CPPN(size_params) for _ in range(population_size)] #Generates a list containing the population of CPPNs
-    initial_mutations(population) #Performs initial mutations on the population of cppns
+    # initial_mutations(population) #Performs initial mutations on the population of cppns
     return population
 
 def select_population(
@@ -247,6 +246,8 @@ def add_node_between_con(cppn: CPPN) -> None:
     out = connection.out
     input = connection.input
 
+    weight = connection.weight
+
     #Finds the index of the layer which the output node is in
     counter = 0
     for i in range(len(cppn.nodes)):
@@ -272,8 +273,8 @@ def add_node_between_con(cppn: CPPN) -> None:
     connection.set_enabled(False) #Disables the old connection
 
     #Creates two new connection, emulating the node being placed in the middle of the old connection
-    cppn.create_connection(connection_out, new_node, uniform(-1,1)) 
-    cppn.create_connection(new_node, connection_input, uniform(-1,1))
+    cppn.create_connection(connection_out, new_node, 1) 
+    cppn.create_connection(new_node, connection_input, weight)
 
 def add_node_pop(
     population: List, 
@@ -485,11 +486,11 @@ def mutate_population(
     """
 
     add_node_pop(population, add_node_rate) #Adds nodes to each cppn
-    remove_nodes(population, remove_node_rate) #Removes nodes from cppns
+    #remove_nodes(population, remove_node_rate) #Removes nodes from cppns
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
-    remove_connections(population, remove_edge_rate) #Removes edges in cppns
+    #remove_connections(population, remove_edge_rate) #Removes edges in cppns
 
 
 if __name__ == "__main__":
