@@ -85,6 +85,6 @@ def evaluate_pop(
     #TODO Change this to assign fitnesses correctly :)
     #Sets the fitness of each phenotype using results obtained    
     for result in results:
-        population[result["index"]] = float(result["fitness"])
+        pop[result["index"]].fitness = float(result["fitness"])
 
     logging.info(f"Evaluation complete for generation {run_name}.")
