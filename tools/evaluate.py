@@ -81,12 +81,10 @@ def evaluate_pop(
 
     logging.info("Finished simulation")
     results = read_sim_output(f"fitnessFiles/{run_directory}/{run_name}/output") #Reads sim results from output file
-
-    print(results)
     
-    #TODO Fix this :)
-    #Sets the fitness of each phenotype using results obtained
-    for n, indv in enumerate(results):
-        pop[n].fitness = float(indv["fitness"]) 
+    #TODO Change this to assign fitnesses correctly :)
+    #Sets the fitness of each phenotype using results obtained    
+    for result in results:
+        population[result["index"]] = float(result["fitness"])
 
     logging.info(f"Evaluation complete for generation {run_name}.")

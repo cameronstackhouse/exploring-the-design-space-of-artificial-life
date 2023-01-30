@@ -33,6 +33,7 @@ def read_sim_output(filename: str) -> List[dict]:
         current_z = robot[7][2].text #Gets the new z position of the voxel
         total_distance_of_all_voxels = robot[8].text 
         
+        results["index"] = int((robot.tag)[2:]) # Gets the number of the xenobot evaluated
         result["fitness"] = fitness
         result["x_movement"] = float(current_x) - float(robot[6][0].text) #Finds the distance the voxel has moved along the x axis
         result["y_movement"] = float(current_y) - float(robot[6][1].text) #Finds the distance the voxel has moved along the y axis
@@ -67,6 +68,6 @@ def read_history(filename: str) -> dict:
 
 if __name__ == "__main__":
     #TODO DELETE FOR RELEASE
-    q = read_sim_output("tools/example")
+    q = read_sim_output("fitnessFiles/a/Initial/output")
     b = read_settings("settings")
     print(b)

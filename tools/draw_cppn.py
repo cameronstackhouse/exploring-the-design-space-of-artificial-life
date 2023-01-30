@@ -34,7 +34,10 @@ def draw_cppn(
             s.attr(rank="same") #Sets the subgraph rank so that every node in a layer is shown on the same layer
             #Iterates through each node in the layer
             for node in layer:
-                s.node(node.name, str(node.activation_function.__name__)) #Adds the node to the subgraph
+                if node.activation_function is None:
+                    s.node(node.name, "Input Node") # TODO Change this to have input name :)
+                else:
+                    s.node(node.name, str(node.activation_function.__name__)) #Adds the node to the subgraph
     
     #Gets a list of connections to be shown 
     valid_connections = []
