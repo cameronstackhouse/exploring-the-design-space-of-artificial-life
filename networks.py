@@ -3,7 +3,8 @@ Module defining components for the creation of functioning
 compositional pattern-producing networks
 """
 
-from random import choice, uniform
+from copy import copy, deepcopy
+from random import choice, random
 from enum import Enum
 import multiprocessing as mp
 from typing import List
@@ -199,8 +200,8 @@ class CPPN:
         #Connects the input nodes with the two output nodes
         for node in self.nodes[0]:
             #Connect the node to the two output nodes
-            self.create_connection(node, material, uniform(-1,1))
-            self.create_connection(node, presence, uniform(-1,1))
+            self.create_connection(node, material, random())
+            self.create_connection(node, presence, random())
 
     def run(
         self, 
@@ -392,9 +393,9 @@ class CPPN:
         #TODO Ask chico about this!
         presence = self.presence #Gets presence output of CPPN
         material = self.material #Gets material output of CPPN
-        if presence < 0.5: #Checks if presence output is less than 0.3
+        if presence <= 0.2: #Checks if presence output is less than 0.5
             return 0 #If so there is no material in the location
-        elif material < 0.5: #Checks if material output is less than 0.7
+        elif material < 0.5: #Checks if material output is less than 0.5
             return 1 #If so there is skin in the location
         else:
             return 2 #Else there is a cardiac cell in the location

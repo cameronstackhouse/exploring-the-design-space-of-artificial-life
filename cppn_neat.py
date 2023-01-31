@@ -3,8 +3,11 @@ Module to simulate CPPN-NEAT evolution on a population of
 CPPNs
 """
 #TODO maticulously go through this, ensure everything works as intended
+#TODO 1) Change mutation probabilities to mutation numbers
+#TODO 2) Update docstrings after 1
 
-from random import randint, uniform, choice, random
+from copy import copy, deepcopy
+from random import randint, uniform, choice, random, gauss
 from typing import List
 from networks import CPPN, NodeType, Node
 from matplotlib import pyplot as plt
@@ -16,12 +19,12 @@ from tools.fitness_functions import FitnessFunction
 
 def evolve(
     population_size: int, 
-    add_node_rate: float, 
-    mutate_node_rate: float, 
-    remove_node_rate: float, 
-    add_edge_rate: float, 
-    mutate_edge_rate: float, 
-    remove_edge_rate: float, 
+    add_node_rate: int, 
+    mutate_node_rate: int, 
+    remove_node_rate: int, 
+    add_edge_rate: int, 
+    mutate_edge_rate: int, 
+    remove_edge_rate: int, 
     truncation_rate: float, 
     generations: int, 
     run_directory: str, 
@@ -90,7 +93,7 @@ def create_population(
     :param size_params: list representing the dimentions of the design space
     """
     population = [CPPN(size_params) for _ in range(population_size)] #Generates a list containing the population of CPPNs
-    # initial_mutations(population) #Performs initial mutations on the population of cppns
+    initial_mutations(population) #Performs initial mutations on the population of cppns
     return population
 
 def select_population(
@@ -110,6 +113,38 @@ def select_population(
     sorted_pop = sorted(population, key=lambda indv: indv.fitness) #Sorts the population by their phenotypes respective fitness scores
     return sorted_pop[:int(population_size*truncation_rate)] #Gets the top fittest individuals of the population and adds them to a list
 
+def initial_mutations(pop):
+    """
+    
+    """
+
+    for cppn in pop:
+    
+        for _ in range(10):
+            #Node adds
+            add_node_between_con(cppn)
+            
+        for _ in range(10):
+            #Link adds
+            add_connection(cppn)
+    
+        for _ in range(5):
+            #Link removals
+            connection = choice(cppn.connections)
+            remove_connection(cppn, connection)
+    
+        for _ in range(100):
+            #Node mutations
+            layer = choice(cppn.nodes[1:])
+            node = choice(layer)
+            mutate_node(node)
+    
+        for _ in range(100):
+            #Weight changes
+            connection = choice(cppn.connections)
+            mutate_connection(connection)
+
+
 def crossover_indv(
     cppn_a: CPPN, 
     cppn_b: CPPN
@@ -128,22 +163,26 @@ def crossover_indv(
     #TODO GENES ARE RANDOMLY CHOSEN AT MATCHING GENES, EXCESS AND DISJOINT
     #TODO I think this is what is going wrong, deepcopy (or copy) for cppn
     # TAKEN FROM MORE FIT PARENT
+    #TODO CLEAN CODE!
 
     child = None
-    if cppn_a.fitness > cppn_b.fitness:
-        # Takes the excess and disjoint genes from cppn_a
-        child = cppn_a.deepcopy()
 
+    if cppn_a.fitness > cppn_b.fitness: # Case where the fitness of a is greater than b
+        # Takes the excess and disjoint genes from cppn_a
+        child = deepcopy(cppn_a)
+
+        # Inherits matching connections with a probability 0.5 from either parent
         for connection in child.connections:
             for connection_b in cppn_b.connections:
                 if connection.historical_marking == connection_b.historical_marking:
                     if random() >= 0.5:
                         connection.weight = connection_b.weight
         
-    elif cppn_b.fitness > cppn_a.fitness:
+    elif cppn_b.fitness > cppn_a.fitness: # Case where the fitness of b is greater than a
         # Takes the excess and disjoint genes from cppn_b
-        child = cppn_b.deepcopy()
+        child = deepcopy(cppn_b)
         
+        # Inherits matching connections with a probability 0.5 from either parent
         for connection in child.connections:
             for connection_b in cppn_a.connections:
                 if connection.historical_marking == connection_b.historical_marking:
@@ -151,7 +190,20 @@ def crossover_indv(
                         connection.weight = connection_b.weight
     else:
         # Takes the excess and disjoint genes randomly
-        pass
+        if 0.5>= random():
+            child = deepcopy(cppn_a)
+            for connection in child.connections:
+                for connection_b in cppn_b.connections:
+                    if connection.historical_marking == connection_b.historical_marking:
+                        if random() >= 0.5:
+                            connection.weight = connection_b.weight
+        else:
+            child = deepcopy(cppn_b)
+            for connection in child.connections:
+                for connection_b in cppn_a.connections:
+                    if connection.historical_marking == connection_b.historical_marking:
+                        if random() >= 0.5:
+                            connection.weight = connection_b.weight
     
     return child
 
@@ -177,24 +229,28 @@ def mutate_node(node: Node) -> None:
     :param node: node to mutate
     """
     #Only mutates non output node activation functions as output node activation functions are always sigmoid functions
-    if node.type != NodeType.MATERIAL_OUTPUT and node.type != NodeType.PRESENCE_OUTPUT:
+    old_activation = node.activation_function
+    activation_function = node.activation_function    
+    
+    while activation_function is old_activation:
         activation_function = choice(node.outer.activation_functions)
-        node.activation_function = activation_function #Sets its activation function as a random activation function
+    
+    node.activation_function = activation_function #Sets its activation function as a random activation function
 
 def mutate_nodes(
     population: List, 
-    rate: float) -> None:
+    num_mutations: int) -> None:
     """
     Function to mutate nodes within a population.
 
     :param population: population of CPPNs
     :param rate: rate at which a node is mutated
     """
-    for cppn in population: #Iterates through all CPPNs in a population
-        for layer in cppn.nodes[1:-1]: #Iterates through all layers in a cppn apart from first and last
-            for node in layer: #Iterates through all nodes in a layer
-                if rate >= uniform(0,1): #If a random number is less than or equal to the mutation rate
-                    mutate_node(node) #Mutate the current node
+    for _ in range(num_mutations):
+        cppn = choice(population)
+        layer = choice(cppn.nodes[1:-1])
+        node = choice(layer)
+        mutate_node(node)
 
 def add_node_between_con(cppn: CPPN) -> None:
     """
@@ -249,7 +305,7 @@ def add_node_between_con(cppn: CPPN) -> None:
 
 def add_node_pop(
     population: List, 
-    rate: float
+    num_of_additions: int
     ) -> None:
     """
     Function to add nodes to a population
@@ -257,9 +313,9 @@ def add_node_pop(
     :param population: population of CPPNs
     :param rate: rate at which nodes are added to a CPPN
     """
-    for cppn in population: #Iterates through CPPNs in the population
-        if rate >= uniform(0,1): #Checks if a random number is less than or equal to the addition rate
-            add_node_between_con(cppn) #Adds a node between a random enabled connection
+    for _ in range(num_of_additions):
+        cppn = choice(population)
+        add_node_between_con(cppn)
 
 def mutate_connection(connection: CPPN.Connection) -> None:
     """
@@ -267,11 +323,16 @@ def mutate_connection(connection: CPPN.Connection) -> None:
 
     :param connection: connection to mutate
     """
-    connection.weight = uniform(-1,1) #Changes the weight to a random value between 0 and 1
+    old_weight = connection.weight
+    new = old_weight
+    while new == old_weight:
+        new = gauss(old_weight, 0.5)
+        new = max(-1.0, min(new, 1.0))
+    connection.weight = new
 
 def mutate_connections(
     population: List, 
-    rate: float
+    num_of_mutations: int
     ) -> None:
     """
     Function to mutate connections in a population
@@ -279,10 +340,10 @@ def mutate_connections(
     :param population: population of CPPNs
     :param rate: rate of connection mutation
     """
-    for cppn in population: #Iterates through the population
-        for connection in cppn.connections: #Iterates through connections in a CPPN
-            if rate >= uniform(0,1): #Checks if a random number is less than or equal to the mutation rate
-                mutate_connection(connection) #Mutates the connection
+    for _ in range(num_of_mutations):
+        cppn = choice(population)
+        connection = choice(cppn.connections)
+        mutate_connection(connection)
 
 def remove_connection(
     cppn: CPPN, 
@@ -343,7 +404,7 @@ def remove_connection(
 
 def remove_connections(
     population: List, 
-    rate: float
+    num_of_removals: int
     ) -> None:
     """
     Function to remove connections from population
@@ -352,10 +413,10 @@ def remove_connections(
     :param rate: rate at which nodes are removed from a CPPN
     """
     #Iterates through CPPNs in the population
-    for cppn in population:
-        if rate >= uniform(0,1): #Checks if a random number is less than or equal to the removal rate
-            connection = choice(cppn.connections)
-            remove_connection(cppn, connection) #If so the connection is removed from the CPPN
+    for _ in range(num_of_removals):
+        cppn = choice(population)
+        connection = choice(cppn.connections)
+        remove_connection(cppn, connection)
 
 def add_connection(cppn: CPPN) -> None:
     """
@@ -386,7 +447,7 @@ def add_connection(cppn: CPPN) -> None:
 
 def add_connections(
     population: List, 
-    rate: float
+    rate_of_addition: int
     ) -> None:
     """
     Function to add connections to a population of CPPNs
@@ -394,9 +455,9 @@ def add_connections(
     :param population: population of CPPNs to add connections to
     :param rate: rate at which connections are added to the population of CPPNs
     """
-    for cppn in population: #Iterates through the population of CPPNs
-        if rate >= uniform(0,1): #Checks if the random number is less than or equal to the addition rate
-            add_connection(cppn) #Adds a connection to the CPPN
+    for _ in range(rate_of_addition):
+        cppn = choice(population)
+        add_connection(cppn)
 
 def remove_nodes(
     population: List, 
@@ -439,12 +500,12 @@ def remove_nodes(
                 
 def mutate_population(
     population: List, 
-    add_node_rate: float,
-    mutate_node_rate: float, 
-    remove_node_rate: float, 
-    add_edge_rate: float, 
-    mutate_edge_rate: float, 
-    remove_edge_rate: float) -> None:
+    add_node_rate: int,
+    mutate_node_rate: int, 
+    remove_node_rate: int, 
+    add_edge_rate: int, 
+    mutate_edge_rate: int, 
+    remove_edge_rate: int) -> None:
     """
     Function to mutate a population of CPPNs
 
@@ -457,11 +518,11 @@ def mutate_population(
     """
 
     add_node_pop(population, add_node_rate) #Adds nodes to each cppn
-    #remove_nodes(population, remove_node_rate) #Removes nodes from cppns
+    remove_nodes(population, remove_node_rate) #Removes nodes from cppns
     mutate_nodes(population, mutate_node_rate) #Mutates nodes in each cppn
     add_connections(population, add_edge_rate) #Adds edges to cppns
     mutate_connections(population, mutate_edge_rate) #Mutate edges in each cppn
-    #remove_connections(population, remove_edge_rate) #Removes edges in cppns
+    remove_connections(population, remove_edge_rate) #Removes edges in cppns
 
 
 if __name__ == "__main__":
@@ -478,12 +539,12 @@ if __name__ == "__main__":
 
     pop_size = int(evolution_params["population_size"])
     generations = int(evolution_params["generations"])
-    add_node_rate = float(evolution_params["node_add_rate"])
-    mutate_node_rate = float(evolution_params["mutate_node_rate"])
-    delete_node_rate = float(evolution_params["node_removal_rate"])
-    add_connection_rate = float(evolution_params["connection_addition_rate"])
-    mutate_connection_rate = float(evolution_params["mutate_connection_rate"])
-    remove_connection_rate = float(evolution_params["connection_removal_rate"])
+    add_node_rate = int(evolution_params["node_add_rate"])
+    mutate_node_rate = int(evolution_params["mutate_node_rate"])
+    delete_node_rate = int(evolution_params["node_removal_rate"])
+    add_connection_rate = int(evolution_params["connection_addition_rate"])
+    mutate_connection_rate = int(evolution_params["mutate_connection_rate"])
+    remove_connection_rate = int(evolution_params["connection_removal_rate"])
     truncation_rate = float(evolution_params["truncation_rate"])
     size_params = list(evolution_params["size_paramaters"])
 
