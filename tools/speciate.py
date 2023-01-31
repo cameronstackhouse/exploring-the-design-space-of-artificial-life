@@ -6,8 +6,6 @@ Xenobots using functions defined by Stanley in the
 "Evolving Neural Networks through Augmenting Topologies" paper.
 """
 
-#TODO SUNDAY!
-
 def speciate(
     pop: List, 
     threshold: float

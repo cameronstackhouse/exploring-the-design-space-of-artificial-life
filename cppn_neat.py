@@ -3,9 +3,8 @@ Module to simulate CPPN-NEAT evolution on a population of
 CPPNs
 """
 #TODO maticulously go through this, ensure everything works as intended
-#TODO SUNDAY HAS TO BE DONE! THIS IS FUNDAMENTAL
 
-from random import randint, uniform, choice
+from random import randint, uniform, choice, random
 from typing import List
 from networks import CPPN, NodeType, Node
 from matplotlib import pyplot as plt
@@ -55,12 +54,13 @@ def evolve(
     
     while generations_complete < generations: #Repeats until the number of generations specified is reached
         population = select_population(population, population_size, truncation_rate) #Selects the top fit trunction_rate% of the population
-
+        
         print(generations_complete) #Displays how many generations have been completed
 
         population = crossover_pop(population, population_size) #Crosses over the population
         mutate_population(population, add_node_rate, mutate_node_rate, remove_node_rate, add_edge_rate, mutate_edge_rate, remove_edge_rate) #Mutates the population
        
+        print(len(population))
         #Evaluates the population using voxcraft-sim to find fitness of each solution 
         evaluate_pop(population, run_directory, generations_complete, fitness_function)
 
@@ -78,36 +78,6 @@ def evolve(
     #TODO Add pruning maybe
     
     return population, fittest #Returns the fittest individual and the population
-
-def initial_mutations(population: List) -> None:
-    """
-    Performs initial mutations on the beginning population as done by
-    Kriegman et al. in the source code for reconfigurable organisms 
-    (https://github.com/skriegman/reconfigurable_organisms)
-
-    :param population: Population of CPPNs
-    """
-    #TODO Add comments :)
-    for individual in population:
-
-        for _ in range(10):
-            #TODO Add 10 random verticies, then select 10 random pairs of unconnected
-            #Verticies and add edge, weight of which is drawn from a uniform distribution between -1 and 1 
-            pass
-    
-        for _ in range(5):
-            #Five randomly selected edges are removed
-            pass
-
-        for _ in range(100):
-            #100 edges randomly selected and their weights mutated
-            #100 vertices selected and activation functions randomly chosen from sin, abs, square, sqrt(abs)
-            connection = choice(individual.connections)
-            node = choice(choice(individual.nodes[:-1]))
-            mutate_connection(connection)
-            mutate_node(node)
-
-        #TODO Check how they add nodes :)
 
 def create_population(
     population_size: int, 
@@ -143,7 +113,7 @@ def select_population(
 def crossover_indv(
     cppn_a: CPPN, 
     cppn_b: CPPN
-    ):
+    ) -> CPPN:
     """
     Function to crossover connections of two CPPNs.
     Only connections with the same innovation number are crossed over
@@ -155,34 +125,35 @@ def crossover_indv(
     :rtype: CPPN
     :return: Crossed over CPPN
     """
-    #TODO This doesn't work lads
-    #Compares each weight in each connection in each network and crosses over the weights if the innovation numbers match
+    #TODO GENES ARE RANDOMLY CHOSEN AT MATCHING GENES, EXCESS AND DISJOINT
+    #TODO I think this is what is going wrong, deepcopy (or copy) for cppn
+    # TAKEN FROM MORE FIT PARENT
 
-    #Determines which CPPN is the fittest to keep its disjoint and excess connections
+    child = None
+    if cppn_a.fitness > cppn_b.fitness:
+        # Takes the excess and disjoint genes from cppn_a
+        child = cppn_a.deepcopy()
 
-    fittest = None
-    if cppn_a.fitness >= cppn_b.fitness:
-        fittest = cppn_a
-        less_fit = cppn_b
+        for connection in child.connections:
+            for connection_b in cppn_b.connections:
+                if connection.historical_marking == connection_b.historical_marking:
+                    if random() >= 0.5:
+                        connection.weight = connection_b.weight
+        
     elif cppn_b.fitness > cppn_a.fitness:
-        fittest = cppn_b
-        less_fit = cppn_a
-
-    # TODO Add case for equal fitness
+        # Takes the excess and disjoint genes from cppn_b
+        child = cppn_b.deepcopy()
+        
+        for connection in child.connections:
+            for connection_b in cppn_a.connections:
+                if connection.historical_marking == connection_b.historical_marking:
+                    if random() >= 0.5:
+                        connection.weight = connection_b.weight
+    else:
+        # Takes the excess and disjoint genes randomly
+        pass
     
-    for connection in fittest.connections:
-        for connection_2 in less_fit.connections:
-            if connection.historical_marking == connection_2.historical_marking:
-                # Chooses weight from matching connections at random from the two
-                if uniform(0,1) >= 0.5:
-                    connection.weight = connection_2.weight
-                
-                if not connection.enabled or not connection_2.enabled:
-                    if uniform(0,1) >= 0.3:
-                        connection.enabled = False
-    
-    return fittest
-                
+    return child
 
 def crossover_pop(
     population: List, 
@@ -220,7 +191,7 @@ def mutate_nodes(
     :param rate: rate at which a node is mutated
     """
     for cppn in population: #Iterates through all CPPNs in a population
-        for layer in cppn.nodes: #Iterates through all layers in a cppn
+        for layer in cppn.nodes[1:-1]: #Iterates through all layers in a cppn apart from first and last
             for node in layer: #Iterates through all nodes in a layer
                 if rate >= uniform(0,1): #If a random number is less than or equal to the mutation rate
                     mutate_node(node) #Mutate the current node
