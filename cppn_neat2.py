@@ -1,14 +1,17 @@
 from random import choice, random
 from networks import Node, NodeType
+from tools.evaluate import evaluate_pop
+from tools.speciate import speciate
 
-#TODO Add comments
 
 def generate_population(size_params, individuals):
     return [CPPN(size_params) for _ in range(individuals)]
 
 def crossover(cppn_a, cppn_b):
-    #TODO
-    if cppn_a.fitness > cppn_b.fitness:
+    #TODO Crossover function as specified by NEAT paper
+    child = None
+
+    if cppn_a.fitness >= cppn_b.fitness:
         pass
     elif cppn_b.fitness > cppn_a.fitness:
         pass
@@ -106,10 +109,29 @@ def mutate_population(population):
 
 def evolve():
     #TODO
-    # 1) Evaluate population
-    # 2) Speciate
-    # 3) Kill off worst NNs
-    # 4) Mutate and crossover
-    # 5) Repeat
-    pass
+    population = generate_population([8,8,7], 100)
+    generations_complete = 0
+
+    for while generations_complete < 100:
+        pass
+        # 1) Evaluate population (use evaluate.py)
+        evaluate_pop(population, "a", generations_complete, "fitness_function")
+
+        # 2) Speciate 
+        speciate(population, 3)
+
+        # 3) Kill off worst NNs
+        # TODO
+        
+        # 4) Mutate and crossover
+        # TODO
+        mutate_population(population)
+        #population = crossover_population(population)
+
+        # 5) Repeat
+        generations_complete += 1
+
+
+if __name__ == "__main__":
+    evolve()
 
