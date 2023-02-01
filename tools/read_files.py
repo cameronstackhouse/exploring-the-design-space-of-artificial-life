@@ -62,7 +62,8 @@ def read_settings(filename: str) -> dict:
 def read_history(filename: str) -> dict:
     """
     """
-    #TODO Add read_history function to read 
+    #TODO Add read_history function to read history files to get
+    # movement information for fourier transform
     pass
 
 

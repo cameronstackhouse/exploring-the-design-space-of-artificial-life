@@ -52,6 +52,7 @@ class Node:
         self.previous_out = None
         self.previous_in = None
         self.name = None
+        self.layer = layer
         self.position = 0 # TODO MAKE SURE THIS WORKS!
         outer_cppn.add_node(self, layer) #Adds the node to the CPPNs list of nodes
     
