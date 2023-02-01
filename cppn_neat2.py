@@ -16,7 +16,9 @@ def crossover(cppn_a, cppn_b):
     child = None
     less_fit = None
 
-    if cppn_a.fitness >= cppn_b.fitness:
+    if cppn_a.fitness == cppn_b.fitness:
+        pass
+    elif cppn_a.fitness >= cppn_b.fitness:
         child = deepcopy(cppn_a)
         less_fit = cppn_b
     elif cppn_b.fitness > cppn_a.fitness:
@@ -32,10 +34,15 @@ def crossover(cppn_a, cppn_b):
                 if not connection.enabled or not connection_b.enabled:
                     if random() < 0.7:
                         connection.enabled = False
+                        # checks for validity of network
+                    
+                        child.run(0)
+                        if child.material is None or child.presence is None:
+                            connection.enabled = True
+                        
+                        child.reset()
                     else:
                         connection.enabled = True
-
-                    # TODO check for validity
     
     return child
 

@@ -3,6 +3,7 @@ Module defining components for the creation of functioning
 compositional pattern-producing networks
 """
 
+import pickle
 from copy import copy, deepcopy
 from random import choice, random
 from enum import Enum
@@ -546,8 +547,26 @@ class CPPN:
             :param value: weight of the connection
             """
             self.weight = value
-        
+
+class PopulationContainer:
+    def __init__(population, name, description):
+        self.population = population
+        self.name = name
+        self.description = description
     
+    def best(self) -> CPPN:
+        best = None
+        for cppn in self.population:
+            if best is None or best.fitness < cppn.fitness:
+                best = cppn
+    
+def save_population(population, filename):
+    pickle.dump(population, open(filename, "wb"))
+
+def load_population(filename) -> PopulationContainer:
+    return pickle.load(open(filename, "rb"))
+
+            
 if __name__ == "__main__":
     """
     ******************
@@ -557,26 +576,30 @@ if __name__ == "__main__":
     """
     a = CPPN([8,8,7])
 
+    pickle.dump(a, open("test.p", "wb"))
 
-    dec = input("Want to see it?")
+    b = pickle.load(open("test.p", "rb"))
 
-    if dec.lower() == "yes":
 
-        draw_cppn(a, show_weights=True)
+    # dec = input("Want to see it?")
 
-        print(a.valid_connections())
+    # if dec.lower() == "yes":
+
+    #     draw_cppn(a, show_weights=True)
+
+    #     print(a.valid_connections())
    
-        b = a.to_phenotype()
+    #     b = a.to_phenotype()
 
-        print(b)
+    #     print(b)
 
-        newarr = b.reshape(8,8,7)
+    #     newarr = b.reshape(8,8,7)
 
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection="3d")
-        data = newarr
-        z,x,y = data.nonzero()
+    #     fig = plt.figure()
+    #     ax = fig.add_subplot(111, projection="3d")
+    #     data = newarr
+    #     z,x,y = data.nonzero()
 
-        ax.scatter(x, y, z, cmap='coolwarm', alpha=1)
-        plt.show()
+    #     ax.scatter(x, y, z, cmap='coolwarm', alpha=1)
+    #     plt.show()
     
