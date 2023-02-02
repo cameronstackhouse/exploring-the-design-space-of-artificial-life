@@ -3,6 +3,7 @@ Module implementing CPPN-NEAT for the evolution of CPPNs to produce
 xenobots
 """
 
+import sys
 from random import choice, random
 from copy import deepcopy
 from typing import List
@@ -254,7 +255,7 @@ def mutate_population(population: List[CPPN]) -> None:
         if random() < mutate_activation_function_rate:
             mutate_activation_function(cppn)
 
-def evolve():
+def evolve(file_name: str):
     """
     Function to perform CPPN-NEAT to evolve a population of xenobots
     """
@@ -264,7 +265,7 @@ def evolve():
     while generations_complete < 100:
         pass
         # Evaluate population (use evaluate.py)
-        evaluate_pop(population, "a", generations_complete, "fitness_function")
+        evaluate_pop(population, file_name, generations_complete, "fitness_function")
 
         # Speciate 
         speciate(population, 3)
@@ -278,6 +279,8 @@ def evolve():
         # Repeat
         generations_complete += 1
 
+def run_experiment(filename):
+    evolve(filename)
 
 if __name__ == "__main__":
-    evolve()
+    run_experiment(sys.argv[1])
