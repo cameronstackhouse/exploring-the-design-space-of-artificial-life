@@ -50,15 +50,35 @@ def crossover(
     child = None
     less_fit = None
 
+    rounded_a = round(cppn_a.fitness, 2)
+    rounded_b = round(cppn_b.fitness, 2)
+
     # Gets excess and disjoint genes from the fittest parent
-    if cppn_a.fitness == cppn_b.fitness:
+    if rounded_a == rounded_b:
         #PLACEHOLDER
         child = deepcopy(cppn_a)
         less_fit = cppn_b
-    elif cppn_a.fitness >= cppn_b.fitness:
+        excess_and_disjoint = []
+
+        for connection in cppn_a.connections:
+            found = False
+            for connection_b in cppn_b.connections:
+                if connection.historical_marking == connection_b.historical_marking:
+                    found = True
+                    break
+            
+            if not found:
+                excess_and_disjoint.append(connection_b)
+
+        # Randomly take excess and disjoint genes from parents if equal fitness
+        for connection in cppn_a.connections:
+            for connection_b in cppn_b.connections:
+                pass
+
+    elif rounded_a > rounded_b:
         child = deepcopy(cppn_a)
         less_fit = cppn_b
-    elif cppn_b.fitness > cppn_a.fitness:
+    elif rounded_b > rounded_a:
         child = deepcopy(cppn_b)
         less_fit = cppn_a
     
@@ -73,10 +93,13 @@ def crossover(
                     if random() < 0.7:
                         connection.enabled = False
                         # checks for validity of network
-                        child.run(0)
-                        if child.material is None or child.presence is None:
+                        #TODO This might not actually catch error, think again
+                        try:
+                            child.run(0)
+                        except TypeError:
+                            #TODO Update this
                             connection.enabled = True
-                        
+
                         child.reset()
                     else:
                         connection.enabled = True
@@ -268,7 +291,7 @@ def evolve(file_name: str):
         evaluate_pop(population, file_name, generations_complete, "fitness_function")
 
         # Speciate 
-        speciate(population, 3)
+        speciate(population, 0.3)
         
         # Mutate and crossover fittest
         mutate_population(population)

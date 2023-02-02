@@ -68,7 +68,6 @@ def distance(
 
     #TODO Make sure this works
     #TODO Add comments
-    #NOTE: Also include an additional argument which counts how many activation functions differ between 2 individuals
 
     N = max(len(cppn1.connections), len(cppn2.connections)) # Gets the number of genes in the larger genome
     excess = 0 # Initilises excess genes counter
@@ -101,6 +100,7 @@ def distance(
     # Gets the number of disjoint genes
     one_minus_two = innov_numbers_1.difference(innov_numbers_2)
     two_minus_one = innov_numbers_2.difference(innov_numbers_1)
+    matching_counter = 0
 
     if max_one > max_two:
         for gene in innov_numbers_2:
@@ -124,24 +124,6 @@ def distance(
         for connection_2 in cppn2.connections:
             if connection.historical_marking == connection_2.historical_marking:
                 weight_difference += abs(connection.weight - connection_2.weight)
+                matching_counter += 1
     
-    # Gets the number of differing activation functions between the CPPNs
-    cppn_one_activation_functions = {}
-    cppn_two_activation_functions = {}
-
-    for activation_function in cppn1.activation_functions:
-        if activation_function in cppn_one_activation_functions:
-            cppn_one_activation_functions[activation_function] += 1
-        else:
-            cppn_one_activation_functions[activation_function] = 1
-    
-    for activation_function in cppn2.activation_functions:
-        if activation_function in cppn_two_activation_functions:
-            cppn_two_activation_functions[activation_function] += 1
-        else:
-            cppn_two_activation_functions[activation_function] = 1 
-    
-    for activation_function in cppn_one_activation_functions:
-        differing_activation_functions += abs(cppn_two_activation_functions[activation_function] - cppn_one_activation_functions[activation_function])
-
-    return (c1*excess/N) + (c2*disjoint/N) + c3*weight_difference + differing_activation_functions
+    return (c1*excess/N) + (c2*disjoint/N) + c3*(weight_difference/matching_counter)

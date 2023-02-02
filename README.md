@@ -29,6 +29,11 @@ Install voxcraft-sim for xenobot simulations following the instructions for loca
 ### Settings File
 
 ### Running Experiments
+To run a basic CPPN-NEAT using the absolute distance of the center of mass of xenobots as the fitness function run the following command:
+
+    python3 cppn_neat.py directory_name
+
+this will save history, output, vxa, and vxd files in the directory "fitnessFiles/directory_name/" as specified.
 
 ### Running Tests
 Navigate to the exploring-the-design-space-of-artificial-life file:

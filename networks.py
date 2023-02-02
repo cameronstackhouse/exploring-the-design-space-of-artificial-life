@@ -395,9 +395,9 @@ class CPPN:
         #TODO Ask chico about this!
         presence = self.presence #Gets presence output of CPPN
         material = self.material #Gets material output of CPPN
-        if presence <= 0.2: #Checks if presence output is less than 0.5
+        if presence <= 0.2: #Checks if presence output is less than 0.2
             return 0 #If so there is no material in the location
-        elif material < 0.5: #Checks if material output is less than 0.5
+        elif material < 0.5: #Checks if material output is less than 0.5 #TODO FIX ERROR THAT IS THROWN HERE!
             return 1 #If so there is skin in the location
         else:
             return 2 #Else there is a cardiac cell in the location

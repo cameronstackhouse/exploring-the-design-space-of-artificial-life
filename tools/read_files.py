@@ -66,6 +66,10 @@ def read_history(filename: str) -> dict:
     # movement information for fourier transform
     pass
 
+def read_vxd(filename: str):
+    """
+    """
+    pass
 
 if __name__ == "__main__":
     #TODO DELETE FOR RELEASE
