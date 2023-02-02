@@ -47,6 +47,7 @@ def evaluate_pop(
     os.system(f"mkdir -p fitnessFiles/{run_directory}/{run_name}/") # Creates a new directory to store fitness files
 
     #Initilises logging
+    os.system(f"rm -f fitnessFiles/{run_directory}/evaluation.log") # Removes log file if exists
     logging.basicConfig(filename=f"fitnessFiles/{run_directory}/evaluation.log", format='%(levelname)s:%(message)s', level=logging.DEBUG)
     vxa.write("base.vxa") #Write a base vxa file
     os.system(f"cp base.vxa fitnessFiles/{run_directory}/{run_name}/") #Copy vxa file to correct run directory

@@ -1,5 +1,5 @@
 """
-
+Module containing fitness functions for use in voxcraft-sim
 """
 
 from enum import Enum
@@ -14,3 +14,6 @@ class FitnessFunction(Enum):
     OBJECT_EXPULSION = 4
     TOTAL_DISTANCE = 5
     #TODO Add more fitness func values here
+
+def total_distance():
+    pass
