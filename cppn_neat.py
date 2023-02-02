@@ -10,7 +10,7 @@ from typing import List
 from networks import Node, NodeType, CPPN
 from tools.evaluate import evaluate_pop
 from tools.speciate import speciate
-
+from tools.draw_cppn import draw_cppn
 
 def initial_mutations(population: List):
     """
@@ -96,6 +96,8 @@ def crossover(
                         #TODO This might not actually catch error, think again
                         try:
                             child.run(0)
+                            if child.material is None or child.presence is None:
+                                connection.enabled = True
                         except TypeError:
                             #TODO Update this
                             connection.enabled = True
@@ -283,6 +285,10 @@ def evolve(file_name: str):
     Function to perform CPPN-NEAT to evolve a population of xenobots
     """
     population = generate_population([8,8,7], 50) # Generates an initial population of 
+
+    test_i = choice(population)
+    draw_cppn(test_i)
+    
     generations_complete = 0
 
     while generations_complete < 100:
@@ -295,6 +301,9 @@ def evolve(file_name: str):
         
         # Mutate and crossover fittest
         mutate_population(population)
+
+        test_i = choice(population)
+        draw_cppn(test_i)
 
         # Crossover the population of CPPNs
         population = crossover_population(population)

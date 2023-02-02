@@ -10,28 +10,16 @@ p = os.path.abspath('.')
 sys.path.insert(1, p)
 
 import cppn_neat
-from networks import CPPN
+from networks import CPPN, NodeType
 
 #TODO Add tests to test the functionality of cppn-neat
 #TODO Add comments
 
-def test_evolve() -> None:
-    """
-    
-    """
-    pass
-
-def test_initial_mutations() -> None:
-    """
-    
-    """
-    pass
-
-def test_create_population() -> None:
+def test_generate_population() -> None:
     """
     Tests the "create_population" function in cppn_neat.
     """
-    population = cppn_neat.create_population(10, [8,8,7])
+    population = cppn_neat.generate_population([8,8,7], 10)
     assert len(population) == 10
 
     for cppn in population:
@@ -41,123 +29,81 @@ def test_create_population() -> None:
         assert cppn.presence is None
 
         for connection in cppn.connections:
-            assert connection.weight >= -1 and connection.weight <= 1
-
-def test_select_population() -> None:
-    """
-    Tests the "select_population" function in cppn_neat.
-    """
-    # Creates population of CPPNs
-    population = cppn_neat.create_population(10, [8,8,7])
-    
-    # Assigns a psuedo fitness to each CPPN
-    for cppn in population:
-        cppn.fitness = randint(1, 10)
-
-    # Gets the top 5 and bottom 5 CPPNs 
-    sorted_pop = sorted(population, key=lambda indv: indv.fitness)
-    top_5 = sorted_pop[:5]
-    bottom_5 = sorted_pop[5:]
-    
-    # Selects the top 50% of CPPNs according to fitness
-    population = cppn_neat.select_population(population, 10, 0.5)
-
-    assert len(population) == 5 # Asserts that only 5 CPPNs have been selected
-    
-    # Asserts that the top 5 fittest CPPNs are still in the population
-    for cppn in top_5:
-        assert cppn in population
-    
-    # Asserts that the bottom 5 least fit CPPNs are no longer in the population
-    for cppn in bottom_5:
-        assert cppn not in population
+            assert connection.weight >= 0 and connection.weight <= 1
 
 def test_crossover_indv() -> None:
     """
     
     """
     cppn_one = CPPN([8,8,7])
+    cppn_two = CPPN([8,8,7])
 
     cppn_one.fitness = 15
+    cppn_two.fitness = 10
 
-    print(CPPN.innovation_counter)
+    child = cppn_neat.crossover(cppn_one, cppn_two)
+    assert not child.has_cycles()
 
-def test_crossover_pop() -> None:
+def test_add_con_when_full() -> None:
     """
     
     """
-    pass
+    cppn_one = CPPN([8,8,7])
 
-def test_mutate_node() -> None:
+    before = len(cppn_one.connections)
+    before_connections = cppn_one.connections
+
+    cppn_neat.add_connection(cppn_one)
+
+    assert len(cppn_one.connections) == before
+    assert cppn_one.connections == before_connections
+
+def test_add_node() -> None:
     """
     
     """
-    pass
+    cppn_one = CPPN([8,8,7])
+    cppn_two = CPPN([8,8,7])
 
-def test_mutate_nodes() -> None:
-    """
+    previous_num_connections = len(cppn_one.connections)
     
-    """
-    pass
+    cppn_neat.add_node(cppn_one)
+    total_num_nodes = 0
 
-def test_add_node_between_con() -> None:
-    """
+    for layer in cppn_one.nodes:
+        total_num_nodes += len(layer)
+
+    assert len(cppn_one.nodes) == 3
+    assert total_num_nodes == 8
+    assert len(cppn_one.nodes[0]) == 5
+    assert len(cppn_one.nodes[1]) == 1
+    assert len(cppn_one.nodes[2]) == 2
+
+    for node in cppn_one.nodes[0]:
+        assert node.type in [NodeType.INPUT_B, NodeType.INPUT_D, NodeType.INPUT_X, NodeType.INPUT_Y, NodeType.INPUT_Z]
     
-    """
-    pass
-
-def test_add_node_pop() -> None:
-    """
+    for node in cppn_one.nodes[1]:
+        assert node.type is NodeType.HIDDEN
     
-    """
-    pass
-
-def test_mutate_connection() -> None:
-    """
+    for node in cppn_one.nodes[2]:
+        assert node.type in [NodeType.MATERIAL_OUTPUT, NodeType.PRESENCE_OUTPUT]
     
-    """
-    pass
+    num_enabled = 0
 
-def test_mutate_connections() -> None:
-    """
+    for connection in cppn_one.connections:
+        if connection.enabled:
+            num_enabled += 1
     
-    """
-    pass
+    assert num_enabled == previous_num_connections + 1
 
-def test_remove_connection() -> None:
-    """
+    innov_numbers_one = set()
+    innov_numbers_two = set()
     
-    """
-    pass
-
-def test_remove_connections() -> None:
-    """
+    for connection in cppn_one.connections:
+        innov_numbers_one.add(connection.historical_marking)
     
-    """
-    pass
-
-def test_add_connection() -> None:
-    """
+    for connection in cppn_two.connections:
+        innov_numbers_two.add(connection.historical_marking)
     
-    """
-    pass
-
-def test_add_connections() -> None:
-    """
-    
-    """
-    pass
-
-def test_remove_nodes() -> None:
-    """
-    
-    """
-    pass
-
-def test_mutate_population() -> None:
-    """
-    
-    """
-    pass
-
-test_crossover_indv()
+    assert innov_numbers_one != innov_numbers_two
+    assert innov_numbers_one - innov_numbers_two == {10}

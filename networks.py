@@ -333,6 +333,7 @@ class CPPN:
         :param weight: weight associated with the connection
         """
         #Makes sure the connection does not exist in the topology
+        #TODO Maybe an issue here, not sure
         for connection in self.connections:
             if connection.out is out and connection.input is input:
                 return False

@@ -39,6 +39,24 @@ def test_set_activation_function() -> None:
     node.set_activation_function(neg_abs) # Changes the activation function to negative absolute
     assert node.activation_function is not sigmoid and node.activation_function is neg_abs # Checks activation function has been changed
 
+def test_innov_matching() -> None:
+    """
+    
+    """
+    cppn_one = networks.CPPN([8,8,7])
+    cppn_two = networks.CPPN([8,8,7])
+
+    innov_one = set()
+    innov_two = set()
+
+    for connection in cppn_one.connections:
+        innov_one.add(connection.historical_marking)
+    
+    for connection in cppn_two.connections:
+        innov_two.add(connection.historical_marking)
+    
+    assert innov_one == innov_two
+
 def test_activate() -> None:
     """
     Tests activating a singular node to see if an output is produced
