@@ -4,7 +4,8 @@ xenobots
 """
 
 import sys
-from random import choice, random
+import os 
+from random import choice, random, uniform
 from copy import deepcopy
 from typing import List
 from networks import Node, NodeType, CPPN
@@ -56,6 +57,7 @@ def crossover(
     # Gets excess and disjoint genes from the fittest parent
     if rounded_a == rounded_b:
         #PLACEHOLDER
+        #TODO Finish this
         child = deepcopy(cppn_a)
         less_fit = cppn_b
         excess_and_disjoint = []
@@ -166,7 +168,7 @@ def mutate_weight(cppn: CPPN) -> None:
     """
     for connection in cppn.connections:
         if random() < 0.1: # If random is less than 0.1
-            connection.weight = random() # Set the weight to a random number between 0 and 1
+            connection.weight = uniform(-1,1) # Set the weight to a random number between 0 and 1
         else:
             perturb_weight(connection) # Otherwise just perturb the weight
 
@@ -176,7 +178,7 @@ def mutate_activation_function(cppn: CPPN) -> None:
 
     :param cppn: CPPN to mutate activation function 
     """
-    for layer in cppn.nodes[1:]: # Iterates through all layers of nodes (apart from input nodes)
+    for layer in cppn.nodes[1:-1]: # Iterates through all layers of nodes (apart from input nodes and output nodes)
         for node in layer:
             if random() < 0.1: # Sees if activation threshold mutation rate is met
                 #NOTE Could change to "while activation function == old activation function"
@@ -286,8 +288,10 @@ def evolve(file_name: str):
     """
     population = generate_population([8,8,7], 50) # Generates an initial population of 
 
+    os.system(f"rm -f fitnessFiles/{run_directory}/evaluation.log") # Removes log file if exists
+
     test_i = choice(population)
-    draw_cppn(test_i)
+    draw_cppn(test_i, show_weights=True)
     
     generations_complete = 0
 
@@ -297,13 +301,13 @@ def evolve(file_name: str):
         evaluate_pop(population, file_name, generations_complete, "fitness_function")
 
         # Speciate 
-        speciate(population, 0.3)
+        speciate(population, 3.4)
         
         # Mutate and crossover fittest
         mutate_population(population)
 
         test_i = choice(population)
-        draw_cppn(test_i)
+        draw_cppn(test_i, show_weights=True)
 
         # Crossover the population of CPPNs
         population = crossover_population(population)

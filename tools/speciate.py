@@ -6,6 +6,8 @@ Xenobots using functions defined by Stanley in the
 "Evolving Neural Networks through Augmenting Topologies" paper.
 """
 
+#TODO Compare with other implementations
+
 def speciate(
     pop: List, 
     threshold: float
@@ -70,8 +72,8 @@ def distance(
     #TODO Add comments
 
     N = max(len(cppn1.connections), len(cppn2.connections)) # Gets the number of genes in the larger genome
-    excess = 0 # Initilises excess genes counter
-    disjoint = 0 # Initilises disjoint genes counter
+    excess = 1 # Initilises excess genes counter
+    disjoint = 1 # Initilises disjoint genes counter
     weight_difference = 0 
     differing_activation_functions = 0
 
@@ -126,4 +128,4 @@ def distance(
                 weight_difference += abs(connection.weight - connection_2.weight)
                 matching_counter += 1
     
-    return (c1*excess/N) + (c2*disjoint/N) + c3*(weight_difference/matching_counter)
+    return (c1*excess/(excess + disjoint)) + (c2*disjoint/(excess + disjoint)) + c3*(weight_difference/matching_counter)

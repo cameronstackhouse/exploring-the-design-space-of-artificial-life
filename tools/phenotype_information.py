@@ -4,35 +4,61 @@ Module to get information from phenotypes for use in clustering and comparing.
 
 from scipy.fft import fftn # Fourier transform 
 import numpy as np
+from itertools import combinations, permutations
 
-def lz_phenotype(phenotype) -> str:
+def KC_LZ(string):
     """
-    Function to compress the phenotype produced by the CPPN using 
-    lempel-ziv. The size of the generated compression can be used as a measurement
-    of phenotypic complexity.
+    Lempel-ziv to calculate the complexity of a xenobot phenotype.
 
-    :rtype string
-    :return: lempel-ziv compressed string representation of the CPPN
+    Code taken from https://cclab.science/papers/Nature_Communications_2018.pdf
     """
-    dictionary = {"0": "0", "1": "1", "2": "2"}
-    index = 0
-    counter = 3
-    current = ""
-    output = ""
+    n=len(string)
+    s = '0'+string
+    c=1
+    l=1
+    i=0
+    k=1
+    k_max=1
+    stop=0
 
-    #TODO Change to longest
-    #TODO Make sure this works and add comments
+    while stop==0:
+        if s[i+k] != s[l+k]:
+            if k>k_max:
+                k_max=k
+            i=i+1
+            if i==l:
+                c=c+1
+                l=l+k_max
+                if l+1>n:
+                    stop=1
+                else:
+                    i=0
+                    k=1
+                    k_max=1
+            else:
+                k=1
+        else:
+            k=k+1
 
-    while index < len(phenotype)-1:
-        current += str(phenotype[index])
-        if current + str(phenotype[index+1]) not in dictionary:
-            output += dictionary[current]
-            dictionary[current + str(phenotype[index+1])] = str(counter)
-            counter += 1
-            current = ""
-        index += 1
-    
-    return output, dictionary
+            if l+k>n:
+                c=c+1
+                stop=1
+
+    # a la Lempel and Ziv (IEEE trans inf theory it-22, 75 (1976), 
+    # h(n)=c(n)/b(n) where c(n) is the kolmogorov complexity
+    # and h(n) is a normalised measure of complexity.
+    complexity = c
+    return complexity
+
+def calc_KC(s):
+    """
+    Calculates the complexity of a xenobot phenotype
+    """
+    L = len(s)
+    if s == '0'*L or s == '1'*L or s == '2'*L:
+        return np.log2(L)
+    else:
+        return np.log2(L)*(KC_LZ(s)+KC_LZ(s[::-1]))/2.0
 
 def movement_frequency_components(CPPN) -> np.ndarray:
     """
@@ -55,7 +81,10 @@ def motif_vectorisation(phenotype: str) -> list:
 
     :param phenotype: 
     """
-    #TODO
+    #TODO Use motifs to vectorize
+
+    motifs = possible_motifs()
+    
     return []
 
 def num_cells(phenotype) -> dict:
@@ -82,7 +111,11 @@ def num_cells(phenotype) -> dict:
 
 def possible_motifs() -> list:
     """
-    
+    Generates possible motifs from size 2 to 4
     """
-    two_cell_motifs = []
+    possible_cells = [0,1,2]
+    
+    two_cell_motifs = list(combinations(possible_cells, 2))
     three_cell_motifs = []
+    four_cell_motifs = []
+

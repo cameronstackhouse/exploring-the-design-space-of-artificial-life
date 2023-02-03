@@ -5,7 +5,7 @@ compositional pattern-producing networks
 
 import pickle
 from copy import copy, deepcopy
-from random import choice, random
+from random import choice, random, uniform
 from enum import Enum
 import multiprocessing as mp
 from typing import List
@@ -202,8 +202,8 @@ class CPPN:
         #Connects the input nodes with the two output nodes
         for node in self.nodes[0]:
             #Connect the node to the two output nodes
-            self.create_connection(node, material, random())
-            self.create_connection(node, presence, random())
+            self.create_connection(node, material, uniform(-1, 1))
+            self.create_connection(node, presence, uniform(-1, 1))
 
     def run(
         self, 
