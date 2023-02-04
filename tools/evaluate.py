@@ -21,7 +21,8 @@ def evaluate_pop(
     pop: List, 
     run_directory: str, 
     run_name: str, 
-    fitness_function: FitnessFunction
+    fitness_function: FitnessFunction,
+    max_fitness = 0: float
     )-> None:
     """
     Function to evaluate a population of computer-designed organisms generated
@@ -87,5 +88,12 @@ def evaluate_pop(
     #Sets the fitness of each phenotype using results obtained    
     for result in results:
         pop[result["index"]].fitness = float(result["fitness"])
+    
+    sorted_pop = sorted(pop, key=lambda x: x.fitness, reverse=True)
+
+    if sorted_pop[0].fitness > max_fitness:
+        index = pop.index(sorted_pop)
+        os.system(f"cp id{index}.vxd fitnessFiles/{run_directory}/bestSoFar/")
+        os.system(f"mv id{index}.vxd gen{run_name}--fitness{sorted_pop[0].fitness}.vxd")
 
     logging.info(f"Evaluation complete for generation {run_name}.")

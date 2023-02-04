@@ -289,25 +289,24 @@ def evolve(file_name: str):
     population = generate_population([8,8,7], 50) # Generates an initial population of 
 
     os.system(f"rm -f fitnessFiles/{run_directory}/evaluation.log") # Removes log file if exists
-
-    test_i = choice(population)
-    draw_cppn(test_i, show_weights=True)
-    
+    os.system(f"mkdir fitnessFiles/{run_directory}/bestSoFar")
     generations_complete = 0
+    max_fitness = 0
 
     while generations_complete < 100:
         pass
         # Evaluate population (use evaluate.py)
-        evaluate_pop(population, file_name, generations_complete, "fitness_function")
+        evaluate_pop(population, file_name, generations_complete, max_fitness, "fitness_function")
+
+        for indv in population:
+            if indv.fitness > max_fitness:
+                max_fitness = indv.fitness
 
         # Speciate 
         speciate(population, 3.4)
         
         # Mutate and crossover fittest
         mutate_population(population)
-
-        test_i = choice(population)
-        draw_cppn(test_i, show_weights=True)
 
         # Crossover the population of CPPNs
         population = crossover_population(population)
@@ -316,6 +315,9 @@ def evolve(file_name: str):
         generations_complete += 1
 
 def run_experiment(filename):
+    """
+    
+    """
     evolve(filename)
 
 if __name__ == "__main__":
