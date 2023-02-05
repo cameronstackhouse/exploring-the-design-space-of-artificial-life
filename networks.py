@@ -139,6 +139,7 @@ class CPPN:
         self.d_inputs = []
         self.b_inputs = []
         self.fitness = None
+        self.species = None # Species the CPPN belongs to
         self.movement = [] #List describing the movement of the xenobot in the x, y, and z direction
         self.xyz_size = xyz_size #Dimentions of the design space
         self.neighbours = [] #Neighbours in Genotype-Phenotype map

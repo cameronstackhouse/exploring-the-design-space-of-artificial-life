@@ -22,7 +22,7 @@ def evaluate_pop(
     run_directory: str, 
     run_name: str, 
     fitness_function: FitnessFunction,
-    max_fitness = 0: float
+    max_fitness = 0
     )-> None:
     """
     Function to evaluate a population of computer-designed organisms generated
@@ -91,8 +91,8 @@ def evaluate_pop(
     
     sorted_pop = sorted(pop, key=lambda x: x.fitness, reverse=True)
 
-    if sorted_pop[0].fitness > max_fitness:
-        index = pop.index(sorted_pop)
+    if sorted_pop[0].fitness > float(max_fitness):
+        index = pop.index(sorted_pop[0])
         os.system(f"cp id{index}.vxd fitnessFiles/{run_directory}/bestSoFar/")
         os.system(f"mv id{index}.vxd gen{run_name}--fitness{sorted_pop[0].fitness}.vxd")
 

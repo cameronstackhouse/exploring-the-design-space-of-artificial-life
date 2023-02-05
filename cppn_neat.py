@@ -118,36 +118,63 @@ def crossover_population(population: List[CPPN]) -> List[CPPN]:
     :rtype: List of CPPNs
     :return: crossed over population
     """
-    # Roulette wheel selection
-    probabilities = []
+    # TODO: Change this to perform selection and crossover as described in paper
+    # "Every species is assigned a potentially different number of 
+    # offspring in proportion to the sum of adjusted fitnesses f 0 i of 
+    # its member organisms. Species then reproduce by first eliminating the 
+    # lowest performing members from the population" 
     crossed_over = []
 
-    sum_of_fitness = 0
-    for cppn in population:
-        sum_of_fitness += cppn.fitness
-    
-    for cppn in population:
-        probabilities.append(cppn.fitness/sum_of_fitness) # Makes a list containing the fitness of an individual/total fitness to get probability of selection
-    
-    for _ in range(len(population)):
-        prob_one = random()
-        prob_two = random()
+    # 1) Split population into species
+    species = speciate(population, 3.4)
 
-        parent_1 = None
-        parent_2 = None
+    # 2) Eliminate lowest performing members of population 
 
-        cumulative_prob = 0
-
-        # Selects the two parent genotypes using their assigned probability
-        for n in range(len(probabilities)):
-            cumulative_prob += probabilities[n]
-            if prob_one < cumulative_prob and parent_1 is None:
-                parent_1 = population[n]
-            
-            if prob_two < cumulative_prob and parent_2 is None:
-                parent_2 = population[n]
+    # 3) Assign each species different number of offspring
+    # In proportion to sum of adjusted fitness of member organisms
+    species_fitness = []
+    for spec in species:
+        total = 0
+        for indv in spec:
+            total += indv.fitness
         
-        child = crossover(parent_1, parent_2) # Crosses over the two parents
+        species_fitness.append(total)
+
+    fitness_sum = 0
+    for spec in species:
+        for indv in spec:
+            fitness_sum += indv.fitness
+
+    for i in range(len(species_fitness)):
+        species_fitness[i] = species_fitness[i] / fitness_sum
+    
+    # 4) Crossover
+    # TODO Get list of models to crossover, CHECK IF THIS WORKS
+    models = []
+    deletion_num = (len(population) * 0.7)
+
+    for n, spec in enumerate(species_fitness):
+        delete_from_species = int(deletion_num * spec)
+        print(delete_from_species)
+        current_species = species[n]
+        sorted_current = sorted(current_species, key=lambda indv: indv.fitness, reverse=True)
+
+        m = 0
+        for individual in current_species:
+            if m < delete_from_species:
+                models.append(individual)
+            m += 1
+
+    # Crossover
+    print(models)
+    for _ in range(len(population)):
+        parent_1 = choice(models)
+        parent_2 = choice(models)
+
+        child = crossover(parent_1, parent_2)
+
+        # TODO maybe remove one of the parents
+
         crossed_over.append(child)
 
     return crossed_over
@@ -286,17 +313,18 @@ def evolve(file_name: str):
     """
     Function to perform CPPN-NEAT to evolve a population of xenobots
     """
-    population = generate_population([8,8,7], 50) # Generates an initial population of 
+    population = generate_population([8,8,7], 5) # Generates an initial population of 
 
-    os.system(f"rm -f fitnessFiles/{run_directory}/evaluation.log") # Removes log file if exists
-    os.system(f"mkdir fitnessFiles/{run_directory}/bestSoFar")
+    os.system(f"rm -f fitnessFiles/{file_name}/evaluation.log") # Removes log file if exists
+    os.system(f"rm -rf fitnessFiles/{file_name}/bestSoFar")
+    os.system(f"mkdir fitnessFiles/{file_name}/bestSoFar")
     generations_complete = 0
     max_fitness = 0
 
     while generations_complete < 100:
         pass
         # Evaluate population (use evaluate.py)
-        evaluate_pop(population, file_name, generations_complete, max_fitness, "fitness_function")
+        evaluate_pop(population, file_name, generations_complete, "fitness_function", max_fitness)
 
         for indv in population:
             if indv.fitness > max_fitness:
