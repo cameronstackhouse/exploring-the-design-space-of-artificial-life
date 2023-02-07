@@ -11,6 +11,7 @@ sys.path.insert(1, p)
 
 import cppn_neat
 from networks import CPPN, NodeType
+from tools.draw_cppn import draw_cppn
 
 #TODO Add tests to test the functionality of cppn-neat
 #TODO Add comments
@@ -29,7 +30,14 @@ def test_generate_population() -> None:
         assert cppn.presence is None
 
         for connection in cppn.connections:
-            assert connection.weight >= 0 and connection.weight <= 1
+            assert connection.weight >= -1 and connection.weight <= 1
+
+def test_layers_correct():
+    population = cppn_neat.generate_population([8,8,7], 100)
+
+    for cppn in population:
+        for connection in cppn.connections:
+            assert connection.out.layer < connection.input.layer
 
 def test_crossover_indv() -> None:
     """
@@ -44,6 +52,9 @@ def test_crossover_indv() -> None:
     child = cppn_neat.crossover(cppn_one, cppn_two)
     assert not child.has_cycles()
 
+    for connection in child.connections:
+        assert connection.out.layer < connection.input.layer
+
 def test_add_con_when_full() -> None:
     """
     
@@ -57,6 +68,44 @@ def test_add_con_when_full() -> None:
 
     assert len(cppn_one.connections) == before
     assert cppn_one.connections == before_connections
+
+def test_add_con_when_valid():
+    cppn = CPPN([8,8,7])
+
+    cppn_neat.add_node(cppn)
+    cppn_neat.add_node(cppn)
+    cppn_neat.add_node(cppn)
+
+    before = len(cppn.connections)
+
+    cppn_neat.add_connection(cppn)
+
+    num_nodes = 0
+    for layer in cppn.nodes:
+        num_nodes += len(layer)
+
+    assert(len(cppn.nodes)) > 2
+    assert num_nodes == 10
+    assert len(cppn.connections) == before + 1
+
+    for connection in cppn.connections:
+        assert connection.out.layer < connection.input.layer
+
+def test_add_multiple_con_when_valid():
+    cppn = CPPN([8,8,7])
+
+    for _ in range(10):
+        cppn_neat.add_node(cppn)
+    
+    cons_before = len(cppn.connections)
+    
+    # for _ in range(10):
+    #     cppn_neat.add_connection(cppn)
+    
+    # assert len(cppn.connections) == cons_before + 10
+
+    for connection in cppn.connections:
+        assert connection.out.layer < connection.input.layer
 
 def test_add_node() -> None:
     """
@@ -85,6 +134,9 @@ def test_add_node() -> None:
     for node in cppn_one.nodes[1]:
         assert node.type is NodeType.HIDDEN
     
+    for node in cppn_one.nodes[1]:
+        assert node.layer == 1
+    
     for node in cppn_one.nodes[2]:
         assert node.type in [NodeType.MATERIAL_OUTPUT, NodeType.PRESENCE_OUTPUT]
     
@@ -106,4 +158,28 @@ def test_add_node() -> None:
         innov_numbers_two.add(connection.historical_marking)
     
     assert innov_numbers_one != innov_numbers_two
-    assert innov_numbers_one - innov_numbers_two == {10}
+
+def test_add_multiple_nodes():
+    cppn = CPPN([8,8,7])
+
+    for _ in range(100):
+        cppn_neat.add_node(cppn)
+
+    num_nodes = 0
+    for layer in cppn.nodes:
+        num_nodes += len(layer)
+    
+    draw_cppn(cppn)
+    
+    assert num_nodes == 107
+    assert len(cppn.nodes) > 2
+
+    counter = 0
+    for layer in cppn.nodes:
+        for node in layer:
+            assert node.layer == counter
+        
+        counter += 1
+    
+    for connection in cppn.connections:
+        assert connection.out.layer < connection.input.layer

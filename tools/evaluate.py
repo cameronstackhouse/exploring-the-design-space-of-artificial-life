@@ -93,7 +93,7 @@ def evaluate_pop(
 
     if sorted_pop[0].fitness > float(max_fitness):
         index = pop.index(sorted_pop[0])
-        os.system(f"cp id{index}.vxd fitnessFiles/{run_directory}/bestSoFar/")
-        os.system(f"mv id{index}.vxd gen{run_name}--fitness{sorted_pop[0].fitness}.vxd")
+        os.system(f"cp fitnessFiles/{run_directory}/{run_name}/id{index}.vxd fitnessFiles/{run_directory}/bestSoFar/")
+        os.system(f"mv fitnessFiles/{run_directory}/bestSoFar/id{index}.vxd fitnessFiles/{run_directory}/bestSoFar/gen{run_name}--fitness{sorted_pop[0].fitness}.vxd")
 
     logging.info(f"Evaluation complete for generation {run_name}.")

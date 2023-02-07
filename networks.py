@@ -346,7 +346,6 @@ class CPPN:
                 new_connection = self.Connection(out, input, weight, connection.historical_marking) #Creates a new connection using the existing historical marking (prevents historical marking explosion)
                 self.connections.append(new_connection) #Adds the new connection to the list of connections in the CPPN
                 exists = True
-                break
 
         if not exists: #If there isn't an already existing matching connection in a different topology
             new_connection = self.Connection(out, input, weight, CPPN.innovation_counter) #Creates a new connection using innovation counter

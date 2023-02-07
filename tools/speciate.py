@@ -82,7 +82,7 @@ def distance(
     for connection in cppn1.connections:
         for connection_b in cppn2.connections:
             if connection.historical_marking == connection_b.historical_marking:
-                avg_matching_weights += abs(connection.weight) - abs(connection_b.weight)
+                avg_matching_weights += abs(abs(connection.weight) - abs(connection_b.weight))
                 matching_genes += 1
     
     markings_one = set()
