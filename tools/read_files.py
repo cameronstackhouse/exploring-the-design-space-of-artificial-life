@@ -1,3 +1,5 @@
+  #%%
+
 """
 Module containing I/O functions for reading/writing
 to various different files required for running simulations and experiments
@@ -6,6 +8,7 @@ to various different files required for running simulations and experiments
 import json
 from typing import List
 import xml.etree.ElementTree as ET
+import matplotlib.pyplot as plt
 
 def read_sim_output(filename: str) -> List[dict]:
     """
@@ -59,45 +62,31 @@ def read_settings(filename: str) -> dict:
 
     return data
 
-def read_history(filename: str) -> dict:
+def read_history(
+    filename: str
+    ) -> dict:
     """
+    Function to read the history file produced by voxcraft-sim for the movement
+    of a xenobot, allowing for the fourier transform of the movement of the 
+    xenobot to be calculated.
+
+    :param filename: 
     """
     #TODO Add read_history function to read history files to get
     # movement information for fourier transform
 
-    # C++ code to Gen history file
-    # if (d_v3->RecordStepSize) { // output History file
-    #             if (j % real_stepsize == 0) {
-    #                 if (d_v3->RecordVoxel) {
-    #                     // Voxels
-    #                     printf("<<<Step%d Time:%f>>>", j, d_v3->currentTime);
-    #                     for (int i = 0; i < d_v3->num_d_surface_voxels; i++) {
-    #                         auto v = d_v3->d_surface_voxels[i];
-    #                         if (v->removed)
-    #                             continue;
-    #                         if (v->isSurface()) {
-    #                             printf("%.1f,%.1f,%.1f,", v->pos.x * vs, v->pos.y * vs, v->pos.z * vs);
-    #                             printf("%.1f,%.2f,%.2f,%.2f,", v->orient.AngleDegrees(), v->orient.x, v->orient.y, v->orient.z);
-    #                             VX3_Vec3D<double> ppp, nnn;
-    #                             nnn = v->cornerOffset(NNN);
-    #                             ppp = v->cornerOffset(PPP);
-    #                             printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x * vs, nnn.y * vs, nnn.z * vs, ppp.x * vs, ppp.y * vs,
-    #                                    ppp.z * vs);
-    #                             printf("%d,", v->mat->matid); // for coloring
-    #                             printf("%.1f,", v->localSignal);  // for coloring as well.
-    #                             printf(";");
-    #                         }
-    #                     }
-    #                     printf("<<<>>>");
-    #                 }
-                
+    #TODO Tidy and add comments
+    x_components = []
+    y_components = []
+    z_components = []
+
     file = open(filename, "r")
 
     lst = file.readlines()
 
     steps = lst[14:-3] # Gets step information
 
-    # Removes 
+    # Removes uneeded information from step data
     for m, step in enumerate(steps):
         end_chev_index = 0
         for n in range(len(step)):
@@ -107,20 +96,29 @@ def read_history(filename: str) -> dict:
         
         steps[m] = step[end_chev_index:-7]
     
-    surface_voxels = steps[1].split(";")
-
-    print(surface_voxels[200].split(','))
-
     #Each split line: surface voxel info
     #Format: pos.x,y,z * vs, orientation, xori, yori, zori, nnn.x,y,z , ppp.x,y,z, colouring, colouring
+    
+    # Iterates through each step getting the position of a measured voxel at each timestep
+    for step in steps:
+        surface_voxels = step.split(";")
+        measured_voxel = surface_voxels[0].split(",") #TODO Change measured voxel to center of mass
+        x_components.append(float(measured_voxel[0]))
+        y_components.append(float(measured_voxel[1]))
+        z_components.append(float(measured_voxel[2]))
 
-
-
-def read_vxd(filename: str):
-    """
-    """
-    pass
+    return [x_components, y_components, z_components]
 
 if __name__ == "__main__":
     #TODO DELETE FOR RELEASE
-    read_history("demo_basic2.history")
+
+  
+    test = read_history("demo_basic2.history")
+
+    print(test[0])
+
+    plt.plot(test[2])
+    plt.show()
+
+
+# %%
