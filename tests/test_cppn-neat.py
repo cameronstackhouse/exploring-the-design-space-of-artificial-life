@@ -99,13 +99,15 @@ def test_add_multiple_con_when_valid():
     
     cons_before = len(cppn.connections)
     
-    # for _ in range(10):
-    #     cppn_neat.add_connection(cppn)
+    for _ in range(10):
+        cppn_neat.add_connection(cppn)
     
-    # assert len(cppn.connections) == cons_before + 10
+    assert len(cppn.connections) == cons_before + 10
 
     for connection in cppn.connections:
         assert connection.out.layer < connection.input.layer
+    
+    draw_cppn(cppn)
 
 def test_add_node() -> None:
     """
@@ -162,16 +164,14 @@ def test_add_node() -> None:
 def test_add_multiple_nodes():
     cppn = CPPN([8,8,7])
 
-    for _ in range(100):
+    for _ in range(50):
         cppn_neat.add_node(cppn)
 
     num_nodes = 0
     for layer in cppn.nodes:
         num_nodes += len(layer)
     
-    draw_cppn(cppn)
-    
-    assert num_nodes == 107
+    assert num_nodes == 57
     assert len(cppn.nodes) > 2
 
     counter = 0

@@ -109,7 +109,9 @@ def crossover(
     
     return child
 
-def crossover_population(population: List[CPPN]) -> List[CPPN]:
+def crossover_population(
+    population: List[CPPN]
+    ) -> List[CPPN]:
     """
     Function to perform crossover on a population of CPPNs
 
@@ -117,43 +119,41 @@ def crossover_population(population: List[CPPN]) -> List[CPPN]:
     :rtype: List of CPPNs
     :return: crossed over population
     """
-    # TODO Add comments and tidy
-    #TODO Ensure this works too
     crossed_over = []
 
     # 1) Split population into species
     species = speciate(population, 1.0)
 
-    # 2) Eliminate lowest performing members of population 
-
-    # 3) Assign each species different number of offspring
+    # Assign each species different number of offspring
     # In proportion to sum of adjusted fitness of member organisms
     species_fitness = []
-    for spec in species:
+    for spec in species: # Gets the total fitness of each species
         total = 0
         for indv in spec:
             total += indv.fitness
         
-        species_fitness.append(total)
+        species_fitness.append(total) 
 
+    # Gets the total fitness sum of all species
     fitness_sum = 0
     for spec in species:
         for indv in spec:
             fitness_sum += indv.fitness
 
+    # Calculates the total percentage of fitness each species shares
     for i in range(len(species_fitness)):
         species_fitness[i] = species_fitness[i] / fitness_sum
     
-    # 4) Crossover
-    # TODO Get list of models to crossover, CHECK IF THIS WORKS
+    # Get list of models to crossover
     models = []
-    deletion_num = (len(population) * 0.7)
+    deletion_num = (len(population) * 0.7) # Percentage of unfit solutions to remove
 
     for n, spec in enumerate(species_fitness):
-        delete_from_species = int(deletion_num * spec)
+        delete_from_species = int(deletion_num * spec) # Calculates the number of solutions to remove from each species based on percentage of fitness
         current_species = species[n]
-        sorted_current = sorted(current_species, key=lambda indv: indv.fitness, reverse=True)
+        sorted_current = sorted(current_species, key=lambda indv: indv.fitness, reverse=True) # Sorts species members by fitness
 
+        # Adds CPPNs to models to use for crossover whilst lower than delete_from_species number
         m = 0
         for individual in current_species:
             if m < delete_from_species:
@@ -202,23 +202,23 @@ def mutate_activation_function(cppn: CPPN) -> None:
     for layer in cppn.nodes[1:-1]: # Iterates through all layers of nodes (apart from input nodes and output nodes)
         for node in layer:
             if random() < 0.1: # Sees if activation threshold mutation rate is met
-                #NOTE Could change to "while activation function == old activation function"
-                old_activation = cppn.activation_function
+                old_activation = node.activation_function
                 new_activation = old_activation
                 
+                # Changes activation function to a new activation function
                 while old_activation == new_activation:
-                    new_activation = choice(cppn.activation_function)
+                    new_activation = choice(cppn.activation_functions)
                 
                 node.activation_function = new_activation # Assigns the node with a random activation function
 
-def add_node(cppn: CPPN) -> None:
+def add_node(
+    cppn: CPPN
+    ) -> None:
     """
     Function to add a node to a CPPN
 
     :param cppn: CPPN to add a node to 
     """
-
-    #TODO: CREATING CONNECTIONS BETWEEN SAME LAYER!!!!
 
     # Choose an enabled connection
     enabled = []
@@ -257,7 +257,7 @@ def add_connection(cppn: CPPN) -> None:
 
     :param cppn: CPPN to add a new connection to
     """
-#TODO ERROR WITH THIS!!
+
     existing_conn_pairs = []
     for connection in cppn.connections:
         existing_conn_pairs.append((connection.out, connection.input))
@@ -323,7 +323,7 @@ def evolve(file_name: str):
 
     os.system(f"rm -f fitnessFiles/{file_name}/evaluation.log") # Removes log file if exists
     os.system(f"rm -rf fitnessFiles/{file_name}/bestSoFar")
-    os.system(f"mkdir fitnessFiles/{file_name}/bestSoFar")
+    os.system(f"mkdir -p fitnessFiles/{file_name}/bestSoFar")
     generations_complete = 0
     max_fitness = 0
 
@@ -355,13 +355,5 @@ def run_experiment(filename):
     evolve(filename)
 
 if __name__ == "__main__":
-    #run_experiment(sys.argv[1])
-    cppn = CPPN([8,8,7])
-
-    for _ in range(10):
-        add_node(cppn)
-    
-    # for _ in range(100):
-    #     add_connection(cppn)
-    
+    run_experiment(sys.argv[1])
 

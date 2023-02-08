@@ -2,9 +2,13 @@
 Module to get information from phenotypes for use in clustering and comparing.
 """
 
+import os
 from scipy.fft import fftn # Fourier transform 
 import numpy as np
 from itertools import combinations, permutations
+from read_files import read_history
+from voxcraftpython.VoxcraftVXA import VXA
+from voxcraftpython.VoxcraftVXD import VXD
 
 def KC_LZ(string):
     """
@@ -118,4 +122,36 @@ def possible_motifs() -> list:
     two_cell_motifs = list(combinations(possible_cells, 2))
     three_cell_motifs = []
     four_cell_motifs = []
+
+def movement_components(cppn):
+    """
+    Gets the movement components of a xenobot
+    from the history file produced by voxcraft-sim
+    """
+    # Make dir to run
+    os.system("mkdir temp_run_movement")
+
+    # 1) Make VXD File
+
+    # 2) Make VXA File
+
+    # 3) Run voxcraft-sim
+    os.chdir("voxcraft-sim/build")
+    os.system("./voxcraft-sim -i ../../temp_run_movement/ > ../../temp_run_movement/temp_run_movement.history")
+
+    # 4) Read results
+    movement = read_history("temp_run_movement.history")
+
+    # 5) Delete files
+    os.chdir("../../")
+    os.system("rm -rf temp_run_movement")
+
+    # 6) FFT On movement components
+    frequency_comp = fftn(movement)
+    return frequency_comp
+
+if __name__ == "__main__":
+    a = fftn([[1], [1]])
+
+    print(a[0][0])
 

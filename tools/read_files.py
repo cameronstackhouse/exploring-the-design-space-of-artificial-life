@@ -64,7 +64,57 @@ def read_history(filename: str) -> dict:
     """
     #TODO Add read_history function to read history files to get
     # movement information for fourier transform
-    pass
+
+    # C++ code to Gen history file
+    # if (d_v3->RecordStepSize) { // output History file
+    #             if (j % real_stepsize == 0) {
+    #                 if (d_v3->RecordVoxel) {
+    #                     // Voxels
+    #                     printf("<<<Step%d Time:%f>>>", j, d_v3->currentTime);
+    #                     for (int i = 0; i < d_v3->num_d_surface_voxels; i++) {
+    #                         auto v = d_v3->d_surface_voxels[i];
+    #                         if (v->removed)
+    #                             continue;
+    #                         if (v->isSurface()) {
+    #                             printf("%.1f,%.1f,%.1f,", v->pos.x * vs, v->pos.y * vs, v->pos.z * vs);
+    #                             printf("%.1f,%.2f,%.2f,%.2f,", v->orient.AngleDegrees(), v->orient.x, v->orient.y, v->orient.z);
+    #                             VX3_Vec3D<double> ppp, nnn;
+    #                             nnn = v->cornerOffset(NNN);
+    #                             ppp = v->cornerOffset(PPP);
+    #                             printf("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,", nnn.x * vs, nnn.y * vs, nnn.z * vs, ppp.x * vs, ppp.y * vs,
+    #                                    ppp.z * vs);
+    #                             printf("%d,", v->mat->matid); // for coloring
+    #                             printf("%.1f,", v->localSignal);  // for coloring as well.
+    #                             printf(";");
+    #                         }
+    #                     }
+    #                     printf("<<<>>>");
+    #                 }
+                
+    file = open(filename, "r")
+
+    lst = file.readlines()
+
+    steps = lst[14:-3] # Gets step information
+
+    # Removes 
+    for m, step in enumerate(steps):
+        end_chev_index = 0
+        for n in range(len(step)):
+            if step[n] == '>':
+                end_chev_index = n+3
+                break
+        
+        steps[m] = step[end_chev_index:-7]
+    
+    surface_voxels = steps[1].split(";")
+
+    print(surface_voxels[200].split(','))
+
+    #Each split line: surface voxel info
+    #Format: pos.x,y,z * vs, orientation, xori, yori, zori, nnn.x,y,z , ppp.x,y,z, colouring, colouring
+
+
 
 def read_vxd(filename: str):
     """
@@ -73,6 +123,4 @@ def read_vxd(filename: str):
 
 if __name__ == "__main__":
     #TODO DELETE FOR RELEASE
-    q = read_sim_output("fitnessFiles/a/Initial/output")
-    b = read_settings("settings")
-    print(b)
+    read_history("demo_basic2.history")
