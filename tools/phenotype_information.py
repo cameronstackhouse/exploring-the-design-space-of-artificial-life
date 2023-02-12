@@ -128,12 +128,38 @@ def movement_components(cppn):
     Gets the movement components of a xenobot
     from the history file produced by voxcraft-sim
     """
+    #TODO change to do multiple cppns. Allow vxa and vxd options
+    
     # Make dir to run
     os.system("mkdir temp_run_movement")
 
     # 1) Make VXD File
+    vxa = VXA(SimTime=3, HeapSize=0.65, RecordStepSize=100, DtFrac=0.95, EnableExpansion=1) 
+
+    passive = vxa.add_material(RGBA=(0,255,0), E=5000000, RHO=1000000) # passive soft
+    active = vxa.add_material(RGBA=(255,0,0), CTE=0.01, E=5000000, RHO=1000000) # active
+    
+    vxa.write("base.vxa") #Write a base vxa file
+    os.system(f"cp base.vxa temp_run_movement/") #Copy vxa file to correct run directory
+    os.system("rm base.vxa") #Removes old vxa file
 
     # 2) Make VXA File
+    body = cppn.to_phenotype()
+    
+    for cell in range(len(body)):
+        if body[cell] == 1:
+            body[cell] = passive
+        elif body[cell] == 2:
+            body[cell] = active 
+            
+    body = body.reshape(8,8,7)
+    vxd = VXD()
+    vxd.set_tags(RecordVoxel=1) # pass vxd tags in here to overwite vxa tags
+    vxd.set_data(body) #Sets the data to be written as the phenotype generated
+    
+    vxd.write(f"movement.vxd") #Writes vxd file for individual
+    os.system(f"cp movement.vxd temp_run_movement/")
+    os.system(f"rm movement.vxd") #Removes the old non-copied vxd file
 
     # 3) Run voxcraft-sim
     os.chdir("voxcraft-sim/build")
@@ -149,9 +175,4 @@ def movement_components(cppn):
     # 6) FFT On movement components
     frequency_comp = fftn(movement)
     return frequency_comp
-
-if __name__ == "__main__":
-    a = fftn([[1], [1]])
-
-    print(a[0][0])
 

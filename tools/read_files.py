@@ -102,22 +102,30 @@ def read_history(
     # Iterates through each step getting the position of a measured voxel at each timestep
     for step in steps:
         surface_voxels = step.split(";")
-        measured_voxel = surface_voxels[0].split(",") #TODO Change measured voxel to center of mass
-        x_components.append(float(measured_voxel[0]))
-        y_components.append(float(measured_voxel[1]))
-        z_components.append(float(measured_voxel[2]))
+        total_x = 0
+        total_y = 0
+        total_z = 0
+        for voxel in surface_voxels:
+            v = voxel.split(",")
+            if v != ['']:
+                total_x += float(v[11])
+                total_y += float(v[12])
+                total_z += float(v[13])
+            
+        x_components.append(total_x/len(surface_voxels))
+        y_components.append(total_y/len(surface_voxels))
+        z_components.append(total_z/len(surface_voxels))
 
     return [x_components, y_components, z_components]
 
 if __name__ == "__main__":
     #TODO DELETE FOR RELEASE
 
-  
     test = read_history("demo_basic2.history")
 
-    print(test[0])
+    print(test[1])
 
-    plt.plot(test[2])
+    plt.plot(test[1])
     plt.show()
 
 
