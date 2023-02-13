@@ -129,6 +129,7 @@ def movement_components(cppn):
     from the history file produced by voxcraft-sim
     """
     #TODO change to do multiple cppns. Allow vxa and vxd options
+    #TODO CHANGE TO NEW CPPN CONFIG
     
     # Make dir to run
     os.system("mkdir temp_run_movement")
