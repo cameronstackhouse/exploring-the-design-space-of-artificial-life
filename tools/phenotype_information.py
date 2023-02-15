@@ -3,12 +3,14 @@ Module to get information from phenotypes for use in clustering and comparing.
 """
 
 import os
-from scipy.fft import fftn # Fourier transform 
+import neat
+from scipy.fft import fftn
 import numpy as np
 from itertools import combinations, permutations
 from read_files import read_history
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
+from tools.activation_functions import normalize
 
 def KC_LZ(string):
     """
@@ -64,7 +66,7 @@ def calc_KC(s):
     else:
         return np.log2(L)*(KC_LZ(s)+KC_LZ(s[::-1]))/2.0
 
-def movement_frequency_components(CPPN) -> np.ndarray:
+def movement_frequency_components(movement) -> np.ndarray:
     """
     Function to get the frequency components of a xenobot movement path to use in clustering of xenobot behaviour.
     This is done using discrete 3-Dimensional Fourier transform on the X, Y, and Z movement coordinates of the 
@@ -74,7 +76,7 @@ def movement_frequency_components(CPPN) -> np.ndarray:
     :return: List of frequency components of the movement path of the xenobot, describing the behaviour of the xenobot
     """
     
-    frequency_components = fftn(CPPN.movement)
+    frequency_components = fftn(movement)
 
     return frequency_components
 
@@ -123,7 +125,35 @@ def possible_motifs() -> list:
     three_cell_motifs = []
     four_cell_motifs = []
 
-def movement_components(cppn):
+def num_activation_functions(genome) -> dict:
+    """
+    
+    """
+    nodes = {}
+    for node in genome.nodes:
+        if genome.nodes[node].activation not in nodes:
+            nodes[node] = 1
+        else:
+            nodes[node] += 1
+    
+    return nodes
+
+def weights_info(genome) -> dict:
+    """
+    Gets information about weights in a given genome
+    """
+    avg_weight = 0
+    counter = 0
+    activated = 0
+    for connection in genome.connections:
+        counter += 1
+        avg_weight += connection.weight
+        if connection.enabled:
+            activated += 1
+    
+    return {"avg_weight": (avg_weight/counter), "total": counter, "num_enabled": activated}
+
+def movement_components(genome, config, size_params):
     """
     Gets the movement components of a xenobot
     from the history file produced by voxcraft-sim
@@ -145,7 +175,48 @@ def movement_components(cppn):
     os.system("rm base.vxa") #Removes old vxa file
 
     # 2) Make VXA File
-    body = cppn.to_phenotype()
+    net = neat.nn.FeedForwardNetwork.create(genome, config)
+    x_inputs = np.zeros(size_params)
+    y_inputs = np.zeros(size_params)
+    z_inputs = np.zeros(size_params)
+    
+    for x in range(size_params[0]):
+            for y in range(size_params[1]):
+                for z in range(size_params[2]):
+                    x_inputs[x, y, z] = x
+                    y_inputs[x, y, z] = y
+                    z_inputs[x, y, z] = z
+
+    x_inputs = normalize(x_inputs)
+    y_inputs = normalize(y_inputs)
+    z_inputs = normalize(z_inputs)
+
+    #Creates the d input array, calculating the distance each point is away from the centre
+    d_inputs = normalize(np.power(np.power(x_inputs, 2) + np.power(y_inputs, 2) + np.power(z_inputs, 2), 0.5))
+
+    #Creates the b input array, which is just a numpy array of ones
+    b_inputs = np.ones(size_params)
+
+    #Sets all inputs and flattens them into 1D arrays
+    x_inputs = x_inputs.flatten()
+    y_inputs = y_inputs.flatten()
+    z_inputs = z_inputs.flatten()
+    d_inputs = d_inputs.flatten()
+    b_inputs = b_inputs.flatten()
+    
+    inputs = list(zip(x_inputs, y_inputs, z_inputs, d_inputs, b_inputs))
+    
+    for n, input in enumerate(inputs):
+            output = net.activate(input)
+            presence = output[0]
+            material = output[1]
+            
+            if presence <= 0.2: #Checks if presence output is less than 0.2
+                body[n] = 0 #If so there is no material in the location
+            elif material < 0.5: #Checks if material output is less than 0.5 
+                body[n] = 1 #If so there is skin in the location
+            else:
+                body[n] = 2 #Else there is a cardiac cell in the location
     
     for cell in range(len(body)):
         if body[cell] == 1:
@@ -153,7 +224,7 @@ def movement_components(cppn):
         elif body[cell] == 2:
             body[cell] = active 
             
-    body = body.reshape(8,8,7)
+    body = body.reshape(size_params[0], size_params[1], size_params[2])
     vxd = VXD()
     vxd.set_tags(RecordVoxel=1) # pass vxd tags in here to overwite vxa tags
     vxd.set_data(body) #Sets the data to be written as the phenotype generated

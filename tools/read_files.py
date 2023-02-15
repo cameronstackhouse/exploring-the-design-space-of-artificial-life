@@ -123,9 +123,9 @@ if __name__ == "__main__":
 
     test = read_history("demo_basic2.history")
 
-    print(test[1])
+    print(test[0])
 
-    plt.plot(test[1])
+    plt.plot(test[0])
     plt.show()
 
 

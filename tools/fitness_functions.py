@@ -15,5 +15,17 @@ class FitnessFunction(Enum):
     TOTAL_DISTANCE = 5
     #TODO Add more fitness func values here
 
+def max_distance():
+    pass
+
+def vertical_distance():
+    pass
+
+def interaction():
+    pass
+
+def object_expulsion():
+    pass
+
 def total_distance():
     pass
