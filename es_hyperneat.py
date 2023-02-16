@@ -7,6 +7,8 @@ Based on https://github.com/ukuleleplayer/pureples/tree/master/pureples
 import os
 import neat
 from pureples.shared.substrate import Substrate
+from pureples.shared.visualize import draw_net
+from pureples.es_hyperneat.es_hyperneat import ESNetwork
 from tools.evaluate import Run
 from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
 
@@ -27,12 +29,20 @@ def params(version):
 def run(
     config_file, 
     run_name, 
+    generations = 100,
     version = "M",
     size_params = [8,8,7], 
     fitness_func = None
     ) -> None:
     """
+    Function to run HyperNEAT to create and evolve xenobots
     
+    :param config_file: Configuration file name for NEAT
+    :param run_name: Name of the run to store xenobot files
+    :param generations: Number of generations 
+    :param version: Describes complexity of HyperNEAT run
+    :param size_params: Size parameters of xenobots being designed
+    :param fitness_func: Fitness function being used for evaluation
     """
     INPUT_COORDINATES = []
     
@@ -48,10 +58,10 @@ def run(
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
 
-    #config.genome_config.add_activation("neg_abs", neg_abs)
-    #config.genome_config.add_activation("neg_square", neg_square)
-    #config.genome_config.add_activation("sqrt_abs", sqrt_abs)
-    #config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
+    config.genome_config.add_activation("neg_abs", neg_abs)
+    config.genome_config.add_activation("neg_square", neg_square)
+    config.genome_config.add_activation("sqrt_abs", sqrt_abs)
+    config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
     
     os.system(f"rm -rf fitnessFiles/{run_name}")
     os.system(f"mkdir -p fitnessFiles/{run_name}")
@@ -65,10 +75,13 @@ def run(
     stats = neat.StatisticsReporter()
     population.add_reporter(stats)
     
-    winner = population.run(run.evaluate, 10)
+    winner = population.run(run.evaluate, generations)
+    
+    CPPN = neat.nn.FeedForwardNetwork.create(winner, config)
+    NETWORK = ESNetwork(SUBSTRATE, CPPN, PARAMS)
     
     for node in winner.nodes:
         print(winner.nodes[node].activation)
 
 if __name__ == "__main__":
-    run("config-hyperneat", "run-hyperneat")
+    run("config-hyperneat", "run-hyperneat", generations=100)

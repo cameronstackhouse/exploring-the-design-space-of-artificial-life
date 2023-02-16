@@ -90,7 +90,6 @@ class Run:
         for id, (_, genome) in enumerate(genomes):
             net = None
             if self.hyperneat:
-                #TODO Maybe change this, see if it works
                 cppn_designer = neat.nn.FeedForwardNetwork.create(genome, config) # CPPN Which designs network to create xenobot in HyperNEAT
                 xenobot_producer_network = ESNetwork(self.substrate, cppn_designer, self.params) # CPPN designed by HyperNEAT CPPN to produce xenobot
                 net = xenobot_producer_network.create_phenotype_network()

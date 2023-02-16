@@ -12,6 +12,7 @@ Based on:
 * https://github.com/voxcraft/voxcraft-sim 
 * https://github.com/skriegman/reconfigurable_organisms
 * https://github.com/caitlingrasso/Voxcraft-python
+* https://github.com/ukuleleplayer/pureples
 
 ## How to use
 
@@ -25,6 +26,11 @@ Install all python requirements:
 Install voxcraft-sim for xenobot simulations following the instructions for local installation specified on the Github:
 
     https://github.com/voxcraft/voxcraft-sim
+
+After installation of voxcraft-sim place the voxcraft-sim folder into the "exploring-the-design-space-of-artificial-life" directory.
+
+Download [Voxcraft-python](https://github.com/caitlingrasso/Voxcraft-python) and place in directory
+Download []
 
 ### Settings File
 

@@ -11,6 +11,7 @@ from read_files import read_history
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
 from tools.activation_functions import normalize
+from pureples.es_hyperneat.es_hyperneat import ESNetwork
 
 def KC_LZ(string):
     """
@@ -153,13 +154,26 @@ def weights_info(genome) -> dict:
     
     return {"avg_weight": (avg_weight/counter), "total": counter, "num_enabled": activated}
 
-def movement_components(genome, config, size_params):
+def movement_components(
+    genome, 
+    config, 
+    size_params, 
+    hyperneat = False, 
+    substrate = None, 
+    hyperneat_params = None
+    ):
     """
     Gets the movement components of a xenobot
     from the history file produced by voxcraft-sim
     """
     #TODO change to do multiple cppns. Allow vxa and vxd options
-    #TODO CHANGE TO NEW CPPN CONFIG
+    net = None
+    if hyperneat:
+        cppn_designer = neat.nn.FeedForwardNetwork.create(genome, config)
+        xenobot_producer_network = ESNetwork(substrate, cppn_designer, hyperneat_params)
+        net = xenobot_producer_network.create_phenotype_network()
+    else:
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
     
     # Make dir to run
     os.system("mkdir temp_run_movement")
@@ -175,7 +189,6 @@ def movement_components(genome, config, size_params):
     os.system("rm base.vxa") #Removes old vxa file
 
     # 2) Make VXA File
-    net = neat.nn.FeedForwardNetwork.create(genome, config)
     x_inputs = np.zeros(size_params)
     y_inputs = np.zeros(size_params)
     z_inputs = np.zeros(size_params)

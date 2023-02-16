@@ -1,4 +1,4 @@
-from gp_map import FitnessLandscape, GenotypePhenotypeMap
+from gp_map import GenotypePhenotypeMap
 
 """
 TODO Programatic analysis of gp maps
@@ -11,4 +11,7 @@ def random_walk():
     pass
 
 def most_designable_phenotype():
+    pass
+
+def mean_complexity():
     pass
