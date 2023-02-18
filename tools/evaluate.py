@@ -19,6 +19,7 @@ from voxcraftpython.VoxcraftVXD import VXD
 
 class Run:
     """
+    Container 
     """
     def __init__(self, name, params = None, substrate = None, size_params=[8,8,7], hyperneat = False):
         """

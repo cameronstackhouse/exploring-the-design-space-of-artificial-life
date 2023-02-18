@@ -19,6 +19,8 @@ def draw_cppn(
     :param out_dir: Directory to save image produced
     """
     dot = Digraph() #Creates a new digraph
+    
+    #TODO Change this to new implementation
 
     counter = 0
 
