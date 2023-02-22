@@ -25,6 +25,8 @@ class FitnessFunction(Enum):
     ABS_DISTANCE = 3
     X_ONLY = 4
     Y_ONLY = 5
+    WALL_OBSTACLE = 6
+    SMALL_XENOBOTS = 7
     #TODO Add more fitness func values here
 
 def max_distance(fitness: etree.ElementTree) -> etree.ElementTree:

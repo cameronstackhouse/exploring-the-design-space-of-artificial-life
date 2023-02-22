@@ -197,10 +197,6 @@ class VXA:
         simulator = root[1]
         fitness_func = simulator[6]
         
-        print("BEFORE")
-        for child in fitness_func:
-            print(child)
-        
         for child in fitness_func:
             fitness_func.remove(child)
         
@@ -211,11 +207,10 @@ class VXA:
             tools.fitness_functions.total_distance(fitness_func)
         elif function == tools.fitness_functions.FitnessFunction.X_ONLY:
             tools.fitness_functions.x_only(fitness_func)
-
-        print("AFTER")
-        for child in fitness_func:
-            print(child)
-        
+        elif function == tools.fitness_functions.FitnessFunction.WALL_OBSTACLE:
+            tools.fitness_functions.tall_obsticle(root)
+        elif function == tools.fitness_functions.FitnessFunction.SMALL_XENOBOTS:
+            tools.fitness_functions.penalise_large_total_distance(fitness_func)
 
 if __name__ == "__main__":
     a = VXA()
