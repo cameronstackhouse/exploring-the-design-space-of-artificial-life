@@ -8,7 +8,6 @@ import neat
 import numpy as np
 import tools.fitness_functions
 from tools.read_files import read_sim_output
-from tools.activation_functions import normalize
 from tools.gen_phenotype_from_genotype import genotype_to_phenotype
 from pureples.es_hyperneat.es_hyperneat import ESNetwork
 

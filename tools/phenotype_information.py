@@ -260,4 +260,3 @@ def movement_components(
     # 6) FFT On movement components
     frequency_comp = fftn(movement)
     return frequency_comp
-

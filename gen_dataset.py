@@ -2,30 +2,78 @@
 Module to generate the dataset containing
 information about genotypes and phenotypes produced
 by evolutionary algorithms alongside their
-behavioural properties and fitnesses
+behavioural properties and fitnesses.
+
+The format for a xenobot listing is as follows in the JSON file:
+[
+    {
+        "generation": int,
+        "fitness_function": str,
+        "evolutionary_algorithm": str,
+        "genotype": 
+        {
+            "layers": 
+            {
+                "nodes": 
+                {
+                    "id": ,
+                    "activation_function": ,
+                    "connections_in": 
+                    {
+                        "id": int,
+                    }   
+                    "connections_out":
+                    {
+                        "id": int,
+                    }
+                }
+                {
+                
+                }
+            }
+        },
+        "phenotype":
+        {
+            "body": str,
+            "num_muscle": int,
+            "num_passive": int,
+            "fitness": 
+            {
+                {"abs_movement": float}, 
+                {traverse_obsticle": float},  
+            }  
+        }
+    }
+]  
 """
 
-#TODO Maybe use JSON file, hard to represent NN otherwise
+import json 
 
-import csv
-from typing import List
+def write_json(filename, dict) -> None:
+    """ 
+    
+    """
+    json_object = json.dumps(dict)
+    with open(filename, "w") as outfile:
+        outfile.write(json_object)
 
-def initilise_file(filename: str) -> None:
-    with open(filename, mode="w") as xenobot_data_file:
-        file_writer = csv.writer(xenobot_data_file, delimiter=',')
-        file_writer.writerow(["Genotype", "Xenobot", "Fitness",  "Experiment", "Frequency1", "Frequency2", "Frequency3", "Motif1"])
+def read_json(filename) -> dict:
+    """ 
+    
+    """
+    with open(filename, 'r') as openfile:
+        json_object = json.load(openfile)
+    
+    return json_object
 
-def write_to(filename: str, data: List) -> None:
-    with open(filename, mode="a") as xenobot_file:
-        file_writer = csv.writer(xenobot_file, delimiter=',')
-        file_writer.writerow(data)
-
-def initilise_hyperneat_file(filename: str) -> None:
-    with open(filename, mode="w") as xenobot_data_file:
-        file_writer = csv.writer(xenobot_data_file, delimiter=',')
-        file_writer.writerow(["CPPN", "Genotype", "Xenobot", "Fitness",  "Experiment", "Frequency1", "Frequency2", "Frequency3", "Motif1"])
-
-if __name__ == "__main__":
-    filename = "test.csv"
-    #initilise_file(filename)
-    write_to(filename, ["test", "test2", "0.0", "Test3", "Locomotion"])
+def add_xenobot(filename, xenobot: dict) -> None:
+    """ 
+    
+    """
+    with open(filename) as file:
+        json_object = json.load(file)
+    
+    json_object.append(xenobot)
+    
+    with open(filename, 'w') as json_file:
+        json.dump(json_object, json_file, indent=4, separators=(',', ': '))
