@@ -1,8 +1,10 @@
 import numpy as np
 from lxml import etree
-import os
 
-#from tools.evaluate import FitnessFunction #TODO SORT THIS OUT!
+import sys
+sys.path.append('../')
+
+import tools.fitness_functions #TODO SORT THIS OUT!
 
 '''
 Does not yet include signaling parameters
@@ -183,7 +185,43 @@ class VXA:
         with open(filename, 'w+') as f:
             f.write(etree.tostring(self.tree, encoding="unicode", pretty_print=True))
 
-    def set_fitness_function(self, function):
-        #TODO To complete!!
-        simulator = etree.SubElement(self.tree, "Simulator")
-        stopCondition = etree.SubElement(simulator, "StopCondition")
+    def set_fitness_function(
+        self, 
+        function: tools.fitness_functions.FitnessFunction
+        ) -> None:
+        """
+        Method to set the fitness function for the VXA file
+        """        
+        # Deletes preset fitness function
+        root = self.tree.getroot()
+        simulator = root[1]
+        fitness_func = simulator[6]
+        
+        print("BEFORE")
+        for child in fitness_func:
+            print(child)
+        
+        for child in fitness_func:
+            fitness_func.remove(child)
+        
+        # Updates fitness function based on specified function
+        if function == tools.fitness_functions.FitnessFunction.OBJECT_EXPULSION:
+            pass
+        elif function == tools.fitness_functions.FitnessFunction.ABS_DISTANCE:
+            tools.fitness_functions.total_distance(fitness_func)
+        elif function == tools.fitness_functions.FitnessFunction.X_ONLY:
+            tools.fitness_functions.x_only(fitness_func)
+
+        print("AFTER")
+        for child in fitness_func:
+            print(child)
+        
+
+if __name__ == "__main__":
+    a = VXA()
+    func = tools.fitness_functions.FitnessFunction.X_ONLY
+    
+    a.set_fitness_function(func)
+    
+    
+    
