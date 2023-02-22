@@ -9,6 +9,7 @@ import numpy as np
 import tools.fitness_functions
 from tools.read_files import read_sim_output
 from tools.activation_functions import normalize
+from tools.gen_phenotype_from_genotype import genotype_to_phenotype
 from pureples.es_hyperneat.es_hyperneat import ESNetwork
 
 #Imports an interface for writing VXA and VXD files
@@ -42,37 +43,6 @@ class Run:
         :param config: configuration file for run
         """
         
-        # Gets the inputs for 
-        x_inputs = np.zeros(self.size_params)
-        y_inputs = np.zeros(self.size_params)
-        z_inputs = np.zeros(self.size_params)
-    
-        for x in range(self.size_params[0]):
-                for y in range(self.size_params[1]):
-                    for z in range(self.size_params[2]):
-                        x_inputs[x, y, z] = x
-                        y_inputs[x, y, z] = y
-                        z_inputs[x, y, z] = z
-
-        x_inputs = normalize(x_inputs)
-        y_inputs = normalize(y_inputs)
-        z_inputs = normalize(z_inputs)
-
-        #Creates the d input array, calculating the distance each point is away from the centre
-        d_inputs = normalize(np.power(np.power(x_inputs, 2) + np.power(y_inputs, 2) + np.power(z_inputs, 2), 0.5))
-
-        #Creates the b input array, which is just a numpy array of ones
-        b_inputs = np.ones(self.size_params)
-
-        #Sets all inputs and flattens them into 1D arrays
-        x_inputs = x_inputs.flatten()
-        y_inputs = y_inputs.flatten()
-        z_inputs = z_inputs.flatten()
-        d_inputs = d_inputs.flatten()
-        b_inputs = b_inputs.flatten()
-    
-        inputs = list(zip(x_inputs, y_inputs, z_inputs, d_inputs, b_inputs))
-
         vxa = VXA(SimTime=3, HeapSize=0.65, RecordStepSize=100, DtFrac=0.95, EnableExpansion=1) 
     
         #Adds both cardiac and skin cells to the simulation
@@ -102,17 +72,7 @@ class Run:
                 body_size *= dim
             body = np.zeros(body_size)
             
-            for n, input in enumerate(inputs):
-                output = net.activate(input) # Gets output from activating CPPN
-                presence = output[0]
-                material = output[1]
-
-                if presence <= 0.2: #Checks if presence output is less than 0.2
-                    body[n] = 0 #If so there is no material in the location
-                elif material < 0.5: #Checks if material output is less than 0.5 
-                    body[n] = 1 #If so there is skin in the location
-                else:
-                    body[n] = 2 #Else there is a cardiac cell in the location
+            body = genotype_to_phenotype(net, self.size_params) # Generates xenobot body using CPPN
 
             for cell in range(len(body)):
                 if body[cell] == 1:

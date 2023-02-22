@@ -1,14 +1,17 @@
 """ 
 
 """
-
-  #%%
-
+# %%
 import pickle
 import neat
+from copy import deepcopy
+from random import choice
+import numpy as np
 import networkx as nx 
 import matplotlib.pyplot as plt
-from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
+from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs, normalize
+from tools.gen_phenotype_from_genotype import genotype_to_phenotype
+from visualise_xenobot import show
 
 class Geneotype:
     """ 
@@ -19,7 +22,7 @@ class Geneotype:
         geneome
         ) -> None:
         self.genome = geneome
-        self.previous = []
+        self.previous = None
 
 class GenotypePhenotypeMap:
     """ 
@@ -47,27 +50,49 @@ class GenotypePhenotypeMap:
         
         :param n: size of genotypes to generate (number of nodes)
         """    
+        generated_genotypes = set()
+        mutations_applied = set()
+        START_SIZE = 7
+        
         default_genome = neat.DefaultGenome(1)
         default_genome.configure_new(self.config.genome_config)
         
-        #start_net = neat.nn.FeedForwardNetwork.create(default_genome, config)
+        genotype_container = Geneotype(default_genome)
+        generated_genotypes.add(genotype_container)
         
-        #Apply mutations
+        for _ in range(100):
+            not_explored = generated_genotypes - mutations_applied
+            genotype_container = choice(tuple(not_explored))
         
-        # TODO CHECK THESE MUTATIONS AND HAVE MORE CONTROL OVER THEM
-        # Connection weights
-        for connection in default_genome.connections.values():
-            connection.mutate(self.config.genome_config)
+            # TODO CHECK THESE MUTATIONS AND HAVE MORE CONTROL OVER THEM
+            # DISCRETIZE THEM
+            # Connection weights
+            new_connection_weights = deepcopy(genotype_container)
+            for connection in new_connection_weights.genome.connections.values():
+                connection.mutate(self.config.genome_config)
         
-        # Node activation functions and bias
-        for node in default_genome.nodes.values():
-            node.mutate(self.config.genome_config)
+            generated_genotypes.add(new_connection_weights)
         
-        # Add connections
-        default_genome.mutate_add_connection(self.config.genome_config)
+            # Node activation functions and bias
+            new_activation_functions = deepcopy(genotype_container)
+            for node in new_activation_functions.genome.nodes.values():
+                node.mutate(self.config.genome_config)
         
+            generated_genotypes.add(new_activation_functions)
         
-        print(default_genome.size())
+            # Add connections
+            new_connections = deepcopy(genotype_container)
+            new_connections.genome.mutate_add_connection(self.config.genome_config)
+        
+            generated_genotypes.add(new_connections)
+        
+            mutations_applied.add(genotype_container)
+        
+        for genotype in generated_genotypes:
+            net = neat.nn.FeedForwardNetwork.create(genotype.genome, self.config)
+            body = genotype_to_phenotype(net, [8,8,7])
+            show(body)
+                
             
     def draw(self):
         """ 
@@ -92,14 +117,14 @@ def save(
     filename: str
     ) -> None:
     """ 
-    
+    Method to pickle a genotype-phenotype map
     """
     with open(filename, "wb") as file:
         pickle.dump(obj, file)
 
 def load(filename: str):
     """ 
-    
+    Method to load a gentype-phenotype map
     """
     with open(filename, 'rb') as file:
         obj = pickle.load(file)
@@ -110,5 +135,5 @@ gp = GenotypePhenotypeMap("config-gpmap")
 
 gp.gen_genotypes_of_n(10)
 
-gp.draw()
+
 

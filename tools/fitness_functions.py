@@ -78,4 +78,5 @@ def penalise_large_total_distance(fitness: etree.ElementTree) -> etree.ElementTr
     pass
 
 def tall_obsticle(tree: etree.ElementTree) -> etree.ElementTree:
-    pass
+    simulator = tree[1]
+    
