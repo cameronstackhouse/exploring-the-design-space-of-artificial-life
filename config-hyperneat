@@ -1,4 +1,4 @@
-#--- parameters for the xenobot CPPN-NEAT experiment ---#
+#--- parameters for the xenobot HyperNEAT experiment ---#
 
 [NEAT]
 fitness_criterion     = max

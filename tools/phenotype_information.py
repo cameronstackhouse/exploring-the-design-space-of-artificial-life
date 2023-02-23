@@ -7,7 +7,7 @@ import neat
 from scipy.fft import fftn
 import numpy as np
 from itertools import combinations, permutations
-from read_files import read_history
+from tools.read_files import read_history
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
 from tools.activation_functions import normalize
@@ -126,33 +126,6 @@ def possible_motifs() -> list:
     three_cell_motifs = []
     four_cell_motifs = []
 
-def num_activation_functions(genome) -> dict:
-    """
-    
-    """
-    nodes = {}
-    for node in genome.nodes:
-        if genome.nodes[node].activation not in nodes:
-            nodes[node] = 1
-        else:
-            nodes[node] += 1
-    
-    return nodes
-
-def weights_info(genome) -> dict:
-    """
-    Gets information about weights in a given genome
-    """
-    avg_weight = 0
-    counter = 0
-    activated = 0
-    for connection in genome.connections:
-        counter += 1
-        avg_weight += connection.weight
-        if connection.enabled:
-            activated += 1
-    
-    return {"avg_weight": (avg_weight/counter), "total": counter, "num_enabled": activated}
 
 def movement_components(
     genome, 

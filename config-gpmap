@@ -1,4 +1,4 @@
-#--- parameters for the xenobot CPPN-NEAT experiment ---#
+#--- parameters for the generation of genotype-phenotype maps ---#
 
 [NEAT]
 fitness_criterion     = max
