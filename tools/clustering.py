@@ -11,7 +11,7 @@ from sklearn.cluster import AgglomerativeClustering, KMeans
 from sklearn.metrics import silhouette_score
 from scipy.cluster.hierarchy import dendrogram
 
-def dunn_index():
+def dunn_index(labels, distances):
     """ 
     
     """
@@ -32,13 +32,13 @@ def choose_num_clusters(
     :rtype: Tuple
     :return: the optimal number of clusters and the labels produced by the clustering
     """
-    silhouette_scores = np.zeros(len(data) - 1) # List of silhouette scores
+    silhouette_scores = np.zeros(8) # List of silhouette scores
     max_silouette = 0 
     optimal_num_clusters = 0
     optimal_clustering_labels = None
     
     # Iterates through the potential number of clusters
-    for num in range(2, len(data)):
+    for num in range(2, 10):
         k_means = KMeans(n_clusters=num).fit(data) # performs k-means with the data using specified number of clusters
         silhouette_coeff = silhouette_score(data, k_means.labels_) # Calculates the mean silhouette coefficient of the clustering
         silhouette_scores[num-2] = silhouette_coeff # Appends silhouette coefficient to list
@@ -54,21 +54,29 @@ def choose_num_clusters(
         plt.xlabel("Number of clusters")
         plt.ylabel("Mean Silhouette Coefficient")
         plt.plot(silhouette_scores)
-        plt.xticks(np.arange(len(silhouette_scores)), np.arange(2, len (silhouette_scores)+ 2)) # Starts the x axis from 2 clusters
+        plt.xticks(np.arange(len(silhouette_scores)), np.arange(2, 10)) # Starts the x axis from 2 clusters
         plt.show()
     
     return optimal_num_clusters, optimal_clustering_labels
     
-def hierarchical(data) -> AgglomerativeClustering:
+def hierarchical(data: np.array) -> Tuple:
     """ 
+    Performs agglomerative hierachical clustering on a set of data
     
+    :param data: data to perform agglomerative hierarchical clustering on
+    :rtype: Tuple
+    :return: number of clusters formed and clustering labels placed on each datapoint
     """
-    clustering = AgglomerativeClustering().fit(data)
-    return clustering
+    clustering = AgglomerativeClustering().fit(data) # performs agglomerative hierarchical clustering with the data provided
+    return clustering.n_clusters_, clustering.labels_
 
 def plot_dendrogram(data, **kwargs) -> None:
     """
-    https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html#sphx-glr-auto-examples-cluster-plot-agglomerative-dendrogram-py
+    Method to plot a dendrogram generated via hierarchical clustering given a set of data.
+    Code taken from: https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html#sphx-glr-auto-examples-cluster-plot-agglomerative-dendrogram-py
+    
+    :param data: data to generate hierarchical clustering from
+    :kwargs: arguments to pass to the dendrogram plot
     """
     model = AgglomerativeClustering(distance_threshold=0, n_clusters=None).fit(data)
     counts = np.zeros(model.children_.shape[0])
@@ -90,5 +98,6 @@ def plot_dendrogram(data, **kwargs) -> None:
     dendrogram(linkage_matrix, **kwargs)
 
 if __name__ == "__main__":
-    data = np.array([[1,2], [1,4], [1,0], [5,6], [10,2], [10,4], [10,0]])
-    choose_num_clusters(data, plot=True)
+    data = np.array([[i, j] for i in range(100) for j in range(100)])
+    
+    plot_dendrogram(data)
