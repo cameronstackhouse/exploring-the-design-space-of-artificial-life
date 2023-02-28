@@ -7,8 +7,9 @@ import neat
 from copy import deepcopy
 from random import choice
 from typing import Tuple, List
-import networkx as nx 
-from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs, normalize
+import numpy as np
+import seaborn as sns
+from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
 from tools.gen_phenotype_from_genotype import genotype_to_phenotype
 from tools.phenotype_information import calc_KC
 from visualise_xenobot import show
@@ -16,7 +17,7 @@ from visualise_xenobot import show
 class Genotype:
     """ 
     Class to represent a genotype in the genotype map.
-    parent_of attribute essential for visualisation of 
+    connected_to attribute essential for visualisation of 
     GP map
     """
     def __init__(
@@ -25,12 +26,12 @@ class Genotype:
         id
         ) -> None:
         self.genome = geneome
-        self.parent_of = []
         self.id = id
+        self.phenotype = None
 
 class Phenotype:
     """ 
-    
+    Class to represent a phenotype in the genotype-phenotype map
     """
     def __init__(
         self,
@@ -39,9 +40,20 @@ class Phenotype:
         genotypes
         ) -> None:
         self.phenotype = phenotype
-        self.fitness = {} # Dictionary for fitnesses at 
+        self.fitness = {} # TODO Implement this
         self.complexity = complexity
         self.genotypes = genotypes
+
+class Connection:
+    """ 
+    
+    """
+    def __init__(self, n1, n2) -> None:
+        """ 
+        
+        """
+        self.n1 = n1
+        self.n2 = n2
 
 class GenotypePhenotypeMap:
     """ 
@@ -54,13 +66,16 @@ class GenotypePhenotypeMap:
         config_name: str
         ) -> None:
         self.map = {}
-        self.graph = None
         self.phenotypes = []
+        self.connections = []
         self.config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_name)
         self.config.genome_config.add_activation("neg_abs", neg_abs)
         self.config.genome_config.add_activation("neg_square", neg_square)
         self.config.genome_config.add_activation("sqrt_abs", sqrt_abs)
         self.config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
+    
+    def gen_general_phenotype_map(self) -> None:
+        pass
     
     def gen_genotypes_of_n(
         self, 
@@ -71,59 +86,73 @@ class GenotypePhenotypeMap:
         
         :param n: size of genotypes to generate (number of nodes)
         """    
-        generated_genotypes = set()
-        mutations_applied = set()
+        
+        # TODO Change to bidirectional connection system
+        generated_genotypes = set() # Set of generated genotypes
+        mutations_applied = set() # Set of genotypes which mutations have been applied to
         START_SIZE = 7
+        CONNECTION_WEIGHTS = np.arange(-2, 2, 0.25) # Range of possible connection weights
+        ACTIVATION_FUNCTIONS = ["sigmoid", "sin", "neg_abs", "square", "neg_square", "sqrt_abs", "neg_sqrt_abs"]
         
-        default_genome = neat.DefaultGenome(1)
-        default_genome.configure_new(self.config.genome_config)
+        default_genome = neat.DefaultGenome(1) # Creates a default genome
+        default_genome.configure_new(self.config.genome_config) # Configures this default genome
         
-        genotype_container = Genotype(default_genome, self.id_counter)
-        generated_genotypes.add(genotype_container)
+        genotype_container = Genotype(default_genome, self.id_counter) # Adds genome to genotype container
+        generated_genotypes.add(genotype_container) # Adds the initial genome to the set of generated genotypes
         
-        for _ in range(10):
+        for n in range(1000):
+            print(n)
+            # Set of genotypes which havent had mutations applied to them yet
             not_explored = generated_genotypes - mutations_applied
-            genotype_container = choice(tuple(not_explored))
+            genotype_container = choice(tuple(not_explored)) # Chooses genotypem from set to apply set of mutations to
         
-            # TODO CHECK THESE MUTATIONS AND HAVE MORE CONTROL OVER THEM
-            # DISCRETIZE THEM
+            # Applies possible range of mutations to the chosen genotype to generate neighbours
+            
             # Connection weights
-            new_connection_weights = deepcopy(genotype_container)
+            new_connection_weights = deepcopy(genotype_container) # Creates a copy of the genotype
+            # Mutates the connection weights in the 
             for connection in new_connection_weights.genome.connections.values():
+                #TODO: Discretize this!!
+                # Update connection.weight int
                 connection.mutate(self.config.genome_config)
         
             generated_genotypes.add(new_connection_weights)
-            genotype_container.parent_of.append(new_connection_weights)
+            self.connections.append(Connection(genotype_container, new_connection_weights))
+            
             GenotypePhenotypeMap.id_counter += 1
             new_connection_weights.id = GenotypePhenotypeMap.id_counter 
             
             # Node activation functions and bias
+            # Node.activation 'str'
             new_activation_functions = deepcopy(genotype_container)
             for node in new_activation_functions.genome.nodes.values():
                 node.mutate(self.config.genome_config)
         
             generated_genotypes.add(new_activation_functions)
-            genotype_container.parent_of.append(new_activation_functions)
+            self.connections.append(Connection(genotype_container, new_activation_functions))
             GenotypePhenotypeMap.id_counter += 1
             new_activation_functions.id = GenotypePhenotypeMap.id_counter 
             
-        
             # Add connections
             new_connections = deepcopy(genotype_container)
             new_connections.genome.mutate_add_connection(self.config.genome_config)
         
             generated_genotypes.add(new_connections)
-            genotype_container.parent_of.append(new_connections)
+            self.connections.append(Connection(genotype_container, new_connections))
             GenotypePhenotypeMap.id_counter += 1
             new_connections.id = GenotypePhenotypeMap.id_counter 
-        
+            
+            # Add node
+            new_node = deepcopy(genotype_container)
+            new_node.genome.mutate_add_node(self.config.genome_config)
+            
+            generated_genotypes.add(new_node)
+            self.connections.append(Connection(genotype_container, new_node))
+            GenotypePhenotypeMap.id_counter += 1
+            new_node.id = GenotypePhenotypeMap.id_counter
+            
             mutations_applied.add(genotype_container)
-        
-        # for genotype in generated_genotypes:
-        #     net = neat.nn.FeedForwardNetwork.create(genotype.genome, self.config)
-        #     body = genotype_to_phenotype(net, [8,8,7])
-        #     show(body)
-        
+                
         for genotype in generated_genotypes:
             net = neat.nn.FeedForwardNetwork.create(genotype.genome, self.config)
             body = genotype_to_phenotype(net, [8,8,7])
@@ -133,9 +162,6 @@ class GenotypePhenotypeMap:
                 self.map[body].append(genotype)
             else:
                 self.map[body] = [genotype]  
-        
-        for p in self.map:
-            assert self.map[p] is not None
     
     def num_genotypes_and_phenotypes(self) -> Tuple:
         """
@@ -152,7 +178,8 @@ class GenotypePhenotypeMap:
     
     def gen_phenotype_info(self):
         """ 
-        
+        Function to generate information about phenotypes
+        within the genotype_phenotype map
         """
         self.phenotypes = []
         for phenotype in self.map:
@@ -160,6 +187,8 @@ class GenotypePhenotypeMap:
             num_mapped_genotypes = len(self.map[phenotype])
             container = Phenotype(phenotype, complexity, num_mapped_genotypes)
             self.phenotypes.append(container)
+            for genotype in self.map[phenotype]:
+                genotype.phenotype = container
 
     def most_designable(self) -> List:
         """ 
@@ -167,13 +196,13 @@ class GenotypePhenotypeMap:
         meaning the phenotype with the most amount of genotypes
         which map to it
         """
-   
         sorted_phenotypes = sorted(self.phenotypes, key=lambda x: x.genotypes, reverse=True)
         return sorted_phenotypes
 
     def most_complex(self) -> List:
         """
-        
+        Returns a sorted list of phenotypes by their complexity,
+        as calculated via the LZW algorithm
         """
         sorted_phenotypes = sorted(self.phenotypes, key=lambda x: x.complexity, reverse=True)
         return sorted_phenotypes
@@ -184,54 +213,88 @@ class GenotypePhenotypeMap:
         """
         genotypes, phenotypes = self.num_genotypes_and_phenotypes()
         return genotypes/phenotypes
-              
-    def create_graph(self) -> None:
-        """ 
-        Function to create a networkx graph representing the
-        genotype-phenotype mapping 
-        """
-        graph = nx.Graph()
-        
-        # Genotype Nodes
-        # Adds nodes to graph
-        genotypes, _ = self.num_genotypes_and_phenotypes()
-        for n in range(genotypes):
-            graph.add_node(n)
-            
-        # Adds connections to graph
-        for phenotype in self.map:
-            for genotype in self.map[phenotype]:
-                for connected_to in genotype.parent_of:
-                    graph.add_edge(genotype.id, connected_to.id)
-        
-        # Add Phenotype Information
-        # TODO Connections between phenotypes somehow!
-        phenotype_id_counter = GenotypePhenotypeMap.id_counter + 1
-        phenotype_with_id = {}
-        for phenotype in self.map:
-            graph.add_node(phenotype_id_counter)
-            phenotype_with_id[phenotype] = phenotype_id_counter
-            phenotype_id_counter += 1
-        
-        for phenotype in self.map:
-            for genotype in self.map[phenotype]:
-                graph.add_edge(phenotype_with_id[phenotype], genotype.id)
-        
-        self.graph = graph
-            
-    def draw(self):
-        """ 
-        Draws the genotype-phenotype map using networkx
-        """
-        # Create pandas dataframe
-        self.create_graph()
-        
-        colour_map = ['red' if node <= GenotypePhenotypeMap.id_counter else 'green' for node in self.graph]
-        
-        nx.draw_spring(self.graph, node_color=colour_map)
-        
 
-class MultiLayeredGenotypePhenotypeMap:
+    def random_neutral_walk(self, start_genome, steps) -> List:
+        """ 
+        Random neutral walk through the genotype space of the 
+        genotype-phenotype map.
+        Walks through genotype space, only moving to the next genotype
+        if its phenotype matches that of the current one.
+        
+        :param start_genome: 
+        :param steps: 
+        :rtypr: List
+        :return: List of genotypes traversed in the walk path
+        """
+        walk_path = [start_genome]
+        current_genome = start_genome
+        encountered_phenotypes = set() # Phenotypes encountered during walk
+        
+        for _ in range(steps):
+            # Gets a list of the valid traversals
+            valid_traversals = []
+            for connection in self.connections:
+                if connection.n1 is current_genome:
+                    valid_traversals.append(connection.n2)
+                elif connection.n2 is current_genome:
+                    valid_traversals.append(connection.n1)
+                    
+            if len(valid_traversals) > 0:
+                next_genome = choice(valid_traversals) # Chooses next genotype
+                
+                # Checks if phenotypes match
+                if np.array_equal(next_genome.phenotype.phenotype, current_genome.phenotype.phenotype):
+                    walk_path.append(next_genome) # Adds next genotype to walk path
+                    current_genome = next_genome # Moves walk to next node
+                else:
+                    encountered_phenotypes.add(tuple(next_genome.phenotype.phenotype))
+                
+        return walk_path, encountered_phenotypes
+    
+    def probability_of_phenotypes(self) -> List:
+        """ 
+        
+        """
+        total_genotypes = 0
+        phenotype_probabilities = []
+        for phenotype in self.map:
+            total_genotypes += len(self.map[phenotype])
+            phenotype_probabilities.append(len(self.map[phenotype]))
+        
+        return [x / total_genotypes for x in phenotype_probabilities]
+    
+    def probability_of_complex_phenotypes(self) -> List:
+        """ 
+        
+        """
+        pass
+    
+    def reachability(self) -> List:
+        """ 
+        
+        """
+        # Can make histograms using this!!
+        num_phenotypes_encountered = []
+
+        for phenotype in self.map:
+            for _ in range(100):
+                random_genotype = choice(self.map[phenotype])
+                _, phenotypes_encountered = self.random_neutral_walk(random_genotype, 300)
+                num_phenotypes_encountered.append(len(phenotypes_encountered))
+        
+        return num_phenotypes_encountered
+    
+    def innovation_rate(self) -> float:
+        """ 
+        
+        """
+        #TODO
+        for phenotype in self.map:
+            for _ in range(100):
+                random_genotype = choice(self.map[phenotype])
+                self.random_neutral_walk(random_genotype, 100)
+
+class MultiLayeredGenotypePhenotypeMap(GenotypePhenotypeMap):
     """ 
     
     """
@@ -261,19 +324,18 @@ def load(filename: str) -> None:
         return obj
 
 
-gp = GenotypePhenotypeMap("config-gpmap")
+#gp = GenotypePhenotypeMap("config-gpmap")
 
-gp.gen_genotypes_of_n(10)
+#p.gen_genotypes_of_n(10)
+
+gp = load("temp")
 
 ratio = gp.mean_genotype_to_phenotype_ratio()
 
 print(f"Genotype -> Phenotype ratio: {ratio}")
 
-gp.draw()
+#gp.gen_phenotype_info()
 
-gp.gen_phenotype_info()
+probs = gp.probability_of_phenotypes()
 
-a = gp.most_designable()
-
-for phenotype in a:
-    print(f"Number of genotypes: {phenotype.genotypes}. Complexity: {phenotype.complexity}")
+sns.histplot(gp.reachability())
