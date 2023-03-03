@@ -2,6 +2,7 @@
 Module implementing the ability to generate genotype-phenotype maps
 """
 # %%
+import os
 import pickle
 import neat
 from copy import deepcopy
@@ -12,7 +13,12 @@ import seaborn as sns
 from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
 from tools.gen_phenotype_from_genotype import genotype_to_phenotype
 from tools.phenotype_information import calc_KC
+from tools.read_files import read_sim_output
 from visualise_xenobot import show
+from voxcraftpython.VoxcraftVXD import VXD
+from voxcraftpython.VoxcraftVXA import VXA
+
+# TODO: IMPLEMENT HYPERNEAT GP MAP
 
 class Genotype:
     """ 
@@ -46,11 +52,20 @@ class Phenotype:
 
 class Connection:
     """ 
-    
+    Class for a connection between two genotypes in the 
+    genotype space of a GP map
     """
-    def __init__(self, n1, n2) -> None:
+    def __init__(
+        self,
+        n1,
+        n2
+        ) -> None:
         """ 
+        Initilises a connection object, specifying the two
+        genotypes which are connected
         
+        :param n1: Genotype 1
+        :param n2: Genotype 2
         """
         self.n1 = n1
         self.n2 = n2
@@ -65,6 +80,9 @@ class GenotypePhenotypeMap:
         self, 
         config_name: str
         ) -> None:
+        """ 
+        Initilises a genotype-phenotype map object given 
+        """
         self.map = {}
         self.phenotypes = []
         self.connections = []
@@ -74,25 +92,26 @@ class GenotypePhenotypeMap:
         self.config.genome_config.add_activation("sqrt_abs", sqrt_abs)
         self.config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
     
-    def gen_general_phenotype_map(self) -> None:
-        pass
-    
-    def gen_genotypes_of_n(
+    def initilise(self, num_genotypes: int) -> None:
+        """ 
+        
+        """
+        self.gen_genotypes(num_genotypes)
+        self.gen_phenotype_info()
+        self.calculate_fitness()
+        
+    def gen_genotypes(
         self, 
-        n: int
+        num_genotypes: int
         ) -> None:
         """
         Function to generate genotypes... 
+        TODO FINISH AND CHANGE TO BE ABLE TO SET SIZE
         
         :param n: size of genotypes to generate (number of nodes)
         """    
-        
-        # TODO Change to bidirectional connection system
         generated_genotypes = set() # Set of generated genotypes
         mutations_applied = set() # Set of genotypes which mutations have been applied to
-        START_SIZE = 7
-        CONNECTION_WEIGHTS = np.arange(-2, 2, 0.25) # Range of possible connection weights
-        ACTIVATION_FUNCTIONS = ["sigmoid", "sin", "neg_abs", "square", "neg_square", "sqrt_abs", "neg_sqrt_abs"]
         
         default_genome = neat.DefaultGenome(1) # Creates a default genome
         default_genome.configure_new(self.config.genome_config) # Configures this default genome
@@ -100,8 +119,7 @@ class GenotypePhenotypeMap:
         genotype_container = Genotype(default_genome, self.id_counter) # Adds genome to genotype container
         generated_genotypes.add(genotype_container) # Adds the initial genome to the set of generated genotypes
         
-        for n in range(1000):
-            print(n)
+        for n in range(num_genotypes):
             # Set of genotypes which havent had mutations applied to them yet
             not_explored = generated_genotypes - mutations_applied
             genotype_container = choice(tuple(not_explored)) # Chooses genotypem from set to apply set of mutations to
@@ -112,8 +130,6 @@ class GenotypePhenotypeMap:
             new_connection_weights = deepcopy(genotype_container) # Creates a copy of the genotype
             # Mutates the connection weights in the 
             for connection in new_connection_weights.genome.connections.values():
-                #TODO: Discretize this!!
-                # Update connection.weight int
                 connection.mutate(self.config.genome_config)
         
             generated_genotypes.add(new_connection_weights)
@@ -123,7 +139,6 @@ class GenotypePhenotypeMap:
             new_connection_weights.id = GenotypePhenotypeMap.id_counter 
             
             # Node activation functions and bias
-            # Node.activation 'str'
             new_activation_functions = deepcopy(genotype_container)
             for node in new_activation_functions.genome.nodes.values():
                 node.mutate(self.config.genome_config)
@@ -153,11 +168,13 @@ class GenotypePhenotypeMap:
             
             mutations_applied.add(genotype_container)
                 
+        # Iterates through generated phenotypes, producing their associated phenotypes
         for genotype in generated_genotypes:
-            net = neat.nn.FeedForwardNetwork.create(genotype.genome, self.config)
-            body = genotype_to_phenotype(net, [8,8,7])
-            body = tuple(body)
+            net = neat.nn.FeedForwardNetwork.create(genotype.genome, self.config) # Network used to create xenobot bodies
+            body = genotype_to_phenotype(net, [8,8,7]) # Creates xenobot body using neural network
+            body = tuple(body) # Makes body hashable
             
+            # Adds phenotype to genotype-phenotype mapping
             if body in self.map:
                 self.map[body].append(genotype)
             else:
@@ -223,7 +240,7 @@ class GenotypePhenotypeMap:
         
         :param start_genome: 
         :param steps: 
-        :rtypr: List
+        :rtype: List
         :return: List of genotypes traversed in the walk path
         """
         walk_path = [start_genome]
@@ -253,7 +270,12 @@ class GenotypePhenotypeMap:
     
     def probability_of_phenotypes(self) -> List:
         """ 
+        Function to calculate the probability of encountering each phenotype.
+        This identifies if the evolutionary system has a bias in producing
+        a given phenotype output.
         
+        :rtype: List
+        :return: List of probabilities of encountering each phenotype in the system
         """
         total_genotypes = 0
         phenotype_probabilities = []
@@ -265,10 +287,27 @@ class GenotypePhenotypeMap:
     
     def probability_of_complex_phenotypes(self) -> List:
         """ 
+        Function to calculate the probability of encountering phenotypes of 
+        varying complexities. This identifies if the evolutionary system has a
+        bias in producing phenotypes of a given complexity.
         
+        :rtype: List
+        :return: List of probabilities of encountering complexitie of each phenotype in the system
         """
-        pass
-    
+        total_genotypes = 0
+        phenotype_probabilities = np.zeros(10) # Empty phenotype probabilities array
+        for phenotype in self.map:
+            total_genotypes += len(self.map[phenotype]) # Increments total number of
+            for genotype in self.map[phenotype]:
+                complexity = round(genotype.phenotype.complexity)
+                str_complexity = str(complexity)
+                if len(str_complexity) == 2:
+                    phenotype_probabilities[0] += len(self.map[phenotype])
+                else:
+                    phenotype_probabilities[int(str_complexity[0])] += len(self.map[phenotype])
+                    
+        return [x / total_genotypes for x in phenotype_probabilities]
+                
     def reachability(self) -> List:
         """ 
         
@@ -293,6 +332,60 @@ class GenotypePhenotypeMap:
             for _ in range(100):
                 random_genotype = choice(self.map[phenotype])
                 self.random_neutral_walk(random_genotype, 100)
+    
+    def calculate_fitness(self) -> None:
+        """ 
+        Calculates and assigns
+        
+        TODO: Fitness for range of applications using vxa.set_fitness_function
+        """
+        fitness_categories = ["abs_movement", ""]
+        
+        fitness_file_mapping = {}
+        
+        vxa = VXA(SimTime=3, HeapSize=0.65, RecordStepSize=100, DtFrac=0.95, EnableExpansion=1)
+        passive = vxa.add_material(RGBA=(0,255,0), E=5000000, RHO=1000000) # passive soft
+        active = vxa.add_material(RGBA=(255,0,0), CTE=0.01, E=5000000, RHO=1000000) # active
+        
+        os.system(f"rm -rf gp-fitness/") #Deletes contents of run directory if exists
+        os.system(f"mkdir -p gp-fitness") # Creates a new directory to store fitness files
+        vxa.write("base.vxa") #Write a base vxa file
+        os.system(f"cp base.vxa gp-fitness") #Copy vxa file to correct run directory
+        os.system("rm base.vxa") #Removes old vxa file
+    
+        for phen_index, phenotype in enumerate(self.map):
+            fitness_file_mapping[phen_index] = phenotype
+            
+            vxd = VXD()
+            vxd.set_tags(RecordVoxel=1)
+            body = np.zeros(8*8*7)
+            
+            for cell in range(len(phenotype)):
+                if phenotype[cell] == 1:
+                    body[cell] = passive
+                elif phenotype[cell] == 2:
+                    body[cell] = active 
+            
+            reshaped = body.reshape(8,8,7)
+            vxd.set_data(reshaped)
+            
+            vxd.write(f"id{phen_index}.vxd") #Writes vxd file for individual
+            os.system(f"cp id{phen_index}.vxd gp-fitness/")
+            os.system(f"rm id{phen_index}.vxd") #Removes the old non-copied vxd file
+        
+        os.chdir("voxcraft-sim/build") # Changes directory to the voxcraft directory TODO change to be taken from settings file
+        os.system(f"./voxcraft-sim -i ../../gp-fitness -o ../../gp-fitness/output.xml -f > ../../gp-fitness/test.history")
+        os.chdir("../../") # Return to project directory
+        
+        results = read_sim_output(f"gp-fitness/output") #Reads sim results from output file
+        os.system("rm -rf gp-fitness")
+        
+        for result in results:
+            phenotype_index = result["index"]
+            
+            #TODO Verify this works
+            for genotype in self.map[fitness_file_mapping[phenotype_index]]:
+                genotype.phenotype.fitness["abs_movement"] = float(result["fitness"])
 
 class MultiLayeredGenotypePhenotypeMap(GenotypePhenotypeMap):
     """ 
@@ -324,18 +417,8 @@ def load(filename: str) -> None:
         return obj
 
 
-#gp = GenotypePhenotypeMap("config-gpmap")
-
-#p.gen_genotypes_of_n(10)
-
-gp = load("temp")
-
-ratio = gp.mean_genotype_to_phenotype_ratio()
-
-print(f"Genotype -> Phenotype ratio: {ratio}")
-
-#gp.gen_phenotype_info()
-
-probs = gp.probability_of_phenotypes()
-
-sns.histplot(gp.reachability())
+if __name__ == "__main__":
+    gp = GenotypePhenotypeMap("config-gpmap")
+    
+    gp.initilise(10)
+    

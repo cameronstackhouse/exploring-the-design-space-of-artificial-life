@@ -61,6 +61,7 @@ def calc_KC(s):
     """
     Calculates the complexity of a xenobot phenotype
     """
+    #TODO: Maybe do different permutations, averaging complexity
     L = len(s)
     if s == '0'*L or s == '1'*L or s == '2'*L:
         return np.log2(L)

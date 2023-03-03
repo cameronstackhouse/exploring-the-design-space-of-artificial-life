@@ -7,6 +7,7 @@ import os
 import neat
 import numpy as np
 import tools.fitness_functions
+from typing import List
 from tools.read_files import read_sim_output
 from tools.gen_phenotype_from_genotype import genotype_to_phenotype
 from pureples.es_hyperneat.es_hyperneat import ESNetwork
@@ -21,7 +22,14 @@ class Run:
     """
     Container 
     """
-    def __init__(self, name, params = None, substrate = None, size_params=[8,8,7], hyperneat = False):
+    def __init__(
+        self, 
+        name: str, 
+        params = None, 
+        substrate = None, 
+        size_params: List = [8,8,7], 
+        hyperneat: bool = False
+        ) -> None:
         """
         Initilises a run object for running evaluations of 
         xenobots
@@ -33,7 +41,11 @@ class Run:
         self.size_params = size_params
         self.hyperneat = hyperneat
     
-    def evaluate(self, genomes, config) -> None:
+    def evaluate(
+        self, 
+        genomes, 
+        config
+        ) -> None:
         """
         Function to evaluate a population of xenobots using 
         voxcraft-sim and assign each xenobot a fitness

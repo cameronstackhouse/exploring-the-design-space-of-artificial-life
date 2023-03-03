@@ -4,6 +4,7 @@ using unsupervied machine learning
 """
 #%%
 from typing import Tuple
+#import umap #TODO USE THIS FOR VISUALISATION
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,8 +12,12 @@ from sklearn.cluster import AgglomerativeClustering, KMeans
 from sklearn.metrics import silhouette_score
 from scipy.cluster.hierarchy import dendrogram
 
-def dunn_index(labels, distances):
+def dunn_index(
+    labels, 
+    distances
+    ) -> float:
     """ 
+    Function to calculate the dunn index of clustering 
     
     """
     #TODO Implement this
@@ -78,6 +83,7 @@ def plot_dendrogram(data, **kwargs) -> None:
     :param data: data to generate hierarchical clustering from
     :kwargs: arguments to pass to the dendrogram plot
     """
+    # Performs agglomerative hierarcha
     model = AgglomerativeClustering(distance_threshold=0, n_clusters=None).fit(data)
     counts = np.zeros(model.children_.shape[0])
     n_samples = len(model.labels_)
@@ -98,6 +104,6 @@ def plot_dendrogram(data, **kwargs) -> None:
     dendrogram(linkage_matrix, **kwargs)
 
 if __name__ == "__main__":
-    data = np.array([[i, j] for i in range(100) for j in range(100)])
+    data = np.array([[i, j] for i in range(10) for j in range(10)])
     
     plot_dendrogram(data)

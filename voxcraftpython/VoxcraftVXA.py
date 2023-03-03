@@ -201,16 +201,22 @@ class VXA:
             fitness_func.remove(child)
         
         # Updates fitness function based on specified function
-        if function == tools.fitness_functions.FitnessFunction.OBJECT_EXPULSION:
-            pass
+        if function == tools.fitness_functions.FitnessFunction.MAX_DISTANCE:
+            tools.fitness_functions.max_distance(fitness_func)
+        elif function == tools.fitness_functions.FitnessFunction.OBJECT_EXPULSION:
+            tools.fitness_functions.object_expulsion(root)
         elif function == tools.fitness_functions.FitnessFunction.ABS_DISTANCE:
             tools.fitness_functions.total_distance(fitness_func)
         elif function == tools.fitness_functions.FitnessFunction.X_ONLY:
             tools.fitness_functions.x_only(fitness_func)
+        elif function == tools.fitness_functions.FitnessFunction.Y_ONLY:
+            tools.fitness_functions.y_only(fitness_func)
         elif function == tools.fitness_functions.FitnessFunction.WALL_OBSTACLE:
             tools.fitness_functions.tall_obsticle(root)
         elif function == tools.fitness_functions.FitnessFunction.SMALL_XENOBOTS:
             tools.fitness_functions.penalise_large_total_distance(fitness_func)
+        elif function == tools.fitness_functions.FitnessFunction.DISTANCE_BOUND:
+            tools.fitness_functions.distance_bound(root)
 
 if __name__ == "__main__":
     a = VXA()

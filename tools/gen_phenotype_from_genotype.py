@@ -1,11 +1,21 @@
+""" 
+Module containing functionality to generate a xenobot 
+phenotype from a neural network CPPN
+"""
+
+from neat import nn
 import numpy as np
+from typing import List
 from tools.activation_functions import normalize
 
-def genotype_to_phenotype(net, size_params):
+def genotype_to_phenotype(
+    net: nn.FeedForwardNetwork, 
+    size_params: List
+    ) -> np.array:
     """ 
-    
+    Function to convert genotype to phenotype
     """
-    # Gets the inputs for 
+    # Gets the inputs for the CPPN
     x_inputs = np.zeros(size_params)
     y_inputs = np.zeros(size_params)
     z_inputs = np.zeros(size_params)

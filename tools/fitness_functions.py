@@ -27,11 +27,15 @@ class FitnessFunction(Enum):
     Y_ONLY = 5
     WALL_OBSTACLE = 6
     SMALL_XENOBOTS = 7
+    DISTANCE_BOUND = 8
     #TODO Add more fitness func values here
 
-def max_distance(fitness: etree.ElementTree) -> etree.ElementTree:
+def max_distance(fitness: etree.ElementTree) -> None:
     """ 
+    Fitness function for voxcraft-sim calculating the maximum 
+    distance moved by a xenobots centre of mass
     
+    :param fitness: fitness part of voxcraft-sim settings tree
     """
     sqrt = etree.SubElement(fitness, "mtSQRT")
     add = etree.SubElement(sqrt, "mtADD")
@@ -42,7 +46,13 @@ def max_distance(fitness: etree.ElementTree) -> etree.ElementTree:
     etree.SubElement(mul2, "mtVAR").text = 'y'
     etree.SubElement(mul2, "mtVAR").text = 'y'
 
-def abs_distance(fitness: etree.ElementTree) -> etree.ElementTree:
+def object_expulsion(fitness: etree.ElementTree) -> None:
+    """ 
+    
+    """
+    pass
+
+def abs_distance(fitness: etree.ElementTree) -> None:
     """ 
     
     """
@@ -56,27 +66,50 @@ def abs_distance(fitness: etree.ElementTree) -> etree.ElementTree:
     etree.SubElement(abs2, "mtVAR").text = 'y'
     etree.SubElement(abs3, "mtVAR").text = "z"
 
-def x_only(fitness: etree.ElementTree) -> etree.ElementTree:
+def x_only(fitness: etree.ElementTree) -> None:
     """ 
     
     """
     abs = etree.SubElement(fitness, "mtABS")
     etree.SubElement(abs, "mtVAR").text = 'x'
 
-def y_only(fitness: etree.ElementTree) -> etree.ElementTree:
+def y_only(fitness: etree.ElementTree) -> None:
     """
      
     """
     abs = etree.SubElement(fitness, "mtABS")
     etree.SubElement(abs, "mtVAR").text = 'y'
 
-def penalise_large_total_distance(fitness: etree.ElementTree) -> etree.ElementTree:
+def penalise_large_total_distance(fitness: etree.ElementTree) -> None:
     """
     Fitness function which penalises the fitness of
     xenobots which are too large
     """
-    pass
+    highest_add = etree.SubElement()
+    
+    etree.SubElement(highest_add, "mtVAR").text = "num_voxel"
+    
+    add = etree.SubElement(highest_add, "mtADD")
+    
+    abs = etree.SubElement(add, "mtABS")
+    abs2 = etree.SubElement(add, "mtABS")
+    
+    etree.SubElement(abs, "mtVAR").text = 'x'
+    etree.SubElement(abs2, "mtVAR").text = 'y'
 
-def tall_obsticle(tree: etree.ElementTree) -> etree.ElementTree:
+def tall_obsticle(tree: etree.ElementTree) -> None:
+    """
+    
+    """
     simulator = tree[1]
+    fitness_func = simulator[6]
+        
+
+def distance_bound(tree: etree.ElementTree) -> None:
+    """ 
+    
+    """
+    simulator = tree[1]
+    fitness_func = simulator[6]
+    
     
