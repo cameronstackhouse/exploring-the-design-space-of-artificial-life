@@ -57,8 +57,8 @@ class Connection:
     """
     def __init__(
         self,
-        n1,
-        n2
+        n1: Genotype,
+        n2: Genotype
         ) -> None:
         """ 
         Initilises a connection object, specifying the two
@@ -352,8 +352,13 @@ class GenotypePhenotypeMap:
         vxa.write("base.vxa") #Write a base vxa file
         os.system(f"cp base.vxa gp-fitness") #Copy vxa file to correct run directory
         os.system("rm base.vxa") #Removes old vxa file
+        
+        #TODO EVALUATE FITNESS IN BATCHES OF 100 OTHERWISE DOES NOT WORK
+        
+        evaluated = 0
     
         for phen_index, phenotype in enumerate(self.map):
+            evaluated += 1
             fitness_file_mapping[phen_index] = phenotype
             
             vxd = VXD()
@@ -372,6 +377,7 @@ class GenotypePhenotypeMap:
             vxd.write(f"id{phen_index}.vxd") #Writes vxd file for individual
             os.system(f"cp id{phen_index}.vxd gp-fitness/")
             os.system(f"rm id{phen_index}.vxd") #Removes the old non-copied vxd file
+            
         
         os.chdir("voxcraft-sim/build") # Changes directory to the voxcraft directory TODO change to be taken from settings file
         os.system(f"./voxcraft-sim -i ../../gp-fitness -o ../../gp-fitness/output.xml -f > ../../gp-fitness/test.history")
@@ -393,6 +399,7 @@ class MultiLayeredGenotypePhenotypeMap(GenotypePhenotypeMap):
     """
     def __init__(self) -> None:
         self.map = {}
+        self.cppn_to_nn_map = {}
 
 def save(
     obj, 
@@ -418,7 +425,14 @@ def load(filename: str) -> None:
 
 
 if __name__ == "__main__":
-    gp = GenotypePhenotypeMap("config-gpmap")
+    # gp = GenotypePhenotypeMap("config-gpmap")
     
-    gp.initilise(10)
+    # gp.initilise(1000)
     
+    # save(gp, "genotype-phenotype maps/3000 genotypes")
+    
+    gp = load("genotype-phenotype maps/3000 genotypes")
+    
+    for phenotype in gp.map:
+        pheno = gp.map[phenotype][0].phenotype
+        print(pheno.fitness)
