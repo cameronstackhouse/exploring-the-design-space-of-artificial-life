@@ -8,3 +8,5 @@ workspace
 .history
 voxcraft-sim
 genotype-phenotype maps
+gp-fitness
+nohup.out

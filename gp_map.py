@@ -8,8 +8,8 @@ import neat
 from copy import deepcopy
 from random import choice
 from typing import Tuple, List
+from collections import defaultdict
 import numpy as np
-import seaborn as sns
 from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
 from tools.gen_phenotype_from_genotype import genotype_to_phenotype
 from tools.phenotype_information import calc_KC
@@ -34,6 +34,7 @@ class Genotype:
         self.genome = geneome
         self.id = id
         self.phenotype = None
+        self.label = None
 
 class Phenotype:
     """ 
@@ -49,6 +50,7 @@ class Phenotype:
         self.fitness = {} # TODO Implement this
         self.complexity = complexity
         self.genotypes = genotypes
+        self.motifs = None
 
 class Connection:
     """ 
@@ -352,11 +354,9 @@ class GenotypePhenotypeMap:
         vxa.write("base.vxa") #Write a base vxa file
         os.system(f"cp base.vxa gp-fitness") #Copy vxa file to correct run directory
         os.system("rm base.vxa") #Removes old vxa file
-        
-        #TODO EVALUATE FITNESS IN BATCHES OF 100 OTHERWISE DOES NOT WORK
-        
+                
         evaluated = 0
-    
+            
         for phen_index, phenotype in enumerate(self.map):
             evaluated += 1
             fitness_file_mapping[phen_index] = phenotype
@@ -378,21 +378,71 @@ class GenotypePhenotypeMap:
             os.system(f"cp id{phen_index}.vxd gp-fitness/")
             os.system(f"rm id{phen_index}.vxd") #Removes the old non-copied vxd file
             
+            if (evaluated >= 100) or (phen_index == len(self.map) - 1):
+                os.chdir("voxcraft-sim/build") # Changes directory to the voxcraft directory TODO change to be taken from settings file
+                os.system(f"./voxcraft-sim -i ../../gp-fitness -o ../../gp-fitness/output.xml -f > ../../gp-fitness/test.history")
+                os.chdir("../../") # Return to project directory
         
-        os.chdir("voxcraft-sim/build") # Changes directory to the voxcraft directory TODO change to be taken from settings file
-        os.system(f"./voxcraft-sim -i ../../gp-fitness -o ../../gp-fitness/output.xml -f > ../../gp-fitness/test.history")
-        os.chdir("../../") # Return to project directory
+                results = read_sim_output(f"gp-fitness/output") #Reads sim results from output file
         
-        results = read_sim_output(f"gp-fitness/output") #Reads sim results from output file
+                os.system("rm -rf gp-fitness")
+                os.system(f"mkdir -p gp-fitness") # Creates a new directory to store fitness files
+                vxa.write("base.vxa") #Write a base vxa file
+                os.system(f"cp base.vxa gp-fitness") #Copy vxa file to correct run directory
+                os.system("rm base.vxa") #Removes old vxa file
+        
+                for result in results:
+                    phenotype_index = result["index"]
+            
+                    #TODO Verify this works
+                    for genotype in self.map[fitness_file_mapping[phenotype_index]]:
+                        genotype.phenotype.fitness["abs_movement"] = float(result["fitness"])
+                
+                evaluated = 0
+        
         os.system("rm -rf gp-fitness")
         
-        for result in results:
-            phenotype_index = result["index"]
+        def gen_motifs(self) -> set:
+            """ 
+            Generates all 3x3x3 structural 
+            motifs present in xenobots in the GP map.
             
-            #TODO Verify this works
-            for genotype in self.map[fitness_file_mapping[phenotype_index]]:
-                genotype.phenotype.fitness["abs_movement"] = float(result["fitness"])
-
+            :rtype: set
+            :return: set of motifs identified in the population of xenobots
+            """
+            #TODO Change to any sized motifs
+            motifs = set()
+            for phenotype in self.phenotypes:
+                shaped = phenotype.reshape(8,8,7)
+                # Sliding window identifying motifs of size 3x3x3
+                for i in range(len(shaped) - 2):
+                    for j in range(len(shaped[0]) - 2):
+                        for k in range(len(shaped[0][0]) - 2):
+                            motif = shaped[i:i+3, j:j+3, k:k+3]
+                            motifs.add(motif)
+            
+            return motifs
+                            
+        def count_motifs(self, motifs) -> None:
+            """ 
+            Counts the number of 3x3x3 motifs in each phenotype 
+            given a list of motifs.
+            
+            :param motifs: iterable collection of motifs to count
+            """
+            #TODO Change to any size sized motifs
+            for phenotype in self.phenotypes:
+                motif_counts = defaultdict(int)
+                shaped = phenotype.reshape(8,8,7)
+                # Sliding window to identify subsections of xenobot
+                for i in range(len(shaped) - 2):
+                    for j in range(len(shaped[0]) - 2):
+                        for k in range(len(shaped[0][0]) - 2):
+                            subsection = shaped[i:i+3, j:j+3, k:k+3]
+                            if subsection in motifs: # Checks if indexed subsection is in list of motifs
+                                motif_counts[subsection] += 1
+                phenotype.motifs = motif_counts # Sets phenotype motifs
+                
 class MultiLayeredGenotypePhenotypeMap(GenotypePhenotypeMap):
     """ 
     
@@ -425,14 +475,17 @@ def load(filename: str) -> None:
 
 
 if __name__ == "__main__":
-    # gp = GenotypePhenotypeMap("config-gpmap")
+    gp = GenotypePhenotypeMap("config-gpmap")
     
-    # gp.initilise(1000)
+    gp.initilise(100000)
+    
+    save(gp, "genotype-phenotype maps/30000 genotypes")
+    
+    # gp = load("genotype-phenotype maps/3000 genotypes")
+    
+    # gp.calculate_fitness()
     
     # save(gp, "genotype-phenotype maps/3000 genotypes")
     
-    gp = load("genotype-phenotype maps/3000 genotypes")
-    
-    for phenotype in gp.map:
-        pheno = gp.map[phenotype][0].phenotype
-        print(pheno.fitness)
+    # for p in gp.map:
+    #     print(p)
