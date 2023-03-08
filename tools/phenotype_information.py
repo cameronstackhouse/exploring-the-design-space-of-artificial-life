@@ -6,7 +6,8 @@ import os
 import neat
 from scipy.fft import fftn
 import numpy as np
-from itertools import combinations, permutations
+from typing import Tuple
+from itertools import product
 from tools.read_files import read_history
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
@@ -91,7 +92,7 @@ def motif_vectorisation(phenotype: str) -> list:
     """
     #TODO Use motifs to vectorize
 
-    motifs = possible_motifs()
+    motifs = motifs()
     
     return []
 
@@ -117,16 +118,37 @@ def num_cells(phenotype) -> dict:
         
     return {"none": none, "skin": skin, "muscle": muscle}
 
-def possible_motifs() -> list:
+def motifs() -> Tuple:
     """
-    Generates possible motifs from size 2 to 4
-    """
-    possible_cells = [0,1,2]
+    Generates possible motifs from size 2 to 4 to 
+    count in a xenobot structure
     
-    two_cell_motifs = list(combinations(possible_cells, 2))
-    three_cell_motifs = []
-    four_cell_motifs = []
+    :rtype: Tuple
+    :return: List of motifs from dimension 2 -> 4
+    """
+    skin = 1
+    muscle = 2
+    
+    possible_cells = [skin, muscle]
+    
+    two_cell_motifs = list(product(possible_cells, repeat=2))
+    
+    # Three cell motifs    
+    # TODO
+    
+    #NOTE TODO: Could use motifs as almost like a filter in CNN
+    
+    return two_cell_motifs
 
+def pass_filters(xenobot, filters):
+    """ 
+    
+    """
+    vector = []
+    #TODO: Pass motif filter over 3D xenobot struture, dot product for feature map.
+    for filter in filters:
+        count = 0
+        vector.append(count)
 
 def movement_components(
     genome, 
