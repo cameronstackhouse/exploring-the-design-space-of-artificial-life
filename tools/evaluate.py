@@ -106,6 +106,9 @@ class Run:
     
         results = read_sim_output(f"fitnessFiles/{self.name}/{self.generation}/output") #Reads sim results from output file
 
+        #Remove history file
+        os.system(f"rm -f fitnessFiles/{self.name}/{self.generation}/test.history")
+        
         # Assigns fitness to individuals based on results
         for result in results:
             genomes[result["index"]][1].fitness = float(result["fitness"])

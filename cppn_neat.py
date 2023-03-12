@@ -1,13 +1,19 @@
 """
 CPPN-NEAT implemented using the neat-python package
 """
+#%%
 
 import os
+import pickle
 import neat
+import numpy as np
 from typing import List
 from tools.evaluate import Run
 from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
 from tools.fitness_functions import FitnessFunction
+from tools.gen_phenotype_from_genotype import genotype_to_phenotype
+from visualise_xenobot import show
+import matplotlib.pyplot as plt
 
 def run(
     config_file: str, 
@@ -23,6 +29,7 @@ def run(
     :param size_params: Size parameters of xenobots being designed
     :param fitness_func: Fitness function being used for evaluation
     """
+    # TODO Set fitness function
     # Creates a config file for NEAT
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_file)
 
@@ -49,13 +56,57 @@ def run(
     population.add_reporter(stats)
     
     # Runs CPPN-NEAT for 
-    winner = population.run(run.evaluate, 100)
+    winner = population.run(run.evaluate, 1000)
     
-    for node in winner.nodes:
-        print(winner.nodes[node].activation)
+    median = stats.get_fitness_median()
+    mean = stats.get_fitness_mean()
+    std_dev = stats.get_fitness_stdev()
+    best_each_gen = stats.get_fitness_stat(fitest_in_gen)
     
+    results = {
+        "winner": winner,
+        "best_each_gen": best_each_gen,
+        "mean": mean,
+        "median": median,
+        "std_dev": std_dev
+    }
+    
+    with open("NEAT-1000.pickle", "wb") as f:
+        pickle.dump(results, f)
 
-if __name__ == "__main__":
-    run("config-xenobots", "run-big")
+def fitest_in_gen(scores):
+    """ 
     
-    # Gene object produced by CPPN-NEAT library has nodes and connections self
+    """
+    return max(scores)
+    
+if __name__ == "__main__":
+    run("config-xenobots", "run_1000_cppn_neat")
+    
+    # config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, "config-xenobots")
+    
+    #    # Adds additional activation functions to NEAT to be able to implement CPPN-NEAR
+    # config.genome_config.add_activation("neg_abs", neg_abs)
+    # config.genome_config.add_activation("neg_square", neg_square)
+    # config.genome_config.add_activation("sqrt_abs", sqrt_abs)
+    # config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
+    
+    # data = None
+    
+    # with open("NEAT-1000.pickle", "rb") as f:
+    #     data = pickle.load(f)
+    
+    # y = list(range(len(data["mean"])))
+        
+    # plt.plot(y, data["mean"])
+    
+    # net = neat.nn.FeedForwardNetwork.create(data["winner"], config)
+    
+    # body_size = 1
+    # for dim in [8,8,7]:
+    #     body_size *= dim
+    #     body = np.zeros(body_size)
+            
+    # body = genotype_to_phenotype(net, [8,8,7]) # Generates xenobot body using CPPN
+
+    #show(body, [8,8,7])

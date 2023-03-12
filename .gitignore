@@ -7,6 +7,8 @@ fitnessFiles
 workspace
 .history
 voxcraft-sim
-genotype-phenotype maps
 gp-fitness
 nohup.out
+genotype-phenotype_maps
+300000_cppn_neat
+.pickle
