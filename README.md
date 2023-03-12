@@ -19,18 +19,19 @@ Based on:
 ### Installation
 To use the physics simulation to run voxcraft-sim you MUST have an Nvidia GPU alongside an installation of [CUDA 10.1](https://developer.nvidia.com/cuda-10.1-download-archive-base).
 
-Install all python requirements:
-    
-    pip install -r requirements
-
-Install voxcraft-sim for xenobot simulations following the instructions for local installation specified on the Github:
-
-    https://github.com/voxcraft/voxcraft-sim
+Install voxcraft-sim for xenobot simulations following the [instructions for local installation](https://github.com/voxcraft/voxcraft-sim).
 
 After installation of voxcraft-sim place the voxcraft-sim folder into the "exploring-the-design-space-of-artificial-life" directory.
 
-Download [Voxcraft-python](https://github.com/caitlingrasso/Voxcraft-python) and place in directory
-Download []
+Download: 
+* [Voxcraft-python](https://github.com/caitlingrasso/Voxcraft-python)
+* [PUREPLES](https://github.com/ukuleleplayer/pureples) 
+
+and place in directory.
+
+Install all python requirements:
+    
+    pip install -r requirements
 
 ### Settings File
 

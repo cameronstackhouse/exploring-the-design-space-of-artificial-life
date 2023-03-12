@@ -1,7 +1,7 @@
 """ 
 Module implementing the ability to generate genotype-phenotype maps
 """
-# %%
+# %%``
 import os
 import pickle
 import neat
@@ -17,6 +17,10 @@ from tools.read_files import read_sim_output
 from visualise_xenobot import show
 from voxcraftpython.VoxcraftVXD import VXD
 from voxcraftpython.VoxcraftVXA import VXA
+from pureples.shared.substrate import Substrate
+from pureples.es_hyperneat.es_hyperneat import ESNetwork
+import seaborn as sns
+import matplotlib as plt
 
 # TODO: IMPLEMENT HYPERNEAT GP MAP
 
@@ -80,19 +84,23 @@ class GenotypePhenotypeMap:
     id_counter = 0
     def __init__(
         self, 
-        config_name: str
+        config_name: str,
+        hyperneat: bool = False
         ) -> None:
         """ 
         Initilises a genotype-phenotype map object given 
         """
+        self.cppn_to_gene = {} # Used for hyperneat
         self.map = {}
         self.phenotypes = []
         self.connections = []
         self.config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_name)
-        self.config.genome_config.add_activation("neg_abs", neg_abs)
-        self.config.genome_config.add_activation("neg_square", neg_square)
-        self.config.genome_config.add_activation("sqrt_abs", sqrt_abs)
-        self.config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
+        
+        if not hyperneat:
+            self.config.genome_config.add_activation("neg_abs", neg_abs)
+            self.config.genome_config.add_activation("neg_square", neg_square)
+            self.config.genome_config.add_activation("sqrt_abs", sqrt_abs)
+            self.config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
     
     def initilise(self, num_genotypes: int) -> None:
         """ 
@@ -308,7 +316,7 @@ class GenotypePhenotypeMap:
                 else:
                     phenotype_probabilities[int(str_complexity[0])] += len(self.map[phenotype])
                     
-        return [x / total_genotypes for x in phenotype_probabilities]
+        return [(x / total_genotypes) for x in phenotype_probabilities]
                 
     def reachability(self) -> List:
         """ 
@@ -341,7 +349,8 @@ class GenotypePhenotypeMap:
         
         TODO: Fitness for range of applications using vxa.set_fitness_function
         """
-        fitness_categories = ["abs_movement", ""]
+        # TODO, MORE FITNESS CATEGORIES
+        #fitness_categories = ["abs_movement", ""]
         
         fitness_file_mapping = {}
         
@@ -401,55 +410,66 @@ class GenotypePhenotypeMap:
                 evaluated = 0
         
         os.system("rm -rf gp-fitness")
-        
-        def gen_motifs(self) -> set:
-            """ 
-            Generates all 3x3x3 structural 
-            motifs present in xenobots in the GP map.
-            
-            :rtype: set
-            :return: set of motifs identified in the population of xenobots
-            """
-            #TODO Change to any sized motifs
-            motifs = set()
-            for phenotype in self.phenotypes:
-                shaped = phenotype.reshape(8,8,7)
-                # Sliding window identifying motifs of size 3x3x3
-                for i in range(len(shaped) - 2):
-                    for j in range(len(shaped[0]) - 2):
-                        for k in range(len(shaped[0][0]) - 2):
-                            motif = shaped[i:i+3, j:j+3, k:k+3]
-                            motifs.add(motif)
-            
-            return motifs
-                            
-        def count_motifs(self, motifs) -> None:
-            """ 
-            Counts the number of 3x3x3 motifs in each phenotype 
-            given a list of motifs.
-            
-            :param motifs: iterable collection of motifs to count
-            """
-            #TODO Change to any size sized motifs
-            for phenotype in self.phenotypes:
-                motif_counts = defaultdict(int)
-                shaped = phenotype.reshape(8,8,7)
-                # Sliding window to identify subsections of xenobot
-                for i in range(len(shaped) - 2):
-                    for j in range(len(shaped[0]) - 2):
-                        for k in range(len(shaped[0][0]) - 2):
-                            subsection = shaped[i:i+3, j:j+3, k:k+3]
-                            if subsection in motifs: # Checks if indexed subsection is in list of motifs
-                                motif_counts[subsection] += 1
-                phenotype.motifs = motif_counts # Sets phenotype motifs
-                
-class MultiLayeredGenotypePhenotypeMap(GenotypePhenotypeMap):
-    """ 
     
+    def complexity_distribution_plot(self) -> None:
+        """ 
+        
+        """
+        #TODO Comments
+        complexities = []
+        for phenotype in phenotypes:
+            complexities.append(phenotype.complexity)
+        
+        complexity_distribution = sns.histplot(complexities)
+        complexity_distribution.set(xlabel="Kolmogorov Complexity")
+                                            
+
+def gen_motifs(phenotypes: list) -> set:
+    """ 
+    Generates all 3x3x3 structural 
+    motifs present in xenobots in the GP map.
+            
+    :rtype: set
+    :return: set of motifs identified in the population of xenobots
     """
-    def __init__(self) -> None:
-        self.map = {}
-        self.cppn_to_nn_map = {}
+    #TODO Change to any sized motifs
+    motifs = set() # Set of unique motifs
+    for phenotype in phenotypes:
+        body = np.array(phenotype.phenotype)
+        shaped = body.reshape(8,8,7)
+        # Sliding window identifying motifs of size 3x3x3
+        for i in range(len(shaped) - 2):
+            for j in range(len(shaped[0]) - 2):
+                for k in range(len(shaped[0][0]) - 2):
+                    motif = shaped[i:i+3, j:j+3, k:k+3]
+                    motifs.add(tuple(motif.flatten()))
+            
+    return motifs
+
+def count_motifs(
+    phenotypes: list, 
+    motifs: set
+    )-> None:
+    """ 
+    Counts the number of 3x3x3 motifs in each phenotype 
+    given a list of motifs.
+            
+    :param motifs: iterable collection of motifs to count
+    """
+    #TODO Change to any size sized motifs
+    for phenotype in phenotypes:
+        motif_counts = defaultdict(int)
+        body = np.array(phenotype.phenotype)
+        shaped = body.reshape(8,8,7)
+        # Sliding window to identify subsections of xenobot
+        for i in range(len(shaped) - 2):
+            for j in range(len(shaped[0]) - 2):
+                for k in range(len(shaped[0][0]) - 2):
+                    subsection = shaped[i:i+3, j:j+3, k:k+3]
+                    if tuple(subsection.flatten()) in motifs: # Checks if indexed subsection is in list of motifs
+                        motif_counts[tuple(subsection.flatten())] += 1
+        
+        phenotype.motifs = motif_counts # Sets phenotype motifs
 
 def save(
     obj, 
@@ -475,17 +495,31 @@ def load(filename: str) -> None:
 
 
 if __name__ == "__main__":
-    gp = GenotypePhenotypeMap("config-gpmap")
+    # gp = GenotypePhenotypeMap("config-gpmap")
+    # gp.initilise(100000)
     
-    gp.initilise(100000)
+    gp = GenotypePhenotypeMap("config-hyperneat-gpmap")
     
-    save(gp, "genotype-phenotype maps/30000 genotypes")
+    # gp = load("300000_cppn_neat")
     
-    # gp = load("genotype-phenotype maps/3000 genotypes")
+    phenotypes = gp.phenotypes
     
-    # gp.calculate_fitness()
+    # NOTE: Fitness distrib not really that interesting
+    # fitnesses = []
+    # for phenotype in gp.phenotypes:
+    #     if phenotype.fitness["abs_movement"] > 0.1:
+    #         fitnesses.append(phenotype.fitness["abs_movement"])
+  
+    # plot = sns.histplot(data=fitnesses, kde=True)
+    # plot.set(xlabel = "Phenotype Fitness", title="Distribution of Fitness for Centre of Mass Displacement")
     
-    # save(gp, "genotype-phenotype maps/3000 genotypes")
+    # motifs = gen_motifs(phenotypes)
+    # count_motifs(phenotypes, motifs)
     
-    # for p in gp.map:
-    #     print(p)
+    #NOTE Probability of locating phenotype through random search
+    # most_designable = gp.most_designable()
+    
+    # for pheno in most_designable[:5]:
+    #     print(pheno.genotypes)
+    
+    # print(most_designable[2].phenotype)
