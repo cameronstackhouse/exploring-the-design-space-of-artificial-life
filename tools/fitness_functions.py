@@ -27,7 +27,6 @@ class FitnessFunction(Enum):
     Y_ONLY = 5
     WALL_OBSTACLE = 6
     SMALL_XENOBOTS = 7
-    DISTANCE_BOUND = 8
     #TODO Add more fitness func values here
 
 def max_distance(fitness: etree.ElementTree) -> None:
@@ -85,28 +84,20 @@ def penalise_large_total_distance(fitness: etree.ElementTree) -> None:
     Fitness function which penalises the fitness of
     xenobots which are too large
     """
-    highest_add = etree.SubElement()
+    sub = etree.SubElement(fitness, "mtSUB")
     
-    etree.SubElement(highest_add, "mtVAR").text = "num_voxel"
-    
-    add = etree.SubElement(highest_add, "mtADD")
+    add = etree.SubElement(sub, "mtADD")
     
     abs = etree.SubElement(add, "mtABS")
     abs2 = etree.SubElement(add, "mtABS")
     
     etree.SubElement(abs, "mtVAR").text = 'x'
     etree.SubElement(abs2, "mtVAR").text = 'y'
+    
+    etree.SubElement(sub, "mtVAR").text = "num_voxel" #TODO NEED TO MAKE PROPORTIONAL!
 
 def tall_obsticle(tree: etree.ElementTree) -> None:
     """
-    
-    """
-    simulator = tree[1]
-    fitness_func = simulator[6]
-        
-
-def distance_bound(tree: etree.ElementTree) -> None:
-    """ 
     
     """
     simulator = tree[1]

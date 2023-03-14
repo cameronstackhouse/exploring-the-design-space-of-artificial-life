@@ -56,7 +56,7 @@ def run(
     population.add_reporter(stats)
     
     # Runs CPPN-NEAT for 
-    winner = population.run(run.evaluate, 1000)
+    winner = population.run(run.evaluate, 250)
     
     median = stats.get_fitness_median()
     mean = stats.get_fitness_mean()
@@ -71,7 +71,7 @@ def run(
         "std_dev": std_dev
     }
     
-    with open("NEAT-1000.pickle", "wb") as f:
+    with open("NEAT-250.pickle", "wb") as f:
         pickle.dump(results, f)
 
 def fitest_in_gen(scores):
@@ -81,7 +81,7 @@ def fitest_in_gen(scores):
     return max(scores)
     
 if __name__ == "__main__":
-    run("config-xenobots", "run_1000_cppn_neat")
+    # run("config-xenobots", "run_250_cppn_neat")
     
     # config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, "config-xenobots")
     
@@ -93,12 +93,18 @@ if __name__ == "__main__":
     
     # data = None
     
-    # with open("NEAT-1000.pickle", "rb") as f:
-    #     data = pickle.load(f)
-    
-    # y = list(range(len(data["mean"])))
+    with open("NEAT-250.pickle", "rb") as f:
+        data = pickle.load(f)
         
-    # plt.plot(y, data["mean"])
+    print(data.keys())
+    
+    y = list(range(len(data["std_dev"])))
+    
+    plt.plot(y, data["best_each_gen"])    
+    plt.plot(y, data["std_dev"])
+    plt.xlabel("Generation")
+    plt.ylabel("Fitness")
+    plt.legend(["Best Xenobot", "Standard Deviation"])
     
     # net = neat.nn.FeedForwardNetwork.create(data["winner"], config)
     

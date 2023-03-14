@@ -24,7 +24,6 @@ Install voxcraft-sim for xenobot simulations following the [instructions for loc
 After installation of voxcraft-sim place the voxcraft-sim folder into the "exploring-the-design-space-of-artificial-life" directory.
 
 Download: 
-* [Voxcraft-python](https://github.com/caitlingrasso/Voxcraft-python)
 * [PUREPLES](https://github.com/ukuleleplayer/pureples) 
 
 and place in directory.

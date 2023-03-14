@@ -22,7 +22,7 @@ from pureples.es_hyperneat.es_hyperneat import ESNetwork
 import seaborn as sns
 import matplotlib as plt
 
-# TODO: IMPLEMENT HYPERNEAT GP MAP
+# TODO:MODIFY FUNCTIONS FOR HYPERNEAT GP MAP
 
 class Genotype:
     """ 
@@ -95,12 +95,32 @@ class GenotypePhenotypeMap:
         self.phenotypes = []
         self.connections = []
         self.config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_name)
+        self.substrate = None
+        self.params = None
         
         if not hyperneat:
             self.config.genome_config.add_activation("neg_abs", neg_abs)
             self.config.genome_config.add_activation("neg_square", neg_square)
             self.config.genome_config.add_activation("sqrt_abs", sqrt_abs)
             self.config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
+        else:
+            # Set substrate, set params
+            self.params = {"initial_depth": 2,
+                           "max_depth": 3,
+                           "variance_threshold": 0.03,
+                           "iteration_level": 1,
+                           "division_threshold": 0.5,
+                           "max_weight": 5.0,
+                           "activation": "sigmoid"}
+            
+            INPUT_COORDINATES = []
+            
+            for i in range(0, 5):
+                INPUT_COORDINATES.append((-1 + (2 * i/3), -1))
+            
+            OUTPUT_COORDINATES = [(-1, 1), (1, 1)]
+            
+            self.substrate = Substrate(INPUT_COORDINATES, OUTPUT_COORDINATES)
     
     def initilise(self, num_genotypes: int) -> None:
         """ 
@@ -116,10 +136,11 @@ class GenotypePhenotypeMap:
         ) -> None:
         """
         Function to generate genotypes... 
-        TODO FINISH AND CHANGE TO BE ABLE TO SET SIZE
+        TODO 
         
         :param n: size of genotypes to generate (number of nodes)
         """    
+        #TODO Change to mutate connection weights properly! += 0.1 all or -=0.1 all
         generated_genotypes = set() # Set of generated genotypes
         mutations_applied = set() # Set of genotypes which mutations have been applied to
         
@@ -136,32 +157,27 @@ class GenotypePhenotypeMap:
         
             # Applies possible range of mutations to the chosen genotype to generate neighbours
             
-            # Connection weights
-            new_connection_weights = deepcopy(genotype_container) # Creates a copy of the genotype
-            # Mutates the connection weights in the 
-            for connection in new_connection_weights.genome.connections.values():
-                connection.mutate(self.config.genome_config)
-        
-            generated_genotypes.add(new_connection_weights)
-            self.connections.append(Connection(genotype_container, new_connection_weights))
+            # Applies mutation to every connection
+            for n, _ in enumerate(genotype_container.genome.connections.values()):
+                new_connection_weights = deepcopy(genotype_container) # Creates a copy of the genotype
+                new_connection_weights.genome.connections.values()[n].mutate(self.config.genome_config)
+                generated_genotypes.add(new_connection_weights)
+                self.connections.append(Connection(genotype_container, new_connection_weights))
+                GenotypePhenotypeMap.id_counter += 1
+                new_connection_weights.id = GenotypePhenotypeMap.id_counter 
             
-            GenotypePhenotypeMap.id_counter += 1
-            new_connection_weights.id = GenotypePhenotypeMap.id_counter 
+            # Mutates activation function of each node
+            for n, _ in enumerate(genotype_container.genome.nodes.values()):
+                new_activation_function = deepcopy(genotype_container)
+                new_activation_function.genome.nodes.values()[n].mutate(self.config.genome_config)
+                generated_genotypes.add(new_activation_function)
+                self.connections.append(Connection(genotype_container, new_activation_function))
+                GenotypePhenotypeMap.id_counter += 1
+                new_activation_function.id = GenotypePhenotypeMap.id_counter 
             
-            # Node activation functions and bias
-            new_activation_functions = deepcopy(genotype_container)
-            for node in new_activation_functions.genome.nodes.values():
-                node.mutate(self.config.genome_config)
-        
-            generated_genotypes.add(new_activation_functions)
-            self.connections.append(Connection(genotype_container, new_activation_functions))
-            GenotypePhenotypeMap.id_counter += 1
-            new_activation_functions.id = GenotypePhenotypeMap.id_counter 
-            
-            # Add connections
+            # Add connection
             new_connections = deepcopy(genotype_container)
             new_connections.genome.mutate_add_connection(self.config.genome_config)
-        
             generated_genotypes.add(new_connections)
             self.connections.append(Connection(genotype_container, new_connections))
             GenotypePhenotypeMap.id_counter += 1
@@ -170,7 +186,6 @@ class GenotypePhenotypeMap:
             # Add node
             new_node = deepcopy(genotype_container)
             new_node.genome.mutate_add_node(self.config.genome_config)
-            
             generated_genotypes.add(new_node)
             self.connections.append(Connection(genotype_container, new_node))
             GenotypePhenotypeMap.id_counter += 1
@@ -180,7 +195,21 @@ class GenotypePhenotypeMap:
                 
         # Iterates through generated phenotypes, producing their associated phenotypes
         for genotype in generated_genotypes:
-            net = neat.nn.FeedForwardNetwork.create(genotype.genome, self.config) # Network used to create xenobot bodies
+            net = None
+            if self.hyperneat:
+                cppn = neat.nn.FeedForwardNetwork.create(genotype, self.config) # CPPN to design network to produce xenobot
+                sub = ESNetwork(self.substrate, cppn, self.params) # created substrate
+                
+                # Adds mapping between cppn and network to design xenobots
+                if sub in self.cppn_to_gene:
+                    self.cppn_to_gene[sub].append(cppn)
+                else:
+                    self.cppn_to_gene[sub] = [cppn]
+                
+                net = sub.create_phenotype_network()
+            else:
+                net = neat.nn.FeedForwardNetwork.create(genotype.genome, self.config) # Network used to create xenobot bodies
+            
             body = genotype_to_phenotype(net, [8,8,7]) # Creates xenobot body using neural network
             body = tuple(body) # Makes body hashable
             
@@ -197,9 +226,15 @@ class GenotypePhenotypeMap:
         """
         genotypes = 0
         phenotypes = len(self.map.keys())
-        for key in self.map:
-            for _ in self.map[key]:
-                genotypes += 1
+        
+        if not self.hyperneat:
+            for key in self.map:
+                for _ in self.map[key]:
+                    genotypes += 1
+        else:
+            for key in self.cppn_to_gene:
+                for _ in self.cppn_to_gene[key]:
+                    genotypes += 1
         
         return (genotypes, phenotypes)
     
@@ -210,7 +245,7 @@ class GenotypePhenotypeMap:
         """
         self.phenotypes = []
         for phenotype in self.map:
-            complexity = calc_KC(str(phenotype))
+            complexity = calc_KC(str(phenotype)) # TODO: MAYBE CHANGE THIS!
             num_mapped_genotypes = len(self.map[phenotype])
             container = Phenotype(phenotype, complexity, num_mapped_genotypes)
             self.phenotypes.append(container)
@@ -322,6 +357,7 @@ class GenotypePhenotypeMap:
         """ 
         
         """
+        #TODO MODIFY FOR HYPERNEAT - ENSURE DONE CORRECTLY
         # Can make histograms using this!!
         num_phenotypes_encountered = []
 
