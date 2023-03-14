@@ -98,11 +98,13 @@ if __name__ == "__main__":
         
     print(data.keys())
     
-    y = list(range(len(data["mean"])))
-        
-    plt.plot(y, data["mean"])
-    plt.plot(y, data["best_each_gen"])
-    plt.legend(["mean", "fitness of best"])
+    y = list(range(len(data["std_dev"])))
+    
+    plt.plot(y, data["best_each_gen"])    
+    plt.plot(y, data["std_dev"])
+    plt.xlabel("Generation")
+    plt.ylabel("Fitness")
+    plt.legend(["Best Xenobot", "Standard Deviation"])
     
     # net = neat.nn.FeedForwardNetwork.create(data["winner"], config)
     

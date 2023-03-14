@@ -10,7 +10,6 @@ from typing import List
 import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
 import numpy as np
-from math import sqrt
 
 def read_sim_output(filename: str) -> List[dict]:
     """
@@ -120,11 +119,13 @@ def read_history(
 
     return [x_components, y_components, z_components]
 
-def read_xenobot_from_vxd(filename: str):
+def read_xenobot_from_vxd(filename: str) -> np.array:
     """ 
     Function to read a xenobot body from a vxd file
     
     :param filename: name of xenobot file to open
+    :rtype: np.array
+    :return: 
     """
     layer_data = []
     x_voxels = 0
@@ -156,7 +157,6 @@ def read_xenobot_from_vxd(filename: str):
         layer_data[i] = [int(s) for s in layer_data[i]]
     
     # Assemble flattened array into 3D xenobot structure 
-    
     body = np.zeros((x_voxels, y_voxels, z_voxels), dtype=np.int8)
     
     for z in range(len(layer_data)):
@@ -171,9 +171,10 @@ def read_xenobot_from_vxd(filename: str):
 
 if __name__ == "__main__":
     #TODO DELETE FOR RELEASE
-
+    #TODO ENSURE THIS WORKS!
     test = read_xenobot_from_vxd("id4.vxd")
     
     print(test)
+   
 
 # %%

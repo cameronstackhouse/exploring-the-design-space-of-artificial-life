@@ -118,38 +118,6 @@ def num_cells(phenotype) -> dict:
         
     return {"none": none, "skin": skin, "muscle": muscle}
 
-def motifs() -> Tuple:
-    """
-    Generates possible motifs from size 2 to 4 to 
-    count in a xenobot structure
-    
-    :rtype: Tuple
-    :return: List of motifs from dimension 2 -> 4
-    """
-    skin = 1
-    muscle = 2
-    
-    possible_cells = [skin, muscle]
-    
-    two_cell_motifs = list(product(possible_cells, repeat=2))
-    
-    # Three cell motifs    
-    # TODO
-    
-    #NOTE TODO: Could use motifs as almost like a filter in CNN
-    
-    return two_cell_motifs
-
-def pass_filters(xenobot, filters):
-    """ 
-    
-    """
-    vector = []
-    #TODO: Pass motif filter over 3D xenobot struture, dot product for feature map.
-    for filter in filters:
-        count = 0
-        vector.append(count)
-
 def movement_components(
     genome, 
     config, 
@@ -260,3 +228,9 @@ def movement_components(
 def movement_components_from_phenotypes(phenotypes: List):
     #TODO
     pass
+
+def gen_csv_entry(gene, hyperneat=False, substrate=None):
+    """ 
+    
+    """
+    #TODO, DO THIS MARCH 14th
