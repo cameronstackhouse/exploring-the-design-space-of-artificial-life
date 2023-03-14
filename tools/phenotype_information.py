@@ -6,7 +6,7 @@ import os
 import neat
 from scipy.fft import fftn
 import numpy as np
-from typing import Tuple
+from typing import Tuple, List
 from itertools import product
 from tools.read_files import read_history
 from voxcraftpython.VoxcraftVXA import VXA
@@ -256,3 +256,7 @@ def movement_components(
     # 6) FFT On movement components
     frequency_comp = fftn(movement)
     return frequency_comp
+
+def movement_components_from_phenotypes(phenotypes: List):
+    #TODO
+    pass

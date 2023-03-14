@@ -56,6 +56,8 @@ class VXA:
         etree.SubElement(gpu, "HeapSize").text = str(self.HeapSize)
         
         # Simulator
+        # SavePositionOfAllVoxels = 1: XML file contains final positions of all voxels, 
+        # TODO could be used for movement distance of object
         simulator = etree.SubElement(root, "Simulator")
         etree.SubElement(simulator, "EnableCilia").text = str(self.EnableCilia)
         etree.SubElement(simulator, "EnableExpansion").text = str(self.EnableExpansion) # 0 only contraction, 1 is contration + expansion
@@ -206,7 +208,7 @@ class VXA:
         elif function == tools.fitness_functions.FitnessFunction.OBJECT_EXPULSION:
             tools.fitness_functions.object_expulsion(root)
         elif function == tools.fitness_functions.FitnessFunction.ABS_DISTANCE:
-            tools.fitness_functions.total_distance(fitness_func)
+            tools.fitness_functions.abs_distance(fitness_func)
         elif function == tools.fitness_functions.FitnessFunction.X_ONLY:
             tools.fitness_functions.x_only(fitness_func)
         elif function == tools.fitness_functions.FitnessFunction.Y_ONLY:
@@ -220,9 +222,9 @@ class VXA:
 
 if __name__ == "__main__":
     a = VXA()
-    func = tools.fitness_functions.FitnessFunction.X_ONLY
+    func = tools.fitness_functions.FitnessFunction.SMALL_XENOBOTS
     
     a.set_fitness_function(func)
     
-    
+    a.write("test")
     

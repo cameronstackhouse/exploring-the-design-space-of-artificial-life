@@ -9,6 +9,8 @@ import json
 from typing import List
 import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
+import numpy as np
+from math import sqrt
 
 def read_sim_output(filename: str) -> List[dict]:
     """
@@ -118,15 +120,60 @@ def read_history(
 
     return [x_components, y_components, z_components]
 
+def read_xenobot_from_vxd(filename: str):
+    """ 
+    Function to read a xenobot body from a vxd file
+    
+    :param filename: name of xenobot file to open
+    """
+    layer_data = []
+    x_voxels = 0
+    y_voxels = 0
+    z_voxels = 0
+    
+    # Splits file into lines
+    with open(filename) as f:
+        lines = f.read().splitlines()
+    
+    # Strips lines of whitespace
+    for i in range(len(lines)):
+        lines[i] = lines[i].strip()
+    
+    # TODO Remove walls and fixed objects
+    # Gets xenobot structure data
+    for line in lines:
+        if line[:7] == "<Layer>":
+            layer_data.append(line[16:-11])
+        elif line[:10] == "<X_Voxels>":
+            x_voxels = int(line[10])
+        elif line[:10] == "<Y_Voxels>":
+            y_voxels = int(line[10])
+        elif line[:10] == "<Z_Voxels>":
+            z_voxels = int(line[10])
+        
+    # Splits into 2D array of integers
+    for i in range(len(layer_data)):
+        layer_data[i] = [int(s) for s in layer_data[i]]
+    
+    # Assemble flattened array into 3D xenobot structure 
+    
+    body = np.zeros((x_voxels, y_voxels, z_voxels), dtype=np.int8)
+    
+    for z in range(len(layer_data)):
+        k = 0
+        for y in range(y_voxels):
+            for x in range(x_voxels):
+                body[x, y, z] = layer_data[z][k]
+                k += 1
+    
+    # Reconstruct xenobot from layer data
+    return body
+
 if __name__ == "__main__":
     #TODO DELETE FOR RELEASE
 
-    test = read_history("demo_basic2.history")
-
-    print(test[0])
-
-    plt.plot(test[0])
-    plt.show()
-
+    test = read_xenobot_from_vxd("id4.vxd")
+    
+    print(test)
 
 # %%

@@ -5,6 +5,7 @@ Based on https://github.com/ukuleleplayer/pureples/tree/master/pureples
 """
 
 import os
+import pickle
 import neat
 from pureples.shared.substrate import Substrate
 from pureples.shared.visualize import draw_net
@@ -30,7 +31,7 @@ def run(
     config_file, 
     run_name, 
     generations = 100,
-    version = "M",
+    version = "L",
     size_params = [8,8,7], 
     fitness_func = None
     ) -> None:
@@ -57,18 +58,13 @@ def run(
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
-
-    config.genome_config.add_activation("neg_abs", neg_abs)
-    config.genome_config.add_activation("neg_square", neg_square)
-    config.genome_config.add_activation("sqrt_abs", sqrt_abs)
-    config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
     
     os.system(f"rm -rf fitnessFiles/{run_name}")
     os.system(f"mkdir -p fitnessFiles/{run_name}")
     os.system(f"cp {config_file} fitnessFiles/{run_name}/")
     os.system(f"mv fitnessFiles/{run_name}/{config_file} fitnessFiles/{run_name}/run_parameters")
     
-    run = Run(run_name, PARAMS, SUBSTRATE, size_params, True)
+    run = Run(run_name, params=PARAMS, substrate=SUBSTRATE, size_params=size_params, hyperneat=True)
     
     population = neat.Population(config)
     
@@ -80,8 +76,27 @@ def run(
     CPPN = neat.nn.FeedForwardNetwork.create(winner, config)
     NETWORK = ESNetwork(SUBSTRATE, CPPN, PARAMS)
     
-    for node in winner.nodes:
-        print(winner.nodes[node].activation)
+    median = stats.get_fitness_median()
+    mean = stats.get_fitness_mean()
+    std_dev = stats.get_fitness_stdev()
+    best_each_gen = stats.get_fitness_stat(fitest_in_gen)
+    
+    results = {
+        "winner": winner,
+        "best_each_gen": best_each_gen,
+        "mean": mean,
+        "median": median,
+        "std_dev": std_dev
+    }
+    
+    with open("HYPERNEAT-250.pickle", "wb") as f:
+        pickle.dump(results, f)
+
+def fitest_in_gen(scores):
+    """ 
+    
+    """
+    return max(scores)
 
 if __name__ == "__main__":
-    run("config-hyperneat", "run-hyperneat", generations=100)
+    run("config-hyperneat", "run_250_hyperneat", generations=250)
