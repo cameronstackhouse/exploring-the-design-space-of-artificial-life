@@ -3,7 +3,7 @@ Module to simulate ES-HyperNEAT on a population of
 CPPNs for the designing of Xenobots.
 Based on https://github.com/ukuleleplayer/pureples/tree/master/pureples
 """
-
+#%%
 import os
 import pickle
 import neat
@@ -11,8 +11,7 @@ from pureples.shared.substrate import Substrate
 from pureples.shared.visualize import draw_net
 from pureples.es_hyperneat.es_hyperneat import ESNetwork
 from tools.evaluate import Run
-from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
-
+import matplotlib.pyplot as plt
 
 def params(version):
     """
@@ -99,4 +98,6 @@ def fitest_in_gen(scores):
     return max(scores)
 
 if __name__ == "__main__":
-    run("config-hyperneat", "run_250_hyperneat", generations=250)
+    #run("config-hyperneat", "run_250_hyperneat", generations=250)
+    pass
+    

@@ -66,9 +66,9 @@ def calc_KC(s, size_params = [8,8,7]) -> float:
     Calculates the complexity of a xenobot phenotype
     """
     complexity = 0
-    body = np.fromstring(s)
+    body = np.frombuffer(s)
     reshaped = np.reshape(body, size_params)
-    flattened_bodies = [reshaped.flatten("C"), reshaped.flatten("F")]
+    flattened_bodies = [reshaped.flatten('C'), reshaped.flatten('F')]
     
     for b in flattened_bodies:
         # Turns flattened bodies to strings
