@@ -2,13 +2,16 @@
 Module to get information from phenotypes for use in clustering and comparing.
 """
 
+import sys
+sys.path.insert(1, '.')
+
 import os
 import neat
 from scipy.fft import fftn
 import numpy as np
 from typing import Tuple, List
 from itertools import product
-from tools.read_files import read_history
+from read_files import read_history
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
 from tools.activation_functions import normalize
@@ -58,16 +61,28 @@ def KC_LZ(string):
     complexity = c
     return complexity
 
-def calc_KC(s):
+def calc_KC(s, size_params = [8,8,7]) -> float:
     """
     Calculates the complexity of a xenobot phenotype
     """
-    #TODO: Maybe do different permutations, averaging complexity
-    L = len(s)
-    if s == '0'*L or s == '1'*L or s == '2'*L:
-        return np.log2(L)
-    else:
-        return np.log2(L)*(KC_LZ(s)+KC_LZ(s[::-1]))/2.0
+    complexity = 0
+    body = np.frombuffer(s)
+    reshaped = np.reshape(body, size_params)
+    flattened_bodies = [reshaped.flatten('C'), reshaped.flatten('F')]
+    
+    for b in flattened_bodies:
+        # Turns flattened bodies to strings
+        flattened = ""
+        for cell in b:
+            flattened += str(int(cell))
+            
+        L = len(flattened)
+        if flattened == '0'*L or flattened == '1'*L or flattened == '2'*L: # Checks if string is made of uniform cells
+            complexity += np.log2(L)
+        else:
+            complexity += np.log2(L)*(KC_LZ(flattened)+KC_LZ(flattened[::-1]))/2.0
+    
+    return (complexity / 2) 
 
 def movement_frequency_components(movement) -> np.ndarray:
     """
@@ -82,19 +97,6 @@ def movement_frequency_components(movement) -> np.ndarray:
     frequency_components = fftn(movement)
 
     return frequency_components
-
-def motif_vectorisation(phenotype: str) -> list:
-    """
-    Function to summarize a phenotype by motifs in its structure into a vector to be used in 
-    clustering of structure.
-
-    :param phenotype: 
-    """
-    #TODO Use motifs to vectorize
-
-    motifs = motifs()
-    
-    return []
 
 def num_cells(phenotype) -> dict:
     """
@@ -234,3 +236,9 @@ def gen_csv_entry(gene, hyperneat=False, substrate=None):
     
     """
     #TODO, DO THIS MARCH 14th
+    # Evaluate with all fitness funcs. This will take a while
+
+if __name__ == "__main__":
+    xenobot = np.ones([8,8,7])
+    
+    print(calc_KC(xenobot))
