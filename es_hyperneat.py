@@ -7,11 +7,11 @@ Based on https://github.com/ukuleleplayer/pureples/tree/master/pureples
 import os
 import pickle
 import neat
+from typing import List
 from pureples.shared.substrate import Substrate
-from pureples.shared.visualize import draw_net
 from pureples.es_hyperneat.es_hyperneat import ESNetwork
 from tools.evaluate import Run
-import matplotlib.pyplot as plt
+from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
 
 def params(version):
     """
@@ -58,6 +58,11 @@ def run(
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
     
+    config.genome_config.add_activation("neg_abs", neg_abs)
+    config.genome_config.add_activation("neg_square", neg_square)
+    config.genome_config.add_activation("sqrt_abs", sqrt_abs)
+    config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
+    
     os.system(f"rm -rf fitnessFiles/{run_name}")
     os.system(f"mkdir -p fitnessFiles/{run_name}")
     os.system(f"cp {config_file} fitnessFiles/{run_name}/")
@@ -91,12 +96,17 @@ def run(
     with open("HYPERNEAT-1000.pickle", "wb") as f:
         pickle.dump(results, f)
 
-def fitest_in_gen(scores):
+def fitest_in_gen(scores: List) -> float:
     """ 
+    Gets the fittest individual in a generation
+    from a list of fitnesses
     
+    :param scores:
+    :rtype: list
+    :return: 
     """
     return max(scores)
 
 if __name__ == "__main__":
-    run("config-hyperneat", "run_1000_hyperneat", generations=1000)
+    run("config-hyperneat", "run_250_hyperneat", generations=1000)
     

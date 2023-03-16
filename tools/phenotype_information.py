@@ -235,8 +235,10 @@ def gen_csv_entry(gene, hyperneat=False, substrate=None):
     """ 
     
     """
-    #TODO, DO THIS MARCH 14th
+    #TODO, DO THIS MARCH 15th
     # Evaluate with all fitness funcs. This will take a while
+    
+    pass
 
 if __name__ == "__main__":
     xenobot = np.ones([8,8,7])

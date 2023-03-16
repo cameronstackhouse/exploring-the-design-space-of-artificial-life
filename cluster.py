@@ -4,6 +4,7 @@ both Xenobot behaviour and structure.
 """
 
 import seaborn as sns
+import tools.clustering
 
 from sklearn.decomposition import PCA
 
