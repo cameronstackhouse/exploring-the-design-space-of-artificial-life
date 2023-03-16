@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 def run(
     config_file: str, 
     run_name: str, 
+    generations: int = 100,
     size_params: List = [8,8,7], 
     fitness_func: FitnessFunction = None
     ) -> None:
@@ -81,7 +82,7 @@ def fitest_in_gen(scores):
     return max(scores)
     
 if __name__ == "__main__":
-    # run("config-xenobots", "run_250_cppn_neat")
+    run("config-xenobots", "run_cppn_neat_new_params")
     
     # config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, "config-xenobots")
     
@@ -91,28 +92,3 @@ if __name__ == "__main__":
     # config.genome_config.add_activation("sqrt_abs", sqrt_abs)
     # config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
     
-    # data = None
-    
-    with open("NEAT-250.pickle", "rb") as f:
-        data = pickle.load(f)
-        
-    print(data.keys())
-    
-    y = list(range(len(data["std_dev"])))
-    
-    plt.plot(y, data["best_each_gen"])    
-    plt.plot(y, data["std_dev"])
-    plt.xlabel("Generation")
-    plt.ylabel("Fitness")
-    plt.legend(["Best Xenobot", "Standard Deviation"])
-    
-    # net = neat.nn.FeedForwardNetwork.create(data["winner"], config)
-    
-    # body_size = 1
-    # for dim in [8,8,7]:
-    #     body_size *= dim
-    #     body = np.zeros(body_size)
-            
-    # body = genotype_to_phenotype(net, [8,8,7]) # Generates xenobot body using CPPN
-
-    #show(body, [8,8,7])
