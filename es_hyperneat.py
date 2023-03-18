@@ -93,7 +93,7 @@ def run(
         "std_dev": std_dev
     }
     
-    with open("HYPERNEAT-1000.pickle", "wb") as f:
+    with open("HYPERNEAT-250-FINAL.pickle", "wb") as f:
         pickle.dump(results, f)
 
 def fitest_in_gen(scores: List) -> float:
@@ -108,5 +108,5 @@ def fitest_in_gen(scores: List) -> float:
     return max(scores)
 
 if __name__ == "__main__":
-    run("config-hyperneat", "run_250_hyperneat", generations=1000)
+    run("config-hyperneat", "run_250_hyperneat_FINAL", generations=250)
     

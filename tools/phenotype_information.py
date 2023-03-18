@@ -240,6 +240,20 @@ def gen_csv_entry(gene, hyperneat=False, substrate=None):
     
     pass
 
+def phenotype_distance(p1, p2) -> float:
+    """
+    Calculates the hamming distance between two phenotype strings
+    
+    :param p1: 
+    """
+    #TODO - USE FOR ROBUSTNESS CALCULATIONS
+    count = 0
+    for i in range(len(p1)):
+        if p1[i] != p2[i]:
+            count += 1
+            
+    return count
+
 if __name__ == "__main__":
     xenobot = np.ones([8,8,7])
     

@@ -54,6 +54,7 @@ class Phenotype:
         self.fitness = {} # TODO Implement this
         self.complexity = complexity
         self.genotypes = genotypes
+        self.num_cppn_designers = None # TODO ENSURE THIS IS DONE FOR HYPERNEAT MODIFY ALL FUNCTIONS
         self.motifs = None
 
 class Connection:
@@ -128,7 +129,7 @@ class GenotypePhenotypeMap:
         """
         self.gen_genotypes(num_genotypes)
         self.gen_phenotype_info()
-        self.calculate_fitness()
+        #self.calculate_fitness()
         
     def gen_genotypes(
         self, 
@@ -140,7 +141,6 @@ class GenotypePhenotypeMap:
         
         :param n: size of genotypes to generate (number of nodes)
         """    
-        #TODO Change to mutate connection weights properly! += 0.1 all or -=0.1 all
         generated_genotypes = set() # Set of generated genotypes
         mutations_applied = set() # Set of genotypes which mutations have been applied to
         
@@ -150,7 +150,9 @@ class GenotypePhenotypeMap:
         genotype_container = Genotype(default_genome, self.id_counter) # Adds genome to genotype container
         generated_genotypes.add(genotype_container) # Adds the initial genome to the set of generated genotypes
         
-        for n in range(num_genotypes):
+        n = 0
+        
+        while n <= num_genotypes:
             # Set of genotypes which havent had mutations applied to them yet
             not_explored = generated_genotypes - mutations_applied
             genotype_container = choice(tuple(not_explored)) # Chooses genotypem from set to apply set of mutations to
@@ -165,6 +167,7 @@ class GenotypePhenotypeMap:
                 self.connections.append(Connection(genotype_container, new_connection_weights))
                 GenotypePhenotypeMap.id_counter += 1
                 new_connection_weights.id = GenotypePhenotypeMap.id_counter 
+                n+=1
             
             # Mutates activation function of each node
             for n, _ in enumerate(genotype_container.genome.nodes.values()):
@@ -174,6 +177,7 @@ class GenotypePhenotypeMap:
                 self.connections.append(Connection(genotype_container, new_activation_function))
                 GenotypePhenotypeMap.id_counter += 1
                 new_activation_function.id = GenotypePhenotypeMap.id_counter 
+                n+=1
             
             # Add connection
             new_connections = deepcopy(genotype_container)
@@ -182,6 +186,7 @@ class GenotypePhenotypeMap:
             self.connections.append(Connection(genotype_container, new_connections))
             GenotypePhenotypeMap.id_counter += 1
             new_connections.id = GenotypePhenotypeMap.id_counter 
+            n+=1
             
             # Add node
             new_node = deepcopy(genotype_container)
@@ -190,6 +195,7 @@ class GenotypePhenotypeMap:
             self.connections.append(Connection(genotype_container, new_node))
             GenotypePhenotypeMap.id_counter += 1
             new_node.id = GenotypePhenotypeMap.id_counter
+            n+=1
             
             mutations_applied.add(genotype_container)
                 
@@ -227,14 +233,19 @@ class GenotypePhenotypeMap:
         genotypes = 0
         phenotypes = len(self.map.keys())
         
-        if not self.hyperneat:
-            for key in self.map:
-                for _ in self.map[key]:
-                    genotypes += 1
-        else:
+    
+        for key in self.map:
+            for _ in self.map[key]:
+                genotypes += 1
+        
+        if self.hyperneat:
+            producer_cppns = 0
+            #TODO MAKE SURE THIS WORKS
             for key in self.cppn_to_gene:
                 for _ in self.cppn_to_gene[key]:
-                    genotypes += 1
+                    producer_cppns += 1
+                
+            return (producer_cppns, genotypes, phenotypes)
         
         return (genotypes, phenotypes)
     
@@ -243,12 +254,13 @@ class GenotypePhenotypeMap:
         Function to generate information about phenotypes
         within the genotype_phenotype map
         """
+        #TODO ENSURE THIS WORKS WITH HYPERNEAT
         self.phenotypes = []
         for phenotype in self.map:
-            complexity = calc_KC(str(phenotype)) # TODO: MAYBE CHANGE THIS!
+            complexity = calc_KC(str(phenotype))
             num_mapped_genotypes = len(self.map[phenotype])
             container = Phenotype(phenotype, complexity, num_mapped_genotypes)
-            self.phenotypes.append(container)
+            self.phenotypes.append(container) # Adds phenotype object
             for genotype in self.map[phenotype]:
                 genotype.phenotype = container
 
@@ -288,6 +300,9 @@ class GenotypePhenotypeMap:
         :rtype: List
         :return: List of genotypes traversed in the walk path
         """
+        if self.hyperneat:
+            pass
+        
         walk_path = [start_genome]
         current_genome = start_genome
         encountered_phenotypes = set() # Phenotypes encountered during walk
@@ -324,9 +339,14 @@ class GenotypePhenotypeMap:
         """
         total_genotypes = 0
         phenotype_probabilities = []
-        for phenotype in self.map:
-            total_genotypes += len(self.map[phenotype])
-            phenotype_probabilities.append(len(self.map[phenotype]))
+        if self.hyperneat:
+            for phenotype in self.phenotypes:
+                total_genotypes += phenotype.num_cppn_designers
+                phenotype_probabilities.append(phenotype.num_cppn_designers)
+        else:
+            for phenotype in self.map:
+                total_genotypes += len(self.map[phenotype])
+                phenotype_probabilities.append(len(self.map[phenotype]))
         
         return [x / total_genotypes for x in phenotype_probabilities]
     
@@ -416,6 +436,8 @@ class GenotypePhenotypeMap:
                 elif phenotype[cell] == 2:
                     body[cell] = active 
             
+            #TODO CHECK IF BODY ALL 0s or 1s: NO FITNESS
+            
             reshaped = body.reshape(8,8,7)
             vxd.set_data(reshaped)
             
@@ -439,7 +461,7 @@ class GenotypePhenotypeMap:
                 for result in results:
                     phenotype_index = result["index"]
             
-                    #TODO Verify this works
+                    #Assign absolute moevement fitness value to phenotype
                     for genotype in self.map[fitness_file_mapping[phenotype_index]]:
                         genotype.phenotype.fitness["abs_movement"] = float(result["fitness"])
                 
@@ -534,9 +556,9 @@ if __name__ == "__main__":
     # gp = GenotypePhenotypeMap("config-gpmap")
     # gp.initilise(100000)
     
-    gp = GenotypePhenotypeMap("config-hyperneat-gpmap")
+    gp = GenotypePhenotypeMap("config-gpmap")
     
-    # gp = load("300000_cppn_neat")
+    gp.initilise(1000000)
     
     phenotypes = gp.phenotypes
     

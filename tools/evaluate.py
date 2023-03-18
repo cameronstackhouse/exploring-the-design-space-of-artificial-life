@@ -56,8 +56,9 @@ class Run:
         :param config: configuration file for run
         """
         
-        # TODO: THIS IS WHERE FITNESS FUNCTION IS CHANGED!
-        # vxa.set_fitness_function(self.fitness_function)
+        if self.fitness_function is not None:
+            vxa.set_fitness_function(self.fitness_function)
+            
         vxa = VXA(SimTime=3, HeapSize=0.65, RecordStepSize=100, DtFrac=0.95, EnableExpansion=1) 
     
         #Adds both cardiac, skin cells, and non-xenobot cells to the simulation
