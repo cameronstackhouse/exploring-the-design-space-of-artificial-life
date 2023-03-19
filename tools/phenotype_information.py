@@ -9,9 +9,9 @@ import os
 import neat
 from scipy.fft import fftn
 import numpy as np
+from tools.read_files import read_history
 from typing import Tuple, List
 from itertools import product
-from read_files import read_history
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
 from tools.activation_functions import normalize
@@ -66,7 +66,9 @@ def calc_KC(s, size_params = [8,8,7]) -> float:
     Calculates the complexity of a xenobot phenotype
     """
     complexity = 0
-    body = np.frombuffer(s)
+    body = np.zeros(len(s))
+    for i in range(len(s)):
+        body[i] = s[i]
     reshaped = np.reshape(body, size_params)
     flattened_bodies = [reshaped.flatten('C'), reshaped.flatten('F')]
     

@@ -5,6 +5,7 @@ Module implementing the ability to generate genotype-phenotype maps
 import os
 import pickle
 import neat
+from math import log10
 from copy import deepcopy
 from random import choice
 from typing import Tuple, List
@@ -20,7 +21,7 @@ from voxcraftpython.VoxcraftVXA import VXA
 from pureples.shared.substrate import Substrate
 from pureples.es_hyperneat.es_hyperneat import ESNetwork
 import seaborn as sns
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 # TODO:MODIFY FUNCTIONS FOR HYPERNEAT GP MAP
 
@@ -98,6 +99,7 @@ class GenotypePhenotypeMap:
         self.config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_name)
         self.substrate = None
         self.params = None
+        self.hyperneat = hyperneat
         
         if not hyperneat:
             self.config.genome_config.add_activation("neg_abs", neg_abs)
@@ -150,9 +152,9 @@ class GenotypePhenotypeMap:
         genotype_container = Genotype(default_genome, self.id_counter) # Adds genome to genotype container
         generated_genotypes.add(genotype_container) # Adds the initial genome to the set of generated genotypes
         
-        n = 0
+        number = 0
         
-        while n <= num_genotypes:
+        while number <= num_genotypes:
             # Set of genotypes which havent had mutations applied to them yet
             not_explored = generated_genotypes - mutations_applied
             genotype_container = choice(tuple(not_explored)) # Chooses genotypem from set to apply set of mutations to
@@ -162,22 +164,22 @@ class GenotypePhenotypeMap:
             # Applies mutation to every connection
             for n, _ in enumerate(genotype_container.genome.connections.values()):
                 new_connection_weights = deepcopy(genotype_container) # Creates a copy of the genotype
-                new_connection_weights.genome.connections.values()[n].mutate(self.config.genome_config)
+                list(new_connection_weights.genome.connections.values())[n].mutate(self.config.genome_config)
                 generated_genotypes.add(new_connection_weights)
                 self.connections.append(Connection(genotype_container, new_connection_weights))
                 GenotypePhenotypeMap.id_counter += 1
                 new_connection_weights.id = GenotypePhenotypeMap.id_counter 
-                n+=1
+                number+=1
             
             # Mutates activation function of each node
             for n, _ in enumerate(genotype_container.genome.nodes.values()):
                 new_activation_function = deepcopy(genotype_container)
-                new_activation_function.genome.nodes.values()[n].mutate(self.config.genome_config)
+                list(new_activation_function.genome.nodes.values())[n].mutate(self.config.genome_config)
                 generated_genotypes.add(new_activation_function)
                 self.connections.append(Connection(genotype_container, new_activation_function))
                 GenotypePhenotypeMap.id_counter += 1
                 new_activation_function.id = GenotypePhenotypeMap.id_counter 
-                n+=1
+                number+=1
             
             # Add connection
             new_connections = deepcopy(genotype_container)
@@ -186,7 +188,7 @@ class GenotypePhenotypeMap:
             self.connections.append(Connection(genotype_container, new_connections))
             GenotypePhenotypeMap.id_counter += 1
             new_connections.id = GenotypePhenotypeMap.id_counter 
-            n+=1
+            number+=1
             
             # Add node
             new_node = deepcopy(genotype_container)
@@ -195,11 +197,14 @@ class GenotypePhenotypeMap:
             self.connections.append(Connection(genotype_container, new_node))
             GenotypePhenotypeMap.id_counter += 1
             new_node.id = GenotypePhenotypeMap.id_counter
-            n+=1
+            number+=1
+            
+            print(number)
             
             mutations_applied.add(genotype_container)
                 
         # Iterates through generated phenotypes, producing their associated phenotypes
+        cc = 0
         for genotype in generated_genotypes:
             net = None
             if self.hyperneat:
@@ -214,8 +219,10 @@ class GenotypePhenotypeMap:
                 
                 net = sub.create_phenotype_network()
             else:
+                cc+= 1
                 net = neat.nn.FeedForwardNetwork.create(genotype.genome, self.config) # Network used to create xenobot bodies
             
+            print(cc)
             body = genotype_to_phenotype(net, [8,8,7]) # Creates xenobot body using neural network
             body = tuple(body) # Makes body hashable
             
@@ -257,7 +264,10 @@ class GenotypePhenotypeMap:
         #TODO ENSURE THIS WORKS WITH HYPERNEAT
         self.phenotypes = []
         for phenotype in self.map:
-            complexity = calc_KC(str(phenotype))
+            pheno_string = ""
+            for cell in phenotype:
+                pheno_string += str(int(cell))
+            complexity = calc_KC(pheno_string)
             num_mapped_genotypes = len(self.map[phenotype])
             container = Phenotype(phenotype, complexity, num_mapped_genotypes)
             self.phenotypes.append(container) # Adds phenotype object
@@ -468,21 +478,9 @@ class GenotypePhenotypeMap:
                 evaluated = 0
         
         os.system("rm -rf gp-fitness")
-    
-    def complexity_distribution_plot(self) -> None:
-        """ 
-        
-        """
-        #TODO Comments
-        complexities = []
-        for phenotype in phenotypes:
-            complexities.append(phenotype.complexity)
-        
-        complexity_distribution = sns.histplot(complexities)
-        complexity_distribution.set(xlabel="Kolmogorov Complexity")
                                             
 
-def gen_motifs(phenotypes: list) -> set:
+def gen_motifs(phenotypes: list) -> list:
     """ 
     Generates all 3x3x3 structural 
     motifs present in xenobots in the GP map.
@@ -502,11 +500,11 @@ def gen_motifs(phenotypes: list) -> set:
                     motif = shaped[i:i+3, j:j+3, k:k+3]
                     motifs.add(tuple(motif.flatten()))
             
-    return motifs
+    return list(motifs)
 
 def count_motifs(
     phenotypes: list, 
-    motifs: set
+    motifs: list
     )-> None:
     """ 
     Counts the number of 3x3x3 motifs in each phenotype 
@@ -528,7 +526,25 @@ def count_motifs(
                         motif_counts[tuple(subsection.flatten())] += 1
         
         phenotype.motifs = motif_counts # Sets phenotype motifs
-
+        
+def complexity_probability_distribution(gp_map: GenotypePhenotypeMap):
+    """ 
+    
+    """
+    #TODO add comments
+    count = []
+    complexity = []
+    total = 0
+    for i in range(len(gp_map.phenotypes)):
+        count.append(gp_map.phenotypes[i].genotypes)
+        total += count[i]
+        complexity.append(gp_map.phenotypes[i].complexity)
+    
+    count = [log10((c/total)) for c in count]
+    plt.scatter(complexity, count)
+    plt.ylabel("$Log_{10}(P)$")
+    plt.xlabel("Estimated Kolmogorov complexity")
+ 
 def save(
     obj, 
     filename: str
@@ -556,11 +572,21 @@ if __name__ == "__main__":
     # gp = GenotypePhenotypeMap("config-gpmap")
     # gp.initilise(100000)
     
-    gp = GenotypePhenotypeMap("config-gpmap")
     
-    gp.initilise(1000000)
+   gp = load("CPPN-NEAT-GP-MAP-1-MIL.pickle")
+   
+   print(gp.mean_genotype_to_phenotype_ratio())
+
+#%%
+   
+   
+#    ranked_complexity = gp.most_complex()
+   
+#    print(ranked_complexity[-1].phenotype)
+#    print(ranked_complexity[-1].complexity)
+   
+#    show(ranked_complexity[-1].phenotype)
     
-    phenotypes = gp.phenotypes
     
     # NOTE: Fitness distrib not really that interesting
     # fitnesses = []
@@ -571,7 +597,7 @@ if __name__ == "__main__":
     # plot = sns.histplot(data=fitnesses, kde=True)
     # plot.set(xlabel = "Phenotype Fitness", title="Distribution of Fitness for Centre of Mass Displacement")
     
-    # motifs = gen_motifs(phenotypes)
+    # motifs = gen_motifs(phenotypes)x2
     # count_motifs(phenotypes, motifs)
     
     #NOTE Probability of locating phenotype through random search
