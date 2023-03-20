@@ -242,7 +242,7 @@ def gen_json_entry(
     gene, 
     fitness: float,
     xenobot: str,
-    xenobot_dimensions: str,
+    xenobot_dimensions: str = "8x8x7",
     json_name: str="xenobot-data.json",
     hyperneat: bool=False, 
     designer_cppn = None
@@ -286,9 +286,13 @@ def gen_json_entry(
                 
                 json_entry["connections"].append(connection_entry)
         
+        if hyperneat:
+            #TODO
+            pass
         
         # Append entry to file
-        listObj.append(json_entry)
+        if not hyperneat:
+            listObj["CPPN-NEAT"].append(json_entry)
         
         # Write back to json file
         with open(json_name, 'w') as json_file:
@@ -318,10 +322,4 @@ if __name__ == "__main__":
     gene.configure_new(config.genome_config) 
     
     
-    for connection in gene.connections:
-        # Connection and enabled needed
-        input = gene.connections[connection].key[0]
-        output = gene.connections[connection].key[1]
-        weight = gene.connections[connection].weight
-        enabled = gene.connections[connection].enabled
-        print(f"input key: {input} output key: {output} weight: {weight} enabled: {enabled}")
+    gen_json_entry(gene, 0, "aaaaaaaa")
