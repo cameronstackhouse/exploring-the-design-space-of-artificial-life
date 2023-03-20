@@ -24,9 +24,9 @@ def run_and_save(
     for n, function in enumerate(fitness_functions):
         #TODO before running ensure fitness functions fully operational
         # CPPN-NEAT 
-        cppn_neat.run("config-xenobots", f"run-{fit_func_names[n]}-CPPN-NEAT", generations=generations, fitness_func=function)
+        cppn_neat.run(cppn_neat_config, f"run-{fit_func_names[n]}-CPPN-NEAT", generations=generations, fitness_func=function)
         # ES-HyperNEAT 
-        es_hyperneat.run("config-hyperneat", f"run-{fit_func_names[n]}-ES-HyperNEAT", generations=generations, fitness_func=function)
+        es_hyperneat.run(es_hyperneat_config, f"run-{fit_func_names[n]}-ES-HyperNEAT", generations=generations, fitness_func=function)
         
 if __name__ == "__main__":
     run_and_save()

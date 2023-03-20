@@ -7,6 +7,7 @@ sys.path.insert(1, '.')
 
 import os
 import neat
+import json
 from scipy.fft import fftn
 import numpy as np
 from tools.read_files import read_history
@@ -230,19 +231,74 @@ def movement_components(
     return frequency_comp
 
 def movement_components_from_phenotypes(phenotypes: List):
+    """ 
+    
+    :param phenotypes:
+    """
     #TODO
     pass
 
-def gen_csv_entry(gene, hyperneat=False, substrate=None):
+def gen_json_entry(
+    gene, 
+    fitness: float,
+    xenobot: str,
+    xenobot_dimensions: str,
+    json_name: str="xenobot-data.json",
+    hyperneat: bool=False, 
+    designer_cppn = None
+    ) -> None:
     """ 
+    Generates a json entry for 
     
+    :param gene:
+    :param fitness:
+    :param xenobot:
+    :param xenobot_dimensions:
+    :param json_name: 
+    :param hyperneat:
+    :param substrate:
     """
-    #TODO, DO THIS MARCH 15th
-    # Evaluate with all fitness funcs. This will take a while
+    if os.path.isfile(json_name) is False:
+        print("ERROR, NO FILE")
+    else:
+        with open(json_name) as fp:
+            listObj = json.load(fp)
+        
+        # Create JSON entry
+        json_entry = {"nodes": [], "connections": [], "xenobot": xenobot, "xenobot_dimensions": xenobot_dimensions}
+        
+        for node in gene.nodes:
+            node_entry = {
+                "key": gene.nodes[node].key,
+                "activation": gene.nodes[node].activation,
+                "bias": gene.nodes[node].bias
+            }
+            
+            json_entry["nodes"].append(node_entry)
+        
+        for connection in gene.connections:
+            if gene.connections[connection].enabled:
+                connection_entry = {
+                    "input": gene.connections[connection].key[0],
+                    "output": gene.connections[connection].key[1],
+                    "weight": gene.connections[connection].weight
+                }
+                
+                json_entry["connections"].append(connection_entry)
+        
+        
+        # Append entry to file
+        listObj.append(json_entry)
+        
+        # Write back to json file
+        with open(json_name, 'w') as json_file:
+            json.dump(listObj, json_file, indent=4, separators=(',', ': '))
     
-    pass
 
-def phenotype_distance(p1, p2) -> float:
+def phenotype_distance(
+    p1: str, 
+    p2: str
+    ) -> float:
     """
     Calculates the hamming distance between two phenotype strings
     
@@ -257,6 +313,15 @@ def phenotype_distance(p1, p2) -> float:
     return count
 
 if __name__ == "__main__":
-    xenobot = np.ones([8,8,7])
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, "config-gpmap")
+    gene = neat.DefaultGenome(1)
+    gene.configure_new(config.genome_config) 
     
-    print(calc_KC(xenobot))
+    
+    for connection in gene.connections:
+        # Connection and enabled needed
+        input = gene.connections[connection].key[0]
+        output = gene.connections[connection].key[1]
+        weight = gene.connections[connection].weight
+        enabled = gene.connections[connection].enabled
+        print(f"input key: {input} output key: {output} weight: {weight} enabled: {enabled}")
