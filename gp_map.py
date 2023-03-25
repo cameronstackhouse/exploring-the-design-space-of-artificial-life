@@ -101,29 +101,29 @@ class GenotypePhenotypeMap:
         self.params = None
         self.hyperneat = hyperneat
         
-        if not hyperneat:
-            self.config.genome_config.add_activation("neg_abs", neg_abs)
-            self.config.genome_config.add_activation("neg_square", neg_square)
-            self.config.genome_config.add_activation("sqrt_abs", sqrt_abs)
-            self.config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
-        else:
-            # Set substrate, set params
-            self.params = {"initial_depth": 2,
-                           "max_depth": 3,
-                           "variance_threshold": 0.03,
-                           "iteration_level": 1,
-                           "division_threshold": 0.5,
-                           "max_weight": 5.0,
-                           "activation": "sigmoid"}
+        self.config.genome_config.add_activation("neg_abs", neg_abs)
+        self.config.genome_config.add_activation("neg_square", neg_square)
+        self.config.genome_config.add_activation("sqrt_abs", sqrt_abs)
+        self.config.genome_config.add_activation("neg_sqrt_abs", neg_sqrt_abs)
+
+        # Set substrate, set params
+        self.params = {"initial_depth": 2,
+                        "max_depth": 3,
+                        "variance_threshold": 0.03,
+                        "band_threshold": 0.3,
+                        "iteration_level": 1,
+                        "division_threshold": 0.5,
+                        "max_weight": 5.0,
+                        "activation": "sigmoid"}
             
-            INPUT_COORDINATES = []
+        INPUT_COORDINATES = []
             
-            for i in range(0, 5):
-                INPUT_COORDINATES.append((-1 + (2 * i/3), -1))
+        for i in range(0, 5):
+            INPUT_COORDINATES.append((-1 + (2 * i/3), -1))
+                        
+        OUTPUT_COORDINATES = [(-1, 1), (1, 1)]
             
-            OUTPUT_COORDINATES = [(-1, 1), (1, 1)]
-            
-            self.substrate = Substrate(INPUT_COORDINATES, OUTPUT_COORDINATES)
+        self.substrate = Substrate(INPUT_COORDINATES, OUTPUT_COORDINATES)
     
     def initilise(self, num_genotypes: int) -> None:
         """ 
@@ -199,16 +199,13 @@ class GenotypePhenotypeMap:
             new_node.id = GenotypePhenotypeMap.id_counter
             number+=1
             
-            print(number)
-            
             mutations_applied.add(genotype_container)
                 
         # Iterates through generated phenotypes, producing their associated phenotypes
-        cc = 0
         for genotype in generated_genotypes:
             net = None
             if self.hyperneat:
-                cppn = neat.nn.FeedForwardNetwork.create(genotype, self.config) # CPPN to design network to produce xenobot
+                cppn = neat.nn.FeedForwardNetwork.create(genotype.genome, self.config) # CPPN to design network to produce xenobot
                 sub = ESNetwork(self.substrate, cppn, self.params) # created substrate
                 
                 # Adds mapping between cppn and network to design xenobots
@@ -219,10 +216,8 @@ class GenotypePhenotypeMap:
                 
                 net = sub.create_phenotype_network()
             else:
-                cc+= 1
                 net = neat.nn.FeedForwardNetwork.create(genotype.genome, self.config) # Network used to create xenobot bodies
             
-            print(cc)
             body = genotype_to_phenotype(net, [8,8,7]) # Creates xenobot body using neural network
             body = tuple(body) # Makes body hashable
             
@@ -297,46 +292,6 @@ class GenotypePhenotypeMap:
         """
         genotypes, phenotypes = self.num_genotypes_and_phenotypes()
         return genotypes/phenotypes
-
-    def random_neutral_walk(self, start_genome, steps) -> List:
-        """ 
-        Random neutral walk through the genotype space of the 
-        genotype-phenotype map.
-        Walks through genotype space, only moving to the next genotype
-        if its phenotype matches that of the current one.
-        
-        :param start_genome: 
-        :param steps: 
-        :rtype: List
-        :return: List of genotypes traversed in the walk path
-        """
-        if self.hyperneat:
-            pass
-        
-        walk_path = [start_genome]
-        current_genome = start_genome
-        encountered_phenotypes = set() # Phenotypes encountered during walk
-        
-        for _ in range(steps):
-            # Gets a list of the valid traversals
-            valid_traversals = []
-            for connection in self.connections:
-                if connection.n1 is current_genome:
-                    valid_traversals.append(connection.n2)
-                elif connection.n2 is current_genome:
-                    valid_traversals.append(connection.n1)
-                    
-            if len(valid_traversals) > 0:
-                next_genome = choice(valid_traversals) # Chooses next genotype
-                
-                # Checks if phenotypes match
-                if np.array_equal(next_genome.phenotype.phenotype, current_genome.phenotype.phenotype):
-                    walk_path.append(next_genome) # Adds next genotype to walk path
-                    current_genome = next_genome # Moves walk to next node
-                else:
-                    encountered_phenotypes.add(tuple(next_genome.phenotype.phenotype))
-                
-        return walk_path, encountered_phenotypes
     
     def probability_of_phenotypes(self) -> List:
         """ 
@@ -359,55 +314,6 @@ class GenotypePhenotypeMap:
                 phenotype_probabilities.append(len(self.map[phenotype]))
         
         return [x / total_genotypes for x in phenotype_probabilities]
-    
-    def probability_of_complex_phenotypes(self) -> List:
-        """ 
-        Function to calculate the probability of encountering phenotypes of 
-        varying complexities. This identifies if the evolutionary system has a
-        bias in producing phenotypes of a given complexity.
-        
-        :rtype: List
-        :return: List of probabilities of encountering complexitie of each phenotype in the system
-        """
-        total_genotypes = 0
-        phenotype_probabilities = np.zeros(10) # Empty phenotype probabilities array
-        for phenotype in self.map:
-            total_genotypes += len(self.map[phenotype]) # Increments total number of
-            for genotype in self.map[phenotype]:
-                complexity = round(genotype.phenotype.complexity)
-                str_complexity = str(complexity)
-                if len(str_complexity) == 2:
-                    phenotype_probabilities[0] += len(self.map[phenotype])
-                else:
-                    phenotype_probabilities[int(str_complexity[0])] += len(self.map[phenotype])
-                    
-        return [(x / total_genotypes) for x in phenotype_probabilities]
-                
-    def reachability(self) -> List:
-        """ 
-        
-        """
-        #TODO MODIFY FOR HYPERNEAT - ENSURE DONE CORRECTLY
-        # Can make histograms using this!!
-        num_phenotypes_encountered = []
-
-        for phenotype in self.map:
-            for _ in range(100):
-                random_genotype = choice(self.map[phenotype])
-                _, phenotypes_encountered = self.random_neutral_walk(random_genotype, 300)
-                num_phenotypes_encountered.append(len(phenotypes_encountered))
-        
-        return num_phenotypes_encountered
-    
-    def innovation_rate(self) -> float:
-        """ 
-        
-        """
-        #TODO
-        for phenotype in self.map:
-            for _ in range(100):
-                random_genotype = choice(self.map[phenotype])
-                self.random_neutral_walk(random_genotype, 100)
     
     def calculate_fitness(self) -> None:
         """ 
@@ -480,7 +386,7 @@ class GenotypePhenotypeMap:
         os.system("rm -rf gp-fitness")
                                             
 
-def gen_motifs(phenotypes: list) -> list:
+def gen_motifs(phenotypes: list) -> set:
     """ 
     Generates all 3x3x3 structural 
     motifs present in xenobots in the GP map.
@@ -500,11 +406,12 @@ def gen_motifs(phenotypes: list) -> list:
                     motif = shaped[i:i+3, j:j+3, k:k+3]
                     motifs.add(tuple(motif.flatten()))
             
-    return list(motifs)
+    return motifs
 
 def count_motifs(
     phenotypes: list, 
-    motifs: list
+    motifs: set,
+    motif_index: dict
     )-> None:
     """ 
     Counts the number of 3x3x3 motifs in each phenotype 
@@ -513,6 +420,8 @@ def count_motifs(
     :param motifs: iterable collection of motifs to count
     """
     #TODO Change to any size sized motifs
+    
+    count = 0
     for phenotype in phenotypes:
         motif_counts = defaultdict(int)
         body = np.array(phenotype.phenotype)
@@ -522,10 +431,14 @@ def count_motifs(
             for j in range(len(shaped[0]) - 2):
                 for k in range(len(shaped[0][0]) - 2):
                     subsection = shaped[i:i+3, j:j+3, k:k+3]
-                    if tuple(subsection.flatten()) in motifs: # Checks if indexed subsection is in list of motifs
-                        motif_counts[tuple(subsection.flatten())] += 1
+                    indexable = tuple(subsection.flatten())
+                    if indexable in motifs: # Checks if indexed subsection is in list of motifs
+                        motif_counts[motif_index[indexable]] += 1
         
+        count += 1
+        print(f"Calculated motifs for phenotype {count} out of {len(phenotypes)}")
         phenotype.motifs = motif_counts # Sets phenotype motifs
+
         
 def complexity_probability_distribution(gp_map: GenotypePhenotypeMap):
     """ 
@@ -544,7 +457,121 @@ def complexity_probability_distribution(gp_map: GenotypePhenotypeMap):
     plt.scatter(complexity, count)
     plt.ylabel("$Log_{10}(P)$")
     plt.xlabel("Estimated Kolmogorov complexity")
- 
+
+def reachability(gp_map):
+    """
+    
+    """
+    #TODO
+    pass
+
+def robustness(gp_map) -> float:
+    """ 
+    Calculates the mean genotypic robustness of a genotype-phenotype mapping,
+    meaning the mean number of genotype mutations which do not 
+    alter the resulting phenotype structure.
+    """
+    #TODO calculate
+    
+    # Gets genotype connections
+    connections = defaultdict(list)
+    
+    for connection in gp_map.connections:
+        connections[connection.n1].append(connection.n2)
+        connections[connection.n2].append(connection.n1)
+    
+    counter = 0
+    total = 0
+    for phenotype in gp_map.map:
+        for genotype in gp_map.map[phenotype]:
+            
+            if len(connections[genotype]) > 1:
+                counter += 1
+                matching_phenotype = 0
+                num_neighbours = len(connections[genotype])
+                for connected_to in connections[genotype]:
+                    if connected_to.phenotype.phenotype == genotype.phenotype.phenotype:
+                        matching_phenotype += 1
+                
+                total += (matching_phenotype/num_neighbours)
+    
+    return total / counter
+
+def phenotypic_robustness(gp_map) -> float:
+    """ 
+    Average of genotypic robustness over genotypes that match to that phenotype
+    """
+    connections = defaultdict(list)
+    
+    for connection in gp_map.connections:
+        connections[connection.n1].append(connection.n2)
+        connections[connection.n2].append(connection.n1)
+    
+    total = 0
+    count = 0
+    
+    for phenotype in gp_map.map:
+        count += 1
+        pheno_avg = 0
+        for genotype in gp_map.map[phenotype]:
+            if len(connections[genotype]) > 1:
+                matching_phenotype = 0
+                num_neighbours = len(connections[genotype])
+                for connected_to in connections[genotype]:
+                    if connected_to.phenotype.phenotype == genotype.phenotype.phenotype:
+                        matching_phenotype += 1
+            
+                pheno_avg += (matching_phenotype/num_neighbours)
+        
+        pheno_avg /= len(gp_map.map[phenotype])
+    
+        total += pheno_avg
+    
+    return total / count
+
+def robustness_plot(gp_map) -> None:
+    """
+    Plots the distribution of robustness of genotypes in 
+    a genotype-phenotype mapping 
+    """
+    
+    robustness_vals = []
+    
+    connections = defaultdict(list)
+    
+    for connection in gp_map.connections:
+        connections[connection.n1].append(connection.n2)
+        connections[connection.n2].append(connection.n1)
+    
+    for phenotype in gp_map.map:
+        for genotype in gp_map.map[phenotype]:
+            if len(connections[genotype]) > 1:
+                matching_phenotype = 0
+                num_neighbours = len(connections[genotype])
+                for connected_to in connections[genotype]:
+                    if connected_to.phenotype.phenotype == genotype.phenotype.phenotype:
+                        matching_phenotype += 1
+                
+                robustness_vals.append((matching_phenotype/num_neighbours))
+    
+    plt.hist(robustness_vals)
+    
+def evolvability(gp_map):
+    """ 
+    Calculates the innovation rate of a genotype-phenotype mapping,
+    measuring the evolvability of a population in a given mapping.
+    
+    Taken from ebner et al. "How Neutral Networks Influence Evolvability"
+    """
+    total_encountered = []
+    for phenotype in gp_map:
+        encountered_per_step = [] * 100
+        for _ in range(100): # 100 random walks for each phenotype
+            random_genotype = choice(gp_map[phenotype])
+            # Random neutral walk starting from genotype of size 100
+            # Average result over all walks
+            # Plot length of random neutral walk vs avg num phenotypes encountered
+            # np.cumsum
 def save(
     obj, 
     filename: str
@@ -565,45 +592,25 @@ def load(filename: str) -> None:
     """
     with open(filename, 'rb') as file:
         obj = pickle.load(file)
+        file.close()
         return obj
 
 
-if __name__ == "__main__":
-    # gp = GenotypePhenotypeMap("config-gpmap")
-    # gp.initilise(100000)
+if __name__ == "__main__":   
+    #gp = load("ES-HYPERNEAT-GP-MAP-1000000")
+    gp = load("genotype-phenotype_maps/CPPN-NEAT-GP-MAP-1-MIL.pickle")
     
+    print("LOADED")
     
-   gp = load("CPPN-NEAT-GP-MAP-1-MIL.pickle")
-   
-   print(gp.mean_genotype_to_phenotype_ratio())
+    hyper_motifs = load("hyperneat-motifs.pickle")
+    neat_motifs = load("cppn-neat-motifs.pickle")
+    
+    all_motifs = set(hyper_motifs).union(set(neat_motifs))
+    
+    motif_index = {motif: i for i, motif in enumerate(all_motifs)}
+    
+    counted_motifs = count_motifs(gp.phenotypes, all_motifs, motif_index)
+    
+    # NOTE: TODO TOMMOROW. GET MOTIFS COUNTED AND SET OFF FFT!
 
 #%%
-   
-   
-#    ranked_complexity = gp.most_complex()
-   
-#    print(ranked_complexity[-1].phenotype)
-#    print(ranked_complexity[-1].complexity)
-   
-#    show(ranked_complexity[-1].phenotype)
-    
-    
-    # NOTE: Fitness distrib not really that interesting
-    # fitnesses = []
-    # for phenotype in gp.phenotypes:
-    #     if phenotype.fitness["abs_movement"] > 0.1:
-    #         fitnesses.append(phenotype.fitness["abs_movement"])
-  
-    # plot = sns.histplot(data=fitnesses, kde=True)
-    # plot.set(xlabel = "Phenotype Fitness", title="Distribution of Fitness for Centre of Mass Displacement")
-    
-    # motifs = gen_motifs(phenotypes)x2
-    # count_motifs(phenotypes, motifs)
-    
-    #NOTE Probability of locating phenotype through random search
-    # most_designable = gp.most_designable()
-    
-    # for pheno in most_designable[:5]:
-    #     print(pheno.genotypes)
-    
-    # print(most_designable[2].phenotype)

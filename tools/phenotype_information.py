@@ -242,22 +242,24 @@ def gen_json_entry(
     gene, 
     fitness: float,
     xenobot: str,
+    label: str = "None",
     xenobot_dimensions: str = "8x8x7",
     json_name: str="xenobot-data.json",
     hyperneat: bool=False, 
-    designer_cppn = None
+    substrate = None
     ) -> None:
     """ 
     Generates a json entry for 
     
-    :param gene:
-    :param fitness:
-    :param xenobot:
-    :param xenobot_dimensions:
-    :param json_name: 
-    :param hyperneat:
-    :param substrate:
+    :param gene: Neural network genotype
+    :param fitness: Fitness of xenobot
+    :param xenobot: Body of xenobot
+    :param xenobot_dimensions: Dimensions of xenobot
+    :param json_name: Name of JSON file to append to
+    :param hyperneat: Indicating if produced by hyperneat
+    :param substrate: Substrate for hyperneat
     """
+    # Checks for a file
     if os.path.isfile(json_name) is False:
         print("ERROR, NO FILE")
     else:
@@ -265,7 +267,12 @@ def gen_json_entry(
             listObj = json.load(fp)
         
         # Create JSON entry
-        json_entry = {"nodes": [], "connections": [], "xenobot": xenobot, "xenobot_dimensions": xenobot_dimensions}
+        json_entry = {"nodes": [], 
+                      "connections": [], 
+                      "xenobot_body": xenobot, 
+                      "xenobot_dimensions": xenobot_dimensions,
+                      "label": label
+                      }
         
         for node in gene.nodes:
             node_entry = {
@@ -293,6 +300,8 @@ def gen_json_entry(
         # Append entry to file
         if not hyperneat:
             listObj["CPPN-NEAT"].append(json_entry)
+        else:
+            listObj["ES-HyperNEAT"].append(json_entry)
         
         # Write back to json file
         with open(json_name, 'w') as json_file:

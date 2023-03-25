@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import AgglomerativeClustering, KMeans
 from sklearn.metrics import silhouette_score
-from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import dendrogram, linkage
 
 def dunn_index(
     labels, 
@@ -63,47 +63,26 @@ def choose_num_clusters(
         plt.show()
     
     return optimal_num_clusters, optimal_clustering_labels
-    
-def hierarchical(data: np.array) -> Tuple:
+
+def hierarchical_clustering(data: np.array):
     """ 
-    Performs agglomerative hierachical clustering on a set of data
     
-    :param data: data to perform agglomerative hierarchical clustering on
-    :rtype: Tuple
-    :return: number of clusters formed and clustering labels placed on each datapoint
     """
-    clustering = AgglomerativeClustering().fit(data) # performs agglomerative hierarchical clustering with the data provided
-    return clustering.n_clusters_, clustering.labels_
+    #TODO alter distance threshold
+    clustering = AgglomerativeClustering(n_clusters=None, distance_threshold=1.5).fit(data)
+    return clustering.labels_, clustering.n_clusters_
 
-def plot_dendrogram(data, **kwargs) -> None:
-    """
-    Method to plot a dendrogram generated via hierarchical clustering given a set of data.
-    Code taken from: https://scikit-learn.org/stable/auto_examples/cluster/plot_agglomerative_dendrogram.html#sphx-glr-auto-examples-cluster-plot-agglomerative-dendrogram-py
+def plot_dendrogram(data):
+    """ 
     
-    :param data: data to generate hierarchical clustering from
-    :kwargs: arguments to pass to the dendrogram plot
     """
-    # Performs agglomerative hierarcha
-    model = AgglomerativeClustering(distance_threshold=0, n_clusters=None).fit(data)
-    counts = np.zeros(model.children_.shape[0])
-    n_samples = len(model.labels_)
-    for i, merge in enumerate(model.children_):
-        current_count = 0
-        for child_idx in merge:
-            if child_idx < n_samples:
-                current_count += 1  # leaf node
-            else:
-                current_count += counts[child_idx - n_samples]
-        counts[i] = current_count
-
-    linkage_matrix = np.column_stack(
-        [model.children_, model.distances_, counts]
-    ).astype(float)
-
-    # Plot the corresponding dendrogram
-    dendrogram(linkage_matrix, **kwargs)
+    linkage_data = linkage(data)
+    dendrogram(linkage_data)
 
 if __name__ == "__main__":
-    data = np.array([[i, j] for i in range(10) for j in range(10)])
+    data = [[0., 0.], [0.1, -0.1], [1., 1.], [1.1, 1.1], [3,4], [1,2], [9,8], [10,8], [11,8]]
+    results = hierarchical_clustering(data)
     
-    plot_dendrogram(data)
+    print(results[0])
+
+#%%

@@ -11,4 +11,9 @@ gp-fitness
 nohup.out
 genotype-phenotype_maps
 300000_cppn_neat
-.pickle
+cppn-neat-motifs.pickle
+ES-HYPERNEAT
+result-video
+ES-HYPERNEAT-GP-MAP-1000000
+hyperneat-motifs.pickle
+pid.txt
