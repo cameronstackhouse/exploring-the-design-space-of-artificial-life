@@ -124,25 +124,13 @@ def num_cells(phenotype) -> dict:
     return {"none": none, "skin": skin, "muscle": muscle}
 
 def movement_components(
-    genome, 
-    config, 
-    size_params, 
-    hyperneat = False, 
-    substrate = None, 
-    hyperneat_params = None
+    phenotype
     ):
     """
     Gets the movement components of a xenobot
     from the history file produced by voxcraft-sim
     """
     #TODO change to do multiple cppns. Allow vxa and vxd options
-    net = None
-    if hyperneat:
-        cppn_designer = neat.nn.FeedForwardNetwork.create(genome, config)
-        xenobot_producer_network = ESNetwork(substrate, cppn_designer, hyperneat_params)
-        net = xenobot_producer_network.create_phenotype_network()
-    else:
-        net = neat.nn.FeedForwardNetwork.create(genome, config)
     
     # Make dir to run
     os.system("mkdir temp_run_movement")
@@ -150,66 +138,16 @@ def movement_components(
     # 1) Make VXD File
     vxa = VXA(SimTime=3, HeapSize=0.65, RecordStepSize=100, DtFrac=0.95, EnableExpansion=1) 
 
-    passive = vxa.add_material(RGBA=(0,255,0), E=5000000, RHO=1000000) # passive soft
-    active = vxa.add_material(RGBA=(255,0,0), CTE=0.01, E=5000000, RHO=1000000) # active
+    vxa.add_material(RGBA=(0,255,0), E=5000000, RHO=1000000) # passive soft
+    vxa.add_material(RGBA=(255,0,0), CTE=0.01, E=5000000, RHO=1000000) # active
     
     vxa.write("base.vxa") #Write a base vxa file
     os.system(f"cp base.vxa temp_run_movement/") #Copy vxa file to correct run directory
     os.system("rm base.vxa") #Removes old vxa file
 
-    # 2) Make VXA File
-    x_inputs = np.zeros(size_params)
-    y_inputs = np.zeros(size_params)
-    z_inputs = np.zeros(size_params)
-    
-    for x in range(size_params[0]):
-            for y in range(size_params[1]):
-                for z in range(size_params[2]):
-                    x_inputs[x, y, z] = x
-                    y_inputs[x, y, z] = y
-                    z_inputs[x, y, z] = z
-
-    x_inputs = normalize(x_inputs)
-    y_inputs = normalize(y_inputs)
-    z_inputs = normalize(z_inputs)
-
-    #Creates the d input array, calculating the distance each point is away from the centre
-    d_inputs = normalize(np.power(np.power(x_inputs, 2) + np.power(y_inputs, 2) + np.power(z_inputs, 2), 0.5))
-
-    #Creates the b input array, which is just a numpy array of ones
-    b_inputs = np.ones(size_params)
-
-    #Sets all inputs and flattens them into 1D arrays
-    x_inputs = x_inputs.flatten()
-    y_inputs = y_inputs.flatten()
-    z_inputs = z_inputs.flatten()
-    d_inputs = d_inputs.flatten()
-    b_inputs = b_inputs.flatten()
-    
-    inputs = list(zip(x_inputs, y_inputs, z_inputs, d_inputs, b_inputs))
-    
-    for n, input in enumerate(inputs):
-            output = net.activate(input)
-            presence = output[0]
-            material = output[1]
-            
-            if presence <= 0.2: #Checks if presence output is less than 0.2
-                body[n] = 0 #If so there is no material in the location
-            elif material < 0.5: #Checks if material output is less than 0.5 
-                body[n] = 1 #If so there is skin in the location
-            else:
-                body[n] = 2 #Else there is a cardiac cell in the location
-    
-    for cell in range(len(body)):
-        if body[cell] == 1:
-            body[cell] = passive
-        elif body[cell] == 2:
-            body[cell] = active 
-            
-    body = body.reshape(size_params[0], size_params[1], size_params[2])
     vxd = VXD()
     vxd.set_tags(RecordVoxel=1) # pass vxd tags in here to overwite vxa tags
-    vxd.set_data(body) #Sets the data to be written as the phenotype generated
+    vxd.set_data(phenotype) #Sets the data to be written as the phenotype generated
     
     vxd.write(f"movement.vxd") #Writes vxd file for individual
     os.system(f"cp movement.vxd temp_run_movement/")
@@ -217,7 +155,7 @@ def movement_components(
 
     # 3) Run voxcraft-sim
     os.chdir("voxcraft-sim/build")
-    os.system("./voxcraft-sim -i ../../temp_run_movement/ > ../../temp_run_movement/temp_run_movement.history")
+    os.system("./voxcraft-sim -i ../../temp_run_movement/ > temp_run_movement.history")
 
     # 4) Read results
     movement = read_history("temp_run_movement.history")
@@ -235,8 +173,9 @@ def movement_components_from_phenotypes(phenotypes: List):
     
     :param phenotypes:
     """
-    #TODO
-    pass
+    for phenotype in phenotypes:
+        movement_comps = movement_components(phenotype.phenotype)
+        
 
 def gen_json_entry(
     gene, 
@@ -326,9 +265,8 @@ def phenotype_distance(
     return count
 
 if __name__ == "__main__":
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, "config-gpmap")
-    gene = neat.DefaultGenome(1)
-    gene.configure_new(config.genome_config) 
-    
-    
-    gen_json_entry(gene, 0, "aaaaaaaa")
+    body = np.zeros([2,2,3])
+    body[0][0][1] = 2
+    body[0][0][2] = 2
+    body[0][1][2] = 2
+    a = movement_components(body)

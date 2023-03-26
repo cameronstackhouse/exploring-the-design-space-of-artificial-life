@@ -17,3 +17,4 @@ result-video
 ES-HYPERNEAT-GP-MAP-1000000
 hyperneat-motifs.pickle
 pid.txt
+motif_data.json
