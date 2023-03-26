@@ -79,13 +79,19 @@ def read_history(
     #TODO Tidy and add comments
     x_components = []
     y_components = []
-    z_components = []
 
     file = open(filename, "r")
 
     lst = file.readlines()
 
-    steps = lst[14:-3] # Gets step information
+    # Search for steps start index for start of steps
+    start_index = 0
+    for i in range(len(lst)):
+        if lst[i][:3] == "<<<":
+            start_index = i
+            break
+    
+    steps = lst[start_index:-3] # Gets step information
 
     # Removes uneeded information from step data
     for m, step in enumerate(steps):
@@ -105,19 +111,16 @@ def read_history(
         surface_voxels = step.split(";")
         total_x = 0
         total_y = 0
-        total_z = 0
         for voxel in surface_voxels:
             v = voxel.split(",")
             if v != ['']:
-                total_x += float(v[11])
-                total_y += float(v[12])
-                total_z += float(v[13])
+                total_x += float(v[0])
+                total_y += float(v[1])
             
         x_components.append(total_x/len(surface_voxels))
         y_components.append(total_y/len(surface_voxels))
-        z_components.append(total_z/len(surface_voxels))
 
-    return [x_components, y_components, z_components]
+    return [x_components, y_components]
 
 def read_xenobot_from_vxd(filename: str) -> np.array:
     """ 
@@ -172,7 +175,7 @@ def read_xenobot_from_vxd(filename: str) -> np.array:
 if __name__ == "__main__":
     #TODO DELETE FOR RELEASE
     #TODO ENSURE THIS WORKS!
-    test = read_xenobot_from_vxd("id4.vxd")
+    test = read_history("temp_run_movement.history")
     
     print(test)
    

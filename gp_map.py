@@ -5,6 +5,7 @@ Module implementing the ability to generate genotype-phenotype maps
 import os
 import pickle
 import neat
+import json
 from math import log10
 from copy import deepcopy
 from random import choice
@@ -400,10 +401,10 @@ def gen_motifs(phenotypes: list) -> set:
         body = np.array(phenotype.phenotype)
         shaped = body.reshape(8,8,7)
         # Sliding window identifying motifs of size 3x3x3
-        for i in range(len(shaped) - 2):
-            for j in range(len(shaped[0]) - 2):
-                for k in range(len(shaped[0][0]) - 2):
-                    motif = shaped[i:i+3, j:j+3, k:k+3]
+        for i in range(len(shaped) - 4):
+            for j in range(len(shaped[0]) - 4):
+                for k in range(len(shaped[0][0]) - 4):
+                    motif = shaped[i:i+5, j:j+5, k:k+5]
                     motifs.add(tuple(motif.flatten()))
             
     return motifs
@@ -427,10 +428,10 @@ def count_motifs(
         body = np.array(phenotype.phenotype)
         shaped = body.reshape(8,8,7)
         # Sliding window to identify subsections of xenobot
-        for i in range(len(shaped) - 2):
-            for j in range(len(shaped[0]) - 2):
-                for k in range(len(shaped[0][0]) - 2):
-                    subsection = shaped[i:i+3, j:j+3, k:k+3]
+        for i in range(len(shaped) - 4):
+            for j in range(len(shaped[0]) - 4):
+                for k in range(len(shaped[0][0]) - 4):
+                    subsection = shaped[i:i+5, j:j+5, k:k+5]
                     indexable = tuple(subsection.flatten())
                     if indexable in motifs: # Checks if indexed subsection is in list of motifs
                         motif_counts[motif_index[indexable]] += 1
@@ -439,6 +440,43 @@ def count_motifs(
         print(f"Calculated motifs for phenotype {count} out of {len(phenotypes)}")
         phenotype.motifs = motif_counts # Sets phenotype motifs
 
+def gen_motif_clustering_data_file(phenotypes) -> None:
+    """ 
+    
+    """
+    motifs = gen_motifs(phenotypes)
+    motif_index = {motif: i for i, motif in enumerate(motifs)}
+    count_motifs(phenotypes, motifs, motif_index)
+    
+    motif_index_string = {}
+    
+    for n, motif in enumerate(motifs):
+        motif_string = ""
+        for cell in motif:
+            motif_string += str(int(cell))
+        motif_index_string[n] = motif_string
+    
+    data = {
+        "motifs": motif_index_string,
+        "xenobots":[]
+    }
+    
+    for phenotype in phenotypes:
+        xenobot_entry = {}
+        
+        str_body = ""
+        for cell in phenotype.phenotype:
+            str_body += str(int(cell))
+        
+        xenobot_entry["body"] = str_body
+        xenobot_entry["motif_counts"] = phenotype.motifs
+        
+        data["xenobots"].append(xenobot_entry)
+    
+    json_object = json.dumps(data, indent=4)
+    
+    with open("motif_data.json", "w") as outfile:
+        outfile.write(json_object)
         
 def complexity_probability_distribution(gp_map: GenotypePhenotypeMap):
     """ 
@@ -602,14 +640,14 @@ if __name__ == "__main__":
     
     print("LOADED")
     
-    hyper_motifs = load("hyperneat-motifs.pickle")
-    neat_motifs = load("cppn-neat-motifs.pickle")
+    gen_motif_clustering_data_file(gp.phenotypes)
     
-    all_motifs = set(hyper_motifs).union(set(neat_motifs))
+    # hyper_motifs = load("hyperneat-motifs.pickle")
+    # neat_motifs = load("cppn-neat-motifs.pickle")
     
-    motif_index = {motif: i for i, motif in enumerate(all_motifs)}
+    # all_motifs = set(hyper_motifs).union(set(neat_motifs))
     
-    counted_motifs = count_motifs(gp.phenotypes, all_motifs, motif_index)
+    # counted_motifs = count_motifs(gp.phenotypes, all_motifs, motif_index)
     
     # NOTE: TODO TOMMOROW. GET MOTIFS COUNTED AND SET OFF FFT!
 
