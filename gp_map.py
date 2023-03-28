@@ -652,10 +652,7 @@ if __name__ == "__main__":
     
     print("LOADED")
     
-    motifs = gen_motifs(gp.phenotypes)
-    
-    print(len(motifs))
-    save(motifs, "cppn-neat-motifs-3-by-3-1k+.pickle")
+    gen_motif_clustering_data_file(gp.phenotypes, "cppn-neat-motifs-3-by-3-1k+.pickle")
     
     #gen_motif_clustering_data_file(gp.phenotypes, "cppn-neat-motifs.pickle")
     
