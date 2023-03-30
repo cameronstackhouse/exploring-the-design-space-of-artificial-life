@@ -396,17 +396,25 @@ def gen_motifs(phenotypes: list) -> set:
     :return: set of motifs identified in the population of xenobots
     """
     #TODO Change to any sized motifs
+    
+    # TODO: CHANGE TO ONLY KEEPING COUNTS OF 1000+
+    
+    phenotype_counts = defaultdict(int)
     motifs = set() # Set of unique motifs
     for phenotype in phenotypes:
         body = np.array(phenotype.phenotype)
         shaped = body.reshape(8,8,7)
         # Sliding window identifying motifs of size 3x3x3
-        for i in range(len(shaped) - 4):
-            for j in range(len(shaped[0]) - 4):
-                for k in range(len(shaped[0][0]) - 4):
-                    motif = shaped[i:i+5, j:j+5, k:k+5]
-                    motifs.add(tuple(motif.flatten()))
-            
+        for i in range(len(shaped) - 2):
+            for j in range(len(shaped[0]) - 2):
+                for k in range(len(shaped[0][0]) - 2):
+                    motif = shaped[i:i+3, j:j+3, k:k+3]
+                    hashed = hash(tuple(motif.flatten()))
+                    phenotype_counts[hashed] += 1
+                    
+                    if phenotype_counts[hashed] >= 1000:
+                        motifs.add(tuple(motif.flatten()))
+          
     return motifs
 
 def count_motifs(
@@ -415,8 +423,10 @@ def count_motifs(
     motif_index: dict
     )-> None:
     """ 
-    Counts the number of 3x3x3 motifs in each phenotype 
+    Counts the number of 4x4x4 motifs in each phenotype 
     given a list of motifs.
+    
+    Only saves motifs 
             
     :param motifs: iterable collection of motifs to count
     """
@@ -428,10 +438,10 @@ def count_motifs(
         body = np.array(phenotype.phenotype)
         shaped = body.reshape(8,8,7)
         # Sliding window to identify subsections of xenobot
-        for i in range(len(shaped) - 4):
-            for j in range(len(shaped[0]) - 4):
-                for k in range(len(shaped[0][0]) - 4):
-                    subsection = shaped[i:i+5, j:j+5, k:k+5]
+        for i in range(len(shaped) - 2):
+            for j in range(len(shaped[0]) - 2):
+                for k in range(len(shaped[0][0]) - 2):
+                    subsection = shaped[i:i+3, j:j+3, k:k+3]
                     indexable = tuple(subsection.flatten())
                     if indexable in motifs: # Checks if indexed subsection is in list of motifs
                         motif_counts[motif_index[indexable]] += 1
@@ -440,13 +450,15 @@ def count_motifs(
         print(f"Calculated motifs for phenotype {count} out of {len(phenotypes)}")
         phenotype.motifs = motif_counts # Sets phenotype motifs
 
-def gen_motif_clustering_data_file(phenotypes) -> None:
+def gen_motif_clustering_data_file(phenotypes, motif_name) -> None:
     """ 
     
     """
-    motifs = gen_motifs(phenotypes)
+    motifs = set(load(motif_name))
+    print("MOTIFS LOADED")
     motif_index = {motif: i for i, motif in enumerate(motifs)}
     count_motifs(phenotypes, motifs, motif_index)
+    print("COUNTED")
     
     motif_index_string = {}
     
@@ -640,7 +652,9 @@ if __name__ == "__main__":
     
     print("LOADED")
     
-    gen_motif_clustering_data_file(gp.phenotypes)
+    gen_motif_clustering_data_file(gp.phenotypes, "cppn-neat-motifs-3-by-3-1k+.pickle")
+    
+    #gen_motif_clustering_data_file(gp.phenotypes, "cppn-neat-motifs.pickle")
     
     # hyper_motifs = load("hyperneat-motifs.pickle")
     # neat_motifs = load("cppn-neat-motifs.pickle")
