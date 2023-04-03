@@ -606,7 +606,7 @@ def robustness_plot(gp_map) -> None:
     
     plt.hist(robustness_vals)
     
-def evolvability(gp_map):
+def innov_rate(gp_map):
     """ 
     Calculates the innovation rate of a genotype-phenotype mapping,
     measuring the evolvability of a population in a given mapping.
@@ -622,6 +622,33 @@ def evolvability(gp_map):
             # Average result over all walks
             # Plot length of random neutral walk vs avg num phenotypes encountered
             # np.cumsum
+
+def genotype_evolvability(gp_map) -> float:
+    """
+    taken from https://royalsocietypublishing.org/doi/pdf/10.1098/rspb.2007.1137. 
+    Number of different phenotypes in the 1 mutation neighbourhood of a genotype
+    """
+    total = 0
+    counter = 0
+    connections = defaultdict(list)
+    
+    for connection in gp_map.connections:
+        connections[connection.n1].append(connection.n2)
+        connections[connection.n2].append(connection.n1)
+    
+    for pheno in gp_map.map:
+        for geno in gp_map.map[pheno]:
+            if len(connections[geno]) > 1:
+                counter += 1
+                for connected_to in connections[geno]:
+                    if connected_to.phenotype.phenotype != geno.phenotype.phenotype:
+                        total += 1
+    
+    return total / counter
+
+def phenotype_evolvability(gp_map) -> int:
+    pass
+
 def save(
     obj, 
     filename: str
@@ -647,22 +674,11 @@ def load(filename: str) -> None:
 
 
 if __name__ == "__main__":   
-    #gp = load("ES-HYPERNEAT-GP-MAP-1000000")
     gp = load("genotype-phenotype_maps/CPPN-NEAT-GP-MAP-1-MIL.pickle")
+    #gp = load("genotype-phenotype_maps/ES-HYPERNEAT-GP-MAP-1000000")
     
     print("LOADED")
     
-    gen_motif_clustering_data_file(gp.phenotypes, "cppn-neat-motifs-3-by-3-1k+.pickle")
-    
-    #gen_motif_clustering_data_file(gp.phenotypes, "cppn-neat-motifs.pickle")
-    
-    # hyper_motifs = load("hyperneat-motifs.pickle")
-    # neat_motifs = load("cppn-neat-motifs.pickle")
-    
-    # all_motifs = set(hyper_motifs).union(set(neat_motifs))
-    
-    # counted_motifs = count_motifs(gp.phenotypes, all_motifs, motif_index)
-    
-    # NOTE: TODO TOMMOROW. GET MOTIFS COUNTED AND SET OFF FFT!
+    print(genotype_evolvability(gp))
 
 #%%
