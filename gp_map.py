@@ -558,53 +558,29 @@ def phenotypic_robustness(gp_map) -> float:
         connections[connection.n2].append(connection.n1)
     
     total = 0
-    count = 0
+    num_calculated = 0
     
-    for phenotype in gp_map.map:
-        count += 1
-        pheno_avg = 0
-        for genotype in gp_map.map[phenotype]:
-            if len(connections[genotype]) > 1:
+    for pheno in gp_map.map:
+        pheno_robustness = 0
+        counter = 0
+        calculated = False
+        for geno in gp_map.map[pheno]:
+            if len(connections[geno]) > 1:
+                calculated = True
+                counter += 1
                 matching_phenotype = 0
-                num_neighbours = len(connections[genotype])
-                for connected_to in connections[genotype]:
-                    if connected_to.phenotype.phenotype == genotype.phenotype.phenotype:
-                        matching_phenotype += 1
-            
-                pheno_avg += (matching_phenotype/num_neighbours)
-        
-        pheno_avg /= len(gp_map.map[phenotype])
-    
-        total += pheno_avg
-    
-    return total / count
-
-def robustness_plot(gp_map) -> None:
-    """
-    Plots the distribution of robustness of genotypes in 
-    a genotype-phenotype mapping 
-    """
-    
-    robustness_vals = []
-    
-    connections = defaultdict(list)
-    
-    for connection in gp_map.connections:
-        connections[connection.n1].append(connection.n2)
-        connections[connection.n2].append(connection.n1)
-    
-    for phenotype in gp_map.map:
-        for genotype in gp_map.map[phenotype]:
-            if len(connections[genotype]) > 1:
-                matching_phenotype = 0
-                num_neighbours = len(connections[genotype])
-                for connected_to in connections[genotype]:
-                    if connected_to.phenotype.phenotype == genotype.phenotype.phenotype:
+                num_neighbours = len(connections[geno])
+                for connected_to in connections[geno]:
+                    if connected_to.phenotype.phenotype == geno.phenotype.phenotype:
                         matching_phenotype += 1
                 
-                robustness_vals.append((matching_phenotype/num_neighbours))
-    
-    plt.hist(robustness_vals)
+                pheno_robustness += (matching_phenotype/num_neighbours)
+                
+        if calculated:
+            total += (pheno_robustness / counter)
+            num_calculated += 1
+            
+    return total / num_calculated
     
 def innov_rate(gp_map):
     """ 
@@ -646,8 +622,33 @@ def genotype_evolvability(gp_map) -> float:
     
     return total / counter
 
-def phenotype_evolvability(gp_map) -> int:
-    pass
+def phenotype_evolvability(gp_map) -> float:
+    """
+    
+    """
+    total = 0
+    counter = 0
+    div = 0 
+    connections = defaultdict(list)
+    
+    for connection in gp_map.connections:
+        connections[connection.n1].append(connection.n2)
+        connections[connection.n2].append(connection.n1)
+    
+    for pheno in gp_map.map:
+        calculated = False
+        for geno in gp_map.map[pheno]:
+            if len(connections[geno]) > 1:
+                calculated = True
+                counter += 1
+                for connected_to in connections[geno]:
+                    if connected_to.phenotype.phenotype != geno.phenotype.phenotype:
+                        total += 1
+        
+        if calculated:
+            div += 1
+    
+    return total / div
 
 def save(
     obj, 
@@ -679,6 +680,6 @@ if __name__ == "__main__":
     
     print("LOADED")
     
-    print(genotype_evolvability(gp))
+    print(phenotype_evolvability(gp))
 
 #%%
