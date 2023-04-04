@@ -10,6 +10,7 @@ from typing import List
 import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.fft import fftn
 
 def read_sim_output(filename: str) -> List[dict]:
     """
@@ -79,6 +80,7 @@ def read_history(
     #TODO Tidy and add comments
     x_components = []
     y_components = []
+    z_components = []
 
     file = open(filename, "r")
 
@@ -111,21 +113,26 @@ def read_history(
         surface_voxels = step.split(";")
         total_x = 0
         total_y = 0
+        total_z = 0
         for voxel in surface_voxels:
             v = voxel.split(",")
             if v != ['']:
                 total_x += float(v[0])
                 total_y += float(v[1])
+                total_z += float(v[2])
             
         x_components.append(total_x/len(surface_voxels))
         y_components.append(total_y/len(surface_voxels))
+        z_components.append(total_z/len(surface_voxels))
 
     x_components = np.array(x_components)
     y_components = np.array(y_components)
+    z_components = np.array(z_components)
     
     x_components[1:] -= x_components[:-1].copy()
     y_components[1:] -= y_components[:-1].copy()
-    return [x_components, y_components]
+    z_components[1:] -= z_components[:-1].copy()
+    return [x_components[1:], y_components[1:], z_components[1:]]
 
 def read_xenobot_from_vxd(filename: str) -> np.array:
     """ 
@@ -178,11 +185,16 @@ def read_xenobot_from_vxd(filename: str) -> np.array:
     return body
 
 if __name__ == "__main__":
-    #TODO DELETE FOR RELEASE
-    #TODO ENSURE THIS WORKS!
-    test = read_history("temp_run_movement.history")
+    test = read_history("demo_basic.history")
     
-    plt.plot(test[1])
+    plt.plot(test[0])
+    
+    fft_d = fftn(test)
+    
+    print(len(fft_d))
+    
+    
+    
    
 
 # %%
