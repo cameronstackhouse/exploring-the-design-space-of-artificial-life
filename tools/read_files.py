@@ -120,6 +120,11 @@ def read_history(
         x_components.append(total_x/len(surface_voxels))
         y_components.append(total_y/len(surface_voxels))
 
+    x_components = np.array(x_components)
+    y_components = np.array(y_components)
+    
+    x_components[1:] -= x_components[:-1].copy()
+    y_components[1:] -= y_components[:-1].copy()
     return [x_components, y_components]
 
 def read_xenobot_from_vxd(filename: str) -> np.array:
@@ -177,7 +182,7 @@ if __name__ == "__main__":
     #TODO ENSURE THIS WORKS!
     test = read_history("temp_run_movement.history")
     
-    print(test)
+    plt.plot(test[1])
    
 
 # %%
