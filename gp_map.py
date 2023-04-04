@@ -504,16 +504,9 @@ def complexity_probability_distribution(gp_map: GenotypePhenotypeMap):
         complexity.append(gp_map.phenotypes[i].complexity)
     
     count = [log10((c/total)) for c in count]
-    plt.scatter(complexity, count)
+    plt.scatter(complexity, count, s=1)
     plt.ylabel("$Log_{10}(P)$")
     plt.xlabel("Estimated Kolmogorov complexity")
-
-def reachability(gp_map):
-    """
-    
-    """
-    #TODO
-    pass
 
 def robustness(gp_map) -> float:
     """ 
@@ -680,6 +673,15 @@ if __name__ == "__main__":
     
     print("LOADED")
     
-    print(phenotype_evolvability(gp))
+    most_complex = gp.most_complex()
+    
+    print(most_complex[0].complexity)
+    show(most_complex[0].phenotype)
+    
+    print(most_complex[-1].complexity)
+    show(most_complex[-1].phenotype)
+    
+    print(most_complex[round(len(most_complex)/2)].complexity)
+    show(most_complex[round(len(most_complex)/2)].phenotype)
 
 #%%
