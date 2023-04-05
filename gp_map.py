@@ -14,7 +14,7 @@ from collections import defaultdict
 import numpy as np
 from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
 from tools.gen_phenotype_from_genotype import genotype_to_phenotype
-from tools.phenotype_information import calc_KC
+from tools.phenotype_information import calc_KC, movement_components
 from tools.read_files import read_sim_output
 from visualise_xenobot import show
 from voxcraftpython.VoxcraftVXD import VXD
@@ -575,23 +575,6 @@ def phenotypic_robustness(gp_map) -> float:
             
     return total / num_calculated
     
-def innov_rate(gp_map):
-    """ 
-    Calculates the innovation rate of a genotype-phenotype mapping,
-    measuring the evolvability of a population in a given mapping.
-    
-    Taken from ebner et al. "How Neutral Networks Influence Evolvability"
-    """
-    total_encountered = []
-    for phenotype in gp_map:
-        encountered_per_step = [] * 100
-        for _ in range(100): # 100 random walks for each phenotype
-            random_genotype = choice(gp_map[phenotype])
-            # Random neutral walk starting from genotype of size 100
-            # Average result over all walks
-            # Plot length of random neutral walk vs avg num phenotypes encountered
-            # np.cumsum
-
 def genotype_evolvability(gp_map) -> float:
     """
     taken from https://royalsocietypublishing.org/doi/pdf/10.1098/rspb.2007.1137. 
@@ -643,6 +626,36 @@ def phenotype_evolvability(gp_map) -> float:
     
     return total / div
 
+def calculate_frequency_components(phenotypes: List) -> List:
+    """ 
+    Function to calculate the frequency components of the 
+    movement of a list of xenobots.
+    
+    :param phenotypes: List of xenobot phenotypes
+    :rtype: List
+    :return: List of frequency components for each phenotype
+    """
+    vectors = []
+    for phenotype in phenotypes:
+        count += 1
+        body = np.array(phenotype.phenotype)
+        shaped = body.reshape(8,8,7)
+        frequency_comp = movement_components(shaped)
+
+        x = list(frequency_comp[0][:4])
+        y = list(frequency_comp[1][:4])
+        z = list(frequency_comp[2][:4])
+        
+        components = np.append(x, np.append(y, z))
+
+        vectors.append(components)
+        print(len(vectors))
+        
+    return vectors
+
+def save_movement_file(phenotypes: List, frequency_components: List) -> None:
+    pass
+
 def save(
     obj, 
     filename: str
@@ -673,15 +686,11 @@ if __name__ == "__main__":
     
     print("LOADED")
     
-    most_complex = gp.most_complex()
+    #most_complex = gp.most_complex()
     
-    print(most_complex[0].complexity)
-    show(most_complex[0].phenotype)
+    components = calculate_frequency_components(gp.phenotypes)
     
-    print(most_complex[-1].complexity)
-    show(most_complex[-1].phenotype)
+    save(components, "frequency-components-50k.pickle")
     
-    print(most_complex[round(len(most_complex)/2)].complexity)
-    show(most_complex[round(len(most_complex)/2)].phenotype)
 
 #%%

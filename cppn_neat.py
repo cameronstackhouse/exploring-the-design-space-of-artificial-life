@@ -82,7 +82,7 @@ def fitest_in_gen(scores):
     return max(scores)
     
 if __name__ == "__main__":
-    run("config-xenobots", "run_cppn_250_FINAL")
+    run("config-xenobots", "run_cppn_test")
     
     # config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, "config-xenobots")
     

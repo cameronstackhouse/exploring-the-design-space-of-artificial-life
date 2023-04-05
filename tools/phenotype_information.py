@@ -130,7 +130,10 @@ def movement_components(
     Gets the movement components of a xenobot
     from the history file produced by voxcraft-sim
     """
-    #TODO change to do multiple cppns. Allow vxa and vxd options
+    #TODO CHECK FOR NO CELLS!
+    
+    if np.sum(phenotype) == 0:
+        return [[0,0,0,0],[0,0,0,0],[0,0,0,0]]
     
     # Make dir to run
     os.system("mkdir temp_run_movement")
@@ -167,14 +170,6 @@ def movement_components(
     # 6) FFT On movement components
     frequency_comp = fftn(movement)
     return frequency_comp
-
-def movement_components_from_phenotypes(phenotypes: List):
-    """ 
-    
-    :param phenotypes:
-    """
-    for phenotype in phenotypes:
-        movement_comps = movement_components(phenotype.phenotype)
         
 
 def gen_json_entry(
