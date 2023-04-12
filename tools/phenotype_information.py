@@ -6,17 +6,12 @@ import sys
 sys.path.insert(1, '.')
 
 import os
-import neat
 import json
 from scipy.fft import fftn
 import numpy as np
 from tools.read_files import read_history
-from typing import Tuple, List
-from itertools import product
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
-from tools.activation_functions import normalize
-from pureples.es_hyperneat.es_hyperneat import ESNetwork
 
 def KC_LZ(string):
     """
@@ -130,7 +125,10 @@ def movement_components(
     Gets the movement components of a xenobot
     from the history file produced by voxcraft-sim
     """
-    #TODO change to do multiple cppns. Allow vxa and vxd options
+    #TODO CHECK FOR NO CELLS!
+    
+    if np.sum(phenotype) == 0:
+        return [[0,0,0,0],[0,0,0,0],[0,0,0,0]]
     
     # Make dir to run
     os.system("mkdir temp_run_movement")
@@ -155,10 +153,12 @@ def movement_components(
 
     # 3) Run voxcraft-sim
     os.chdir("voxcraft-sim/build")
-    os.system("./voxcraft-sim -i ../../temp_run_movement/ > temp_run_movement.history")
+    os.system("./voxcraft-sim -i ../../temp_run_movement/ > temp_run_movement.history -f")
 
     # 4) Read results
     movement = read_history("temp_run_movement.history")
+    
+    os.system("rm -f temp_run_movement.history")
 
     # 5) Delete files
     os.chdir("../../")
@@ -167,14 +167,6 @@ def movement_components(
     # 6) FFT On movement components
     frequency_comp = fftn(movement)
     return frequency_comp
-
-def movement_components_from_phenotypes(phenotypes: List):
-    """ 
-    
-    :param phenotypes:
-    """
-    for phenotype in phenotypes:
-        movement_comps = movement_components(phenotype.phenotype)
         
 
 def gen_json_entry(
@@ -245,28 +237,3 @@ def gen_json_entry(
         # Write back to json file
         with open(json_name, 'w') as json_file:
             json.dump(listObj, json_file, indent=4, separators=(',', ': '))
-    
-
-def phenotype_distance(
-    p1: str, 
-    p2: str
-    ) -> float:
-    """
-    Calculates the hamming distance between two phenotype strings
-    
-    :param p1: 
-    """
-    #TODO - USE FOR ROBUSTNESS CALCULATIONS
-    count = 0
-    for i in range(len(p1)):
-        if p1[i] != p2[i]:
-            count += 1
-            
-    return count
-
-if __name__ == "__main__":
-    body = np.zeros([2,2,3])
-    body[0][0][1] = 2
-    body[0][0][2] = 2
-    body[0][1][2] = 2
-    a = movement_components(body)

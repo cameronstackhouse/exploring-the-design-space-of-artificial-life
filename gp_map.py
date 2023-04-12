@@ -6,6 +6,7 @@ import os
 import pickle
 import neat
 import json
+import csv
 from math import log10
 from copy import deepcopy
 from random import choice
@@ -14,7 +15,7 @@ from collections import defaultdict
 import numpy as np
 from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
 from tools.gen_phenotype_from_genotype import genotype_to_phenotype
-from tools.phenotype_information import calc_KC
+from tools.phenotype_information import calc_KC, movement_components
 from tools.read_files import read_sim_output
 from visualise_xenobot import show
 from voxcraftpython.VoxcraftVXD import VXD
@@ -450,9 +451,9 @@ def count_motifs(
         print(f"Calculated motifs for phenotype {count} out of {len(phenotypes)}")
         phenotype.motifs = motif_counts # Sets phenotype motifs
 
-def gen_motif_clustering_data_file(phenotypes, motif_name) -> None:
+def gen_motif_clustering_data_file(phenotypes: List, motif_name: str) -> None:
     """ 
-    
+    Generate a CSV file containing motif information associated to each phenotype
     """
     motifs = set(load(motif_name))
     print("MOTIFS LOADED")
@@ -489,10 +490,24 @@ def gen_motif_clustering_data_file(phenotypes, motif_name) -> None:
     
     with open("motif_data.json", "w") as outfile:
         outfile.write(json_object)
+
+def gen_behaviour_clustering_data_file(behaviour_comps: List, name: str):
+    """ 
+    
+    """
+    headers = ["X1", "X2", "X3", "X4", "Y1", "Y2", "Y3", "Y4", "Z1", "Z2", "Z3", "Z4"]
+    with open(name, mode="w", newline="") as csv_file:
+        writer = csv.writer(csv_file)
+
+        writer.writerow(headers)
+        
+        for row in behaviour_comps:
+            writer.writerow(row)
         
 def complexity_probability_distribution(gp_map: GenotypePhenotypeMap):
     """ 
-    
+    Function to plot the complexity-probability distribution of a population 
+    of xenobots 
     """
     #TODO add comments
     count = []
@@ -508,13 +523,16 @@ def complexity_probability_distribution(gp_map: GenotypePhenotypeMap):
     plt.ylabel("$Log_{10}(P)$")
     plt.xlabel("Estimated Kolmogorov complexity")
 
-def robustness(gp_map) -> float:
+def robustness(gp_map: GenotypePhenotypeMap) -> float:
     """ 
     Calculates the mean genotypic robustness of a genotype-phenotype mapping,
     meaning the mean number of genotype mutations which do not 
     alter the resulting phenotype structure.
+    
+    :param gp_map: genotype-phenotype map
+    :rtype: float
+    :return: genotypic robustness
     """
-    #TODO calculate
     
     # Gets genotype connections
     connections = defaultdict(list)
@@ -540,9 +558,13 @@ def robustness(gp_map) -> float:
     
     return total / counter
 
-def phenotypic_robustness(gp_map) -> float:
+def phenotypic_robustness(gp_map: GenotypePhenotypeMap) -> float:
     """ 
     Average of genotypic robustness over genotypes that match to that phenotype
+    
+    :param gp_map: genotype-phenotype map
+    :rtype: float
+    :return: phenotypic robustness
     """
     connections = defaultdict(list)
     
@@ -575,27 +597,14 @@ def phenotypic_robustness(gp_map) -> float:
             
     return total / num_calculated
     
-def innov_rate(gp_map):
-    """ 
-    Calculates the innovation rate of a genotype-phenotype mapping,
-    measuring the evolvability of a population in a given mapping.
-    
-    Taken from ebner et al. "How Neutral Networks Influence Evolvability"
-    """
-    total_encountered = []
-    for phenotype in gp_map:
-        encountered_per_step = [] * 100
-        for _ in range(100): # 100 random walks for each phenotype
-            random_genotype = choice(gp_map[phenotype])
-            # Random neutral walk starting from genotype of size 100
-            # Average result over all walks
-            # Plot length of random neutral walk vs avg num phenotypes encountered
-            # np.cumsum
-
-def genotype_evolvability(gp_map) -> float:
+def genotype_evolvability(gp_map: GenotypePhenotypeMap) -> float:
     """
     taken from https://royalsocietypublishing.org/doi/pdf/10.1098/rspb.2007.1137. 
     Number of different phenotypes in the 1 mutation neighbourhood of a genotype
+    
+    :param gp_map: genotype-phenotype map
+    :rtype: float
+    :return: genotypic evolvability 
     """
     total = 0
     counter = 0
@@ -615,9 +624,14 @@ def genotype_evolvability(gp_map) -> float:
     
     return total / counter
 
-def phenotype_evolvability(gp_map) -> float:
+def phenotype_evolvability(gp_map: GenotypePhenotypeMap) -> float:
     """
+    Calculates the phenotypic evolvability, defined as the average 
+    number of phenotypes reachable from every phenotype
     
+    :param gp_map: genotype-phenotype map
+    :rtype: float
+    :return: mean phenotypic evolvability
     """
     total = 0
     counter = 0
@@ -642,6 +656,33 @@ def phenotype_evolvability(gp_map) -> float:
             div += 1
     
     return total / div
+
+def calculate_frequency_components(phenotypes: List) -> List:
+    """ 
+    Function to calculate the frequency components of the 
+    movement of a list of xenobots.
+    
+    :param phenotypes: List of xenobot phenotypes
+    :rtype: List
+    :return: List of frequency components for each phenotype
+    """
+    vectors = []
+    for phenotype in phenotypes:
+        body = np.array(phenotype.phenotype)
+        shaped = body.reshape(8,8,7)
+        frequency_comp = movement_components(shaped)
+
+        x = list(frequency_comp[0][:4])
+        y = list(frequency_comp[1][:4])
+        z = list(frequency_comp[2][:4])
+        
+        components = np.append(x, np.append(y, z))
+
+        vectors.append(components)
+        print(len(vectors))
+        
+    return vectors
+
 
 def save(
     obj, 
@@ -668,20 +709,22 @@ def load(filename: str) -> None:
 
 
 if __name__ == "__main__":   
-    gp = load("genotype-phenotype_maps/CPPN-NEAT-GP-MAP-1-MIL.pickle")
+    #gp = load("genotype-phenotype_maps/CPPN-NEAT-GP-MAP-1-MIL.pickle")
     #gp = load("genotype-phenotype_maps/ES-HYPERNEAT-GP-MAP-1000000")
     
-    print("LOADED")
+    #phenotypes = load("10k-phenotypes.pickle")
     
-    most_complex = gp.most_complex()
+    #print("LOADED")
     
-    print(most_complex[0].complexity)
-    show(most_complex[0].phenotype)
+    #components = calculate_frequency_components(phenotypes)
     
-    print(most_complex[-1].complexity)
-    show(most_complex[-1].phenotype)
+    #ave(components, "frequency-components-first-10k.pickle")
     
-    print(most_complex[round(len(most_complex)/2)].complexity)
-    show(most_complex[round(len(most_complex)/2)].phenotype)
-
+    components = load("frequency-components-first-10k.pickle")
+    
+    #gen_behaviour_clustering_data_file(components, "frequency-components.csv")
+        
+    a = components[110][1]
+    print(a)
+    print(np.real(a))
 #%%
