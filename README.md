@@ -32,6 +32,8 @@ Install all python requirements:
     
     pip install -r requirements
 
+### TODO: DATASETS
+
 ### Settings File
 
 ### Running Experiments
@@ -41,16 +43,6 @@ To run a basic CPPN-NEAT using the absolute distance of the center of mass of xe
 
 this will save history, output, vxa, and vxd files in the directory "fitnessFiles/directory_name/" as specified.
 
-### Running Tests
-Navigate to the exploring-the-design-space-of-artificial-life file:
-
-    cd exploring-the-design-space-of-artificial-life
-
-and run the following command:
-
-    pytest
-
-This will run the tests found in the tests folder on the source code.
 
 ## Further Readings
 
