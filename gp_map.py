@@ -57,7 +57,7 @@ class Phenotype:
         self.fitness = {} # TODO Implement this
         self.complexity = complexity
         self.genotypes = genotypes
-        self.num_cppn_designers = None # TODO ENSURE THIS IS DONE FOR HYPERNEAT MODIFY ALL FUNCTIONS
+        self.num_cppn_designers = None
         self.motifs = None
 
 class Connection:
@@ -316,77 +316,6 @@ class GenotypePhenotypeMap:
                 phenotype_probabilities.append(len(self.map[phenotype]))
         
         return [x / total_genotypes for x in phenotype_probabilities]
-    
-    def calculate_fitness(self) -> None:
-        """ 
-        Calculates and assigns
-        
-        TODO: Fitness for range of applications using vxa.set_fitness_function
-        """
-        # TODO, MORE FITNESS CATEGORIES
-        #fitness_categories = ["abs_movement", ""]
-        
-        fitness_file_mapping = {}
-        
-        vxa = VXA(SimTime=3, HeapSize=0.65, RecordStepSize=100, DtFrac=0.95, EnableExpansion=1)
-        passive = vxa.add_material(RGBA=(0,255,0), E=5000000, RHO=1000000) # passive soft
-        active = vxa.add_material(RGBA=(255,0,0), CTE=0.01, E=5000000, RHO=1000000) # active
-        
-        os.system(f"rm -rf gp-fitness/") #Deletes contents of run directory if exists
-        os.system(f"mkdir -p gp-fitness") # Creates a new directory to store fitness files
-        vxa.write("base.vxa") #Write a base vxa file
-        os.system(f"cp base.vxa gp-fitness") #Copy vxa file to correct run directory
-        os.system("rm base.vxa") #Removes old vxa file
-                
-        evaluated = 0
-            
-        for phen_index, phenotype in enumerate(self.map):
-            evaluated += 1
-            fitness_file_mapping[phen_index] = phenotype
-            
-            vxd = VXD()
-            vxd.set_tags(RecordVoxel=1)
-            body = np.zeros(8*8*7)
-            
-            for cell in range(len(phenotype)):
-                if phenotype[cell] == 1:
-                    body[cell] = passive
-                elif phenotype[cell] == 2:
-                    body[cell] = active 
-            
-            #TODO CHECK IF BODY ALL 0s or 1s: NO FITNESS
-            
-            reshaped = body.reshape(8,8,7)
-            vxd.set_data(reshaped)
-            
-            vxd.write(f"id{phen_index}.vxd") #Writes vxd file for individual
-            os.system(f"cp id{phen_index}.vxd gp-fitness/")
-            os.system(f"rm id{phen_index}.vxd") #Removes the old non-copied vxd file
-            
-            if (evaluated >= 100) or (phen_index == len(self.map) - 1):
-                os.chdir("voxcraft-sim/build") # Changes directory to the voxcraft directory TODO change to be taken from settings file
-                os.system(f"./voxcraft-sim -i ../../gp-fitness -o ../../gp-fitness/output.xml -f > ../../gp-fitness/test.history")
-                os.chdir("../../") # Return to project directory
-        
-                results = read_sim_output(f"gp-fitness/output") #Reads sim results from output file
-        
-                os.system("rm -rf gp-fitness")
-                os.system(f"mkdir -p gp-fitness") # Creates a new directory to store fitness files
-                vxa.write("base.vxa") #Write a base vxa file
-                os.system(f"cp base.vxa gp-fitness") #Copy vxa file to correct run directory
-                os.system("rm base.vxa") #Removes old vxa file
-        
-                for result in results:
-                    phenotype_index = result["index"]
-            
-                    #Assign absolute moevement fitness value to phenotype
-                    for genotype in self.map[fitness_file_mapping[phenotype_index]]:
-                        genotype.phenotype.fitness["abs_movement"] = float(result["fitness"])
-                
-                evaluated = 0
-        
-        os.system("rm -rf gp-fitness")
-                                            
 
 def gen_motifs(phenotypes: list) -> set:
     """ 
@@ -683,6 +612,78 @@ def calculate_frequency_components(phenotypes: List) -> List:
         
     return vectors
 
+def calculate_fitness(phenotypes: List) -> None:
+    """ 
+    Calculates and assigns
+        
+    TODO: Fitness for range of applications using vxa.
+    """
+        
+    fitness_vals = np.zeros(len(phenotypes))
+        
+    fitness_file_mapping = {}
+        
+    vxa = VXA(SimTime=3, HeapSize=0.65, RecordStepSize=100, DtFrac=0.95, EnableExpansion=1)
+    passive = vxa.add_material(RGBA=(0,255,0), E=5000000, RHO=1000000) # passive soft
+    active = vxa.add_material(RGBA=(255,0,0), CTE=0.01, E=5000000, RHO=1000000) # active
+        
+    os.system(f"rm -rf gp-fitness/") #Deletes contents of run directory if exists
+    os.system(f"mkdir -p gp-fitness") # Creates a new directory to store fitness files
+    vxa.write("base.vxa") #Write a base vxa file
+    os.system(f"cp base.vxa gp-fitness") #Copy vxa file to correct run directory
+    os.system("rm base.vxa") #Removes old vxa file
+                
+    evaluated = 0
+            
+    for phen_index, phenotype in enumerate(phenotypes):
+        evaluated += 1
+        #fitness_file_mapping[phen_index] = phenotype
+            
+        vxd = VXD()
+        vxd.set_tags(RecordVoxel=1)
+        body = np.zeros(8*8*7)
+            
+        for cell in range(len(phenotype.phenotype)):
+            if phenotype.phenotype[cell] == 1:
+                body[cell] = passive
+            elif phenotype.phenotype[cell] == 2:
+                body[cell] = active 
+            
+        reshaped = body.reshape(8,8,7)
+        vxd.set_data(reshaped)
+            
+        vxd.write(f"id{phen_index}.vxd") #Writes vxd file for individual
+        os.system(f"cp id{phen_index}.vxd gp-fitness/")
+        os.system(f"rm id{phen_index}.vxd") #Removes the old non-copied vxd file
+            
+        if (evaluated >= 100) or (phen_index == len(phenotypes) - 1):
+            os.chdir("voxcraft-sim/build") # Changes directory to the voxcraft directory TODO change to be taken from settings file
+            os.system(f"./voxcraft-sim -i ../../gp-fitness -o ../../gp-fitness/output.xml -f > ../../gp-fitness/test.history")
+            os.chdir("../../") # Return to project directory
+        
+            results = read_sim_output(f"gp-fitness/output") #Reads sim results from output file
+        
+            os.system("rm -rf gp-fitness")
+            os.system(f"mkdir -p gp-fitness") # Creates a new directory to store fitness files
+            vxa.write("base.vxa") #Write a base vxa file
+            os.system(f"cp base.vxa gp-fitness") #Copy vxa file to correct run directory
+            os.system("rm base.vxa") #Removes old vxa file
+        
+            for result in results:
+                phenotype_index = result["index"]
+            
+                #Assign absolute movement fitness value to phenotype
+                fitness_vals[phenotype_index] = float(result["fitness"])
+                    
+                    # for genotype in phenotypes[fitness_file_mapping[phenotype_index]]:
+                    #     genotype.phenotype.fitness["abs_movement"] = float(result["fitness"])
+                
+            evaluated = 0
+    
+    os.system("rm -rf gp-fitness")
+    
+    return fitness_vals
+
 
 def save(
     obj, 
@@ -714,17 +715,20 @@ if __name__ == "__main__":
     
     #phenotypes = load("10k-phenotypes.pickle")
     
+    fitnesses = load("10k-phenotypes-fitnesses.pickle")
+    
+    print((fitnesses[102]))
+    
+    #save(fitnesses, "10k-phenotypes-fitnesses.pickle")
+    
     #print("LOADED")
     
     #components = calculate_frequency_components(phenotypes)
     
     #ave(components, "frequency-components-first-10k.pickle")
     
-    components = load("frequency-components-first-10k.pickle")
+    #components = load("frequency-components-first-10k.pickle")
     
     #gen_behaviour_clustering_data_file(components, "frequency-components.csv")
         
-    a = components[110][1]
-    print(a)
-    print(np.real(a))
 #%%
