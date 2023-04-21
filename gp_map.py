@@ -614,15 +614,12 @@ def calculate_frequency_components(phenotypes: List) -> List:
 
 def calculate_fitness(phenotypes: List) -> None:
     """ 
-    Calculates and assigns
-        
-    TODO: Fitness for range of applications using vxa.
+    Calculates and assigns fitness to each xenobot based on the 
+    centre of mass 
     """
         
     fitness_vals = np.zeros(len(phenotypes))
-        
-    fitness_file_mapping = {}
-        
+                
     vxa = VXA(SimTime=3, HeapSize=0.65, RecordStepSize=100, DtFrac=0.95, EnableExpansion=1)
     passive = vxa.add_material(RGBA=(0,255,0), E=5000000, RHO=1000000) # passive soft
     active = vxa.add_material(RGBA=(255,0,0), CTE=0.01, E=5000000, RHO=1000000) # active
@@ -715,9 +712,7 @@ if __name__ == "__main__":
     
     #phenotypes = load("10k-phenotypes.pickle")
     
-    fitnesses = load("10k-phenotypes-fitnesses.pickle")
-    
-    print((fitnesses[102]))
+    pass
     
     #save(fitnesses, "10k-phenotypes-fitnesses.pickle")
     

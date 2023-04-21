@@ -4,6 +4,7 @@ CPPNs for the designing of Xenobots.
 Based on https://github.com/ukuleleplayer/pureples/tree/master/pureples
 """
 #%%
+import sys
 import os
 import pickle
 import neat
@@ -31,8 +32,7 @@ def run(
     run_name, 
     generations = 100,
     version = "L",
-    size_params = [8,8,7], 
-    fitness_func = None
+    size_params = [8,8,7]
     ) -> None:
     """
     Function to run HyperNEAT to create and evolve xenobots
@@ -42,7 +42,6 @@ def run(
     :param generations: Number of generations 
     :param version: Describes complexity of HyperNEAT run
     :param size_params: Size parameters of xenobots being designed
-    :param fitness_func: Fitness function being used for evaluation
     """
     INPUT_COORDINATES = []
     
@@ -93,7 +92,7 @@ def run(
         "std_dev": std_dev
     }
     
-    with open("HYPERNEAT-250-FINAL.pickle", "wb") as f:
+    with open(f"{run_name}.pickle", "wb") as f:
         pickle.dump(results, f)
 
 def fitest_in_gen(scores: List) -> float:
@@ -101,12 +100,13 @@ def fitest_in_gen(scores: List) -> float:
     Gets the fittest individual in a generation
     from a list of fitnesses
     
-    :param scores:
+    :param scores: fitness scores 
     :rtype: list
-    :return: 
+    :return: greatest fitness score
     """
     return max(scores)
 
 if __name__ == "__main__":
-    run("config-hyperneat", "run_250_hyperneat_FINAL", generations=250)
+    #run("config-hyperneat", "run_250_hyperneat_FINAL", generations=250)
+    run(sys.argv[0], sys.argv[1])
     

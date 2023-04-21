@@ -4,24 +4,11 @@ using unsupervied machine learning
 """
 #%%
 from typing import Tuple
-#import umap #TODO USE THIS FOR VISUALISATION
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.cluster import AgglomerativeClustering, KMeans
+from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
-from scipy.cluster.hierarchy import dendrogram, linkage
-
-def dunn_index(
-    labels, 
-    distances
-    ) -> float:
-    """ 
-    Function to calculate the dunn index of clustering 
-    
-    """
-    #TODO Implement this
-    pass
 
 def choose_num_clusters(
     data: np.array, 
@@ -65,25 +52,5 @@ def choose_num_clusters(
     
     return optimal_num_clusters, optimal_clustering_labels, max_silouette
 
-def hierarchical_clustering(data: np.array):
-    """ 
-    
-    """
-    #TODO alter distance threshold
-    clustering = AgglomerativeClustering(n_clusters=None, distance_threshold=1.5).fit(data)
-    return clustering.labels_, clustering.n_clusters_
-
-def plot_dendrogram(data):
-    """ 
-    
-    """
-    linkage_data = linkage(data)
-    dendrogram(linkage_data)
-
-if __name__ == "__main__":
-    data = [[0., 0.], [0.1, -0.1], [1., 1.], [1.1, 1.1], [3,4], [1,2], [9,8], [10,8], [11,8]]
-    results = hierarchical_clustering(data)
-    
-    print(results[0])
 
 #%%
