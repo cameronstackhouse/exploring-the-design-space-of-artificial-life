@@ -3,7 +3,6 @@ Module containing code to visualise xenobot structures in python
 """
 # %%
 import matplotlib.pyplot as plt
-from typing import List
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np 
 

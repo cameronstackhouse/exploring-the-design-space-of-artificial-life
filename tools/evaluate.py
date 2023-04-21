@@ -6,7 +6,6 @@ by voxcraft-sim (https://github.com/voxcraft/voxcraft-sim).
 import os 
 import neat
 import numpy as np
-import tools.fitness_functions
 from typing import List
 from tools.read_files import read_sim_output
 from tools.gen_phenotype_from_genotype import genotype_to_phenotype
@@ -15,8 +14,6 @@ from pureples.es_hyperneat.es_hyperneat import ESNetwork
 #Imports an interface for writing VXA and VXD files
 from voxcraftpython.VoxcraftVXA import VXA
 from voxcraftpython.VoxcraftVXD import VXD
-
-#TODO Add input option to specify what is being tested for (Locomotion, Object Movement, Object Transport)
 
 class Run:
     """
@@ -64,8 +61,6 @@ class Run:
         #Adds both cardiac, skin cells, and non-xenobot cells to the simulation
         passive = vxa.add_material(RGBA=(0,255,0), E=5000000, RHO=1000000) # passive soft
         active = vxa.add_material(RGBA=(255,0,0), CTE=0.01, E=5000000, RHO=1000000) # active
-        fixed = vxa.add_material(RGBA=(0,0,0)) # Used for objects in environment #TODO: SET FIXED == TRUE
-        moveable = vxa.add_material(RGBA=(128,128,128), E=5000000, RHO=1000000) # Used for objects in environment which xenobots can move
     
         os.system(f"rm -rf fitnessFiles/{self.name}/{self.generation}") #Deletes contents of run directory if exists
 
@@ -99,23 +94,8 @@ class Run:
                     body[cell] = active 
         
             body = body.reshape(self.size_params[0],self.size_params[1],self.size_params[2])
-            # TODO: Add obsticles in VXD file if correct fit func
-            # TODO: Record voxel for object expulsion
-            vxd = VXD()
             
-            if self.fitness_function == tools.fitness_functions.object_expulsion:
-                object = np.zeros([8,8,7])
-                # TODO WORK OUT HOW TO TRACK MOVEMENT OF THIS OBJECT
-                object[4,4,1] = moveable
-                np.append(body, object)
-            elif self.fitness_function == tools.fitness_functions.tall_obsticle:
-                # Creates wall and adds it to xenobot structure
-                wall = np.zeros([8,8,20])
-                wall_row = 20
-                for axis_1_cell in wall[0]:
-                    for axis_2_cell in wall[1]:
-                      wall[axis_1_cell][axis_2_cell][wall_row] = fixed
-                np.append(body, wall)
+            vxd = VXD()
             
             vxd.set_tags(RecordVoxel=1) # pass vxd tags in here to overwite vxa tags
             vxd.set_data(body) #Sets the data to be written as the phenotype generated
