@@ -1,5 +1,6 @@
 """ 
-Module implementing the ability to generate genotype-phenotype maps
+Module implementing the ability to generate and analyse genotype-phenotype maps
+for the production of xenobots
 """
 # %%``
 import os
@@ -10,7 +11,7 @@ import csv
 from math import log10
 from copy import deepcopy
 from random import choice
-from typing import Tuple, List
+from typing import Tuple, List, Dict, Set
 from collections import defaultdict
 import numpy as np
 from tools.activation_functions import neg_abs, neg_square, sqrt_abs, neg_sqrt_abs
@@ -24,8 +25,6 @@ from pureples.shared.substrate import Substrate
 from pureples.es_hyperneat.es_hyperneat import ESNetwork
 import seaborn as sns
 import matplotlib.pyplot as plt
-
-# TODO:MODIFY FUNCTIONS FOR HYPERNEAT GP MAP
 
 class Genotype:
     """ 
@@ -92,7 +91,10 @@ class GenotypePhenotypeMap:
         hyperneat: bool = False
         ) -> None:
         """ 
-        Initilises a genotype-phenotype map object given 
+        Initilises a genotype-phenotype map object
+        
+        :param config_name: name of the config file for CPPN-NEAT or ES-HyperNEAT
+        :param hyperneat: boolean indicating if the GP map is for ES-HyperNEAT
         """
         self.cppn_to_gene = {} # Used for hyperneat
         self.map = {}
@@ -129,7 +131,9 @@ class GenotypePhenotypeMap:
     
     def initilise(self, num_genotypes: int) -> None:
         """ 
+        Initilises the GP map given a number of genotypes
         
+        :param num_genotypes: number of genotypes
         """
         self.gen_genotypes(num_genotypes)
         self.gen_phenotype_info()
@@ -140,10 +144,9 @@ class GenotypePhenotypeMap:
         num_genotypes: int
         ) -> None:
         """
-        Function to generate genotypes... 
-        TODO 
+        Function to generate genotypes given a number of genotypes 
         
-        :param n: size of genotypes to generate (number of nodes)
+        :param num_genotypes: size of genotypes to generate (number of nodes)
         """    
         generated_genotypes = set() # Set of generated genotypes
         mutations_applied = set() # Set of genotypes which mutations have been applied to
@@ -233,6 +236,9 @@ class GenotypePhenotypeMap:
         """
         Function to get the total number of genotypes
         and total number of phenotypes
+        
+        :rtype: Tuple(List, List)
+        :return: 2 lists, list of genotypes and list of phenotypes
         """
         genotypes = 0
         phenotypes = len(self.map.keys())
@@ -253,12 +259,11 @@ class GenotypePhenotypeMap:
         
         return (genotypes, phenotypes)
     
-    def gen_phenotype_info(self):
+    def gen_phenotype_info(self) -> None:
         """ 
         Function to generate information about phenotypes
         within the genotype_phenotype map
         """
-        #TODO ENSURE THIS WORKS WITH HYPERNEAT
         self.phenotypes = []
         for phenotype in self.map:
             pheno_string = ""
@@ -276,6 +281,9 @@ class GenotypePhenotypeMap:
         Returns a list of the most designable phenotypes,
         meaning the phenotype with the most amount of genotypes
         which map to it
+        
+        :rtype: List
+        :return: Most designable phenotypes in decending order
         """
         sorted_phenotypes = sorted(self.phenotypes, key=lambda x: x.genotypes, reverse=True)
         return sorted_phenotypes
@@ -284,6 +292,9 @@ class GenotypePhenotypeMap:
         """
         Returns a sorted list of phenotypes by their complexity,
         as calculated via the LZW algorithm
+        
+        :rtype: List
+        :return: Most complex phenotypes in decending order
         """
         sorted_phenotypes = sorted(self.phenotypes, key=lambda x: x.complexity, reverse=True)
         return sorted_phenotypes
@@ -291,6 +302,9 @@ class GenotypePhenotypeMap:
     def mean_genotype_to_phenotype_ratio(self) -> float:
         """ 
         Calculate the mean ratio of genotypes to phenotypes
+        
+        :rtype: float
+        :return: mean genotype to phenotype ratio
         """
         genotypes, phenotypes = self.num_genotypes_and_phenotypes()
         return genotypes/phenotypes
@@ -317,7 +331,7 @@ class GenotypePhenotypeMap:
         
         return [x / total_genotypes for x in phenotype_probabilities]
 
-def gen_motifs(phenotypes: list) -> set:
+def gen_motifs(phenotypes: List) -> Set:
     """ 
     Generates all 3x3x3 structural 
     motifs present in xenobots in the GP map.
@@ -325,10 +339,6 @@ def gen_motifs(phenotypes: list) -> set:
     :rtype: set
     :return: set of motifs identified in the population of xenobots
     """
-    #TODO Change to any sized motifs
-    
-    # TODO: CHANGE TO ONLY KEEPING COUNTS OF 1000+
-    
     phenotype_counts = defaultdict(int)
     motifs = set() # Set of unique motifs
     for phenotype in phenotypes:
@@ -348,16 +358,15 @@ def gen_motifs(phenotypes: list) -> set:
     return motifs
 
 def count_motifs(
-    phenotypes: list, 
-    motifs: set,
-    motif_index: dict
+    phenotypes: List, 
+    motifs: Set,
+    motif_index: Dict
     )-> None:
     """ 
-    Counts the number of 4x4x4 motifs in each phenotype 
+    Counts the number of 3x3x3 motifs in each phenotype 
     given a list of motifs.
-    
-    Only saves motifs 
             
+    :param phenotypes: list of 
     :param motifs: iterable collection of motifs to count
     """
     #TODO Change to any size sized motifs
@@ -383,6 +392,9 @@ def count_motifs(
 def gen_motif_clustering_data_file(phenotypes: List, motif_name: str) -> None:
     """ 
     Generate a CSV file containing motif information associated to each phenotype
+    
+    :param phenotypes: list of phenotypes 
+    :param motif_name: name of file containing structural motif count data
     """
     motifs = set(load(motif_name))
     print("MOTIFS LOADED")
@@ -420,9 +432,12 @@ def gen_motif_clustering_data_file(phenotypes: List, motif_name: str) -> None:
     with open("motif_data.json", "w") as outfile:
         outfile.write(json_object)
 
-def gen_behaviour_clustering_data_file(behaviour_comps: List, name: str):
+def gen_behaviour_clustering_data_file(behaviour_comps: List, name: str) -> None:
     """ 
+    Function to generate a CSV file given a list of behaviour components for each xenbot
     
+    :param behaviour_comps: behavioural components of xenobots
+    :param name: name of csv file
     """
     headers = ["X1", "X2", "X3", "X4", "Y1", "Y2", "Y3", "Y4", "Z1", "Z2", "Z3", "Z4"]
     with open(name, mode="w", newline="") as csv_file:
@@ -433,12 +448,13 @@ def gen_behaviour_clustering_data_file(behaviour_comps: List, name: str):
         for row in behaviour_comps:
             writer.writerow(row)
         
-def complexity_probability_distribution(gp_map: GenotypePhenotypeMap):
+def complexity_probability_distribution(gp_map: GenotypePhenotypeMap) -> None:
     """ 
     Function to plot the complexity-probability distribution of a population 
-    of xenobots 
+    of xenobots
+    
+    :param gp_map: Genotype-Phenotype map
     """
-    #TODO add comments
     count = []
     complexity = []
     total = 0
@@ -615,7 +631,9 @@ def calculate_frequency_components(phenotypes: List) -> List:
 def calculate_fitness(phenotypes: List) -> None:
     """ 
     Calculates and assigns fitness to each xenobot based on the 
-    centre of mass 
+    centre of mass displacement over the course of three seconds.
+    
+    :param phenotypes: list of xenobot bodies to evaluate.
     """
         
     fitness_vals = np.zeros(len(phenotypes))
