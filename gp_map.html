@@ -1,0 +1,273 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module gp_map</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>gp_map</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/cameron/dissertation/exploring-the-design-space-of-artificial-life/gp_map.py">/home/cameron/dissertation/exploring-the-design-space-of-artificial-life/gp_map.py</a></font></td></tr></table>
+    <p><tt>Module&nbsp;implementing&nbsp;the&nbsp;ability&nbsp;to&nbsp;generate&nbsp;and&nbsp;analyse&nbsp;genotype-phenotype&nbsp;maps<br>
+for&nbsp;the&nbsp;production&nbsp;of&nbsp;xenobots</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="csv.html">csv</a><br>
+<a href="json.html">json</a><br>
+</td><td width="25%" valign=top><a href="neat.html">neat</a><br>
+<a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="pickle.html">pickle</a><br>
+</td><td width="25%" valign=top><a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+<a href="seaborn.html">seaborn</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="gp_map.html#Connection">Connection</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gp_map.html#Genotype">Genotype</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gp_map.html#GenotypePhenotypeMap">GenotypePhenotypeMap</a>
+</font></dt><dt><font face="helvetica, arial"><a href="gp_map.html#Phenotype">Phenotype</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Connection">class <strong>Connection</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Connection">Connection</a>(n1:&nbsp;gp_map.<a href="#Genotype">Genotype</a>,&nbsp;n2:&nbsp;gp_map.<a href="#Genotype">Genotype</a>)&nbsp;-&amp;gt;&nbsp;None<br>
+&nbsp;<br>
+Class&nbsp;for&nbsp;a&nbsp;connection&nbsp;between&nbsp;two&nbsp;genotypes&nbsp;in&nbsp;the&nbsp;<br>
+genotype&nbsp;space&nbsp;of&nbsp;a&nbsp;GP&nbsp;map<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Connection-__init__"><strong>__init__</strong></a>(self, n1: gp_map.Genotype, n2: gp_map.Genotype) -&gt; None</dt><dd><tt>Initilises&nbsp;a&nbsp;connection&nbsp;<a href="builtins.html#object">object</a>,&nbsp;specifying&nbsp;the&nbsp;two<br>
+genotypes&nbsp;which&nbsp;are&nbsp;connected<br>
+&nbsp;<br>
+:param&nbsp;n1:&nbsp;<a href="#Genotype">Genotype</a>&nbsp;1<br>
+:param&nbsp;n2:&nbsp;<a href="#Genotype">Genotype</a>&nbsp;2</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Genotype">class <strong>Genotype</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Genotype">Genotype</a>(geneome,&nbsp;id)&nbsp;-&amp;gt;&nbsp;None<br>
+&nbsp;<br>
+Class&nbsp;to&nbsp;represent&nbsp;a&nbsp;genotype&nbsp;in&nbsp;the&nbsp;genotype&nbsp;map.<br>
+connected_to&nbsp;attribute&nbsp;essential&nbsp;for&nbsp;visualisation&nbsp;of&nbsp;<br>
+GP&nbsp;map<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Genotype-__init__"><strong>__init__</strong></a>(self, geneome, id) -&gt; None</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="GenotypePhenotypeMap">class <strong>GenotypePhenotypeMap</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#GenotypePhenotypeMap">GenotypePhenotypeMap</a>(config_name:&nbsp;str,&nbsp;hyperneat:&nbsp;bool&nbsp;=&nbsp;False)&nbsp;-&amp;gt;&nbsp;None<br>
+&nbsp;<br>
+Class&nbsp;representing&nbsp;a&nbsp;genotype-phenotype&nbsp;map&nbsp;of&nbsp;<br>
+CPPNs&nbsp;and&nbsp;the&nbsp;xenobots&nbsp;created&nbsp;by&nbsp;each<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="GenotypePhenotypeMap-__init__"><strong>__init__</strong></a>(self, config_name: str, hyperneat: bool = False) -&gt; None</dt><dd><tt>Initilises&nbsp;a&nbsp;genotype-phenotype&nbsp;map&nbsp;<a href="builtins.html#object">object</a><br>
+&nbsp;<br>
+:param&nbsp;config_name:&nbsp;name&nbsp;of&nbsp;the&nbsp;config&nbsp;file&nbsp;for&nbsp;CPPN-NEAT&nbsp;or&nbsp;ES-HyperNEAT<br>
+:param&nbsp;hyperneat:&nbsp;boolean&nbsp;indicating&nbsp;if&nbsp;the&nbsp;GP&nbsp;map&nbsp;is&nbsp;for&nbsp;ES-HyperNEAT</tt></dd></dl>
+
+<dl><dt><a name="GenotypePhenotypeMap-gen_genotypes"><strong>gen_genotypes</strong></a>(self, num_genotypes: int) -&gt; None</dt><dd><tt>Function&nbsp;to&nbsp;generate&nbsp;genotypes&nbsp;given&nbsp;a&nbsp;number&nbsp;of&nbsp;genotypes&nbsp;<br>
+&nbsp;<br>
+:param&nbsp;num_genotypes:&nbsp;size&nbsp;of&nbsp;genotypes&nbsp;to&nbsp;generate&nbsp;(number&nbsp;of&nbsp;nodes)</tt></dd></dl>
+
+<dl><dt><a name="GenotypePhenotypeMap-gen_phenotype_info"><strong>gen_phenotype_info</strong></a>(self) -&gt; None</dt><dd><tt>Function&nbsp;to&nbsp;generate&nbsp;information&nbsp;about&nbsp;phenotypes<br>
+within&nbsp;the&nbsp;genotype_phenotype&nbsp;map</tt></dd></dl>
+
+<dl><dt><a name="GenotypePhenotypeMap-initilise"><strong>initilise</strong></a>(self, num_genotypes: int) -&gt; None</dt><dd><tt>Initilises&nbsp;the&nbsp;GP&nbsp;map&nbsp;given&nbsp;a&nbsp;number&nbsp;of&nbsp;genotypes<br>
+&nbsp;<br>
+:param&nbsp;num_genotypes:&nbsp;number&nbsp;of&nbsp;genotypes</tt></dd></dl>
+
+<dl><dt><a name="GenotypePhenotypeMap-mean_genotype_to_phenotype_ratio"><strong>mean_genotype_to_phenotype_ratio</strong></a>(self) -&gt; float</dt><dd><tt>Calculate&nbsp;the&nbsp;mean&nbsp;ratio&nbsp;of&nbsp;genotypes&nbsp;to&nbsp;phenotypes<br>
+&nbsp;<br>
+:rtype:&nbsp;float<br>
+:return:&nbsp;mean&nbsp;genotype&nbsp;to&nbsp;phenotype&nbsp;ratio</tt></dd></dl>
+
+<dl><dt><a name="GenotypePhenotypeMap-most_complex"><strong>most_complex</strong></a>(self) -&gt; List</dt><dd><tt>Returns&nbsp;a&nbsp;sorted&nbsp;list&nbsp;of&nbsp;phenotypes&nbsp;by&nbsp;their&nbsp;complexity,<br>
+as&nbsp;calculated&nbsp;via&nbsp;the&nbsp;LZW&nbsp;algorithm<br>
+&nbsp;<br>
+:rtype:&nbsp;List<br>
+:return:&nbsp;Most&nbsp;complex&nbsp;phenotypes&nbsp;in&nbsp;decending&nbsp;order</tt></dd></dl>
+
+<dl><dt><a name="GenotypePhenotypeMap-most_designable"><strong>most_designable</strong></a>(self) -&gt; List</dt><dd><tt>Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;most&nbsp;designable&nbsp;phenotypes,<br>
+meaning&nbsp;the&nbsp;phenotype&nbsp;with&nbsp;the&nbsp;most&nbsp;amount&nbsp;of&nbsp;genotypes<br>
+which&nbsp;map&nbsp;to&nbsp;it<br>
+&nbsp;<br>
+:rtype:&nbsp;List<br>
+:return:&nbsp;Most&nbsp;designable&nbsp;phenotypes&nbsp;in&nbsp;decending&nbsp;order</tt></dd></dl>
+
+<dl><dt><a name="GenotypePhenotypeMap-num_genotypes_and_phenotypes"><strong>num_genotypes_and_phenotypes</strong></a>(self) -&gt; Tuple</dt><dd><tt>Function&nbsp;to&nbsp;get&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;genotypes<br>
+and&nbsp;total&nbsp;number&nbsp;of&nbsp;phenotypes<br>
+&nbsp;<br>
+:rtype:&nbsp;Tuple(List,&nbsp;List)<br>
+:return:&nbsp;2&nbsp;lists,&nbsp;list&nbsp;of&nbsp;genotypes&nbsp;and&nbsp;list&nbsp;of&nbsp;phenotypes</tt></dd></dl>
+
+<dl><dt><a name="GenotypePhenotypeMap-probability_of_phenotypes"><strong>probability_of_phenotypes</strong></a>(self) -&gt; List</dt><dd><tt>Function&nbsp;to&nbsp;calculate&nbsp;the&nbsp;probability&nbsp;of&nbsp;encountering&nbsp;each&nbsp;phenotype.<br>
+This&nbsp;identifies&nbsp;if&nbsp;the&nbsp;evolutionary&nbsp;system&nbsp;has&nbsp;a&nbsp;bias&nbsp;in&nbsp;producing<br>
+a&nbsp;given&nbsp;phenotype&nbsp;output.<br>
+&nbsp;<br>
+:rtype:&nbsp;List<br>
+:return:&nbsp;List&nbsp;of&nbsp;probabilities&nbsp;of&nbsp;encountering&nbsp;each&nbsp;phenotype&nbsp;in&nbsp;the&nbsp;system</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>id_counter</strong> = 0</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Phenotype">class <strong>Phenotype</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Phenotype">Phenotype</a>(phenotype,&nbsp;complexity,&nbsp;genotypes)&nbsp;-&amp;gt;&nbsp;None<br>
+&nbsp;<br>
+Class&nbsp;to&nbsp;represent&nbsp;a&nbsp;phenotype&nbsp;in&nbsp;the&nbsp;genotype-phenotype&nbsp;map<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Phenotype-__init__"><strong>__init__</strong></a>(self, phenotype, complexity, genotypes) -&gt; None</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-calculate_fitness"><strong>calculate_fitness</strong></a>(phenotypes: List) -&gt; None</dt><dd><tt>Calculates&nbsp;and&nbsp;assigns&nbsp;fitness&nbsp;to&nbsp;each&nbsp;xenobot&nbsp;based&nbsp;on&nbsp;the&nbsp;<br>
+centre&nbsp;of&nbsp;mass&nbsp;displacement&nbsp;over&nbsp;the&nbsp;course&nbsp;of&nbsp;three&nbsp;seconds.<br>
+&nbsp;<br>
+:param&nbsp;phenotypes:&nbsp;list&nbsp;of&nbsp;xenobot&nbsp;bodies&nbsp;to&nbsp;evaluate.</tt></dd></dl>
+ <dl><dt><a name="-calculate_frequency_components"><strong>calculate_frequency_components</strong></a>(phenotypes: List) -&gt; List</dt><dd><tt>Function&nbsp;to&nbsp;calculate&nbsp;the&nbsp;frequency&nbsp;components&nbsp;of&nbsp;the&nbsp;<br>
+movement&nbsp;of&nbsp;a&nbsp;list&nbsp;of&nbsp;xenobots.<br>
+&nbsp;<br>
+:param&nbsp;phenotypes:&nbsp;List&nbsp;of&nbsp;xenobot&nbsp;phenotypes<br>
+:rtype:&nbsp;List<br>
+:return:&nbsp;List&nbsp;of&nbsp;frequency&nbsp;components&nbsp;for&nbsp;each&nbsp;phenotype</tt></dd></dl>
+ <dl><dt><a name="-complexity_probability_distribution"><strong>complexity_probability_distribution</strong></a>(gp_map: gp_map.GenotypePhenotypeMap) -&gt; None</dt><dd><tt>Function&nbsp;to&nbsp;plot&nbsp;the&nbsp;complexity-probability&nbsp;distribution&nbsp;of&nbsp;a&nbsp;population&nbsp;<br>
+of&nbsp;xenobots<br>
+&nbsp;<br>
+:param&nbsp;gp_map:&nbsp;<a href="#Genotype">Genotype</a>-<a href="#Phenotype">Phenotype</a>&nbsp;map</tt></dd></dl>
+ <dl><dt><a name="-count_motifs"><strong>count_motifs</strong></a>(phenotypes: List, motifs: Set, motif_index: Dict) -&gt; None</dt><dd><tt>Counts&nbsp;the&nbsp;number&nbsp;of&nbsp;3x3x3&nbsp;motifs&nbsp;in&nbsp;each&nbsp;phenotype&nbsp;<br>
+given&nbsp;a&nbsp;list&nbsp;of&nbsp;motifs.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+:param&nbsp;phenotypes:&nbsp;list&nbsp;of&nbsp;<br>
+:param&nbsp;motifs:&nbsp;iterable&nbsp;collection&nbsp;of&nbsp;motifs&nbsp;to&nbsp;count</tt></dd></dl>
+ <dl><dt><a name="-gen_behaviour_clustering_data_file"><strong>gen_behaviour_clustering_data_file</strong></a>(behaviour_comps: List, name: str) -&gt; None</dt><dd><tt>Function&nbsp;to&nbsp;generate&nbsp;a&nbsp;CSV&nbsp;file&nbsp;given&nbsp;a&nbsp;list&nbsp;of&nbsp;behaviour&nbsp;components&nbsp;for&nbsp;each&nbsp;xenbot<br>
+&nbsp;<br>
+:param&nbsp;behaviour_comps:&nbsp;behavioural&nbsp;components&nbsp;of&nbsp;xenobots<br>
+:param&nbsp;name:&nbsp;name&nbsp;of&nbsp;csv&nbsp;file</tt></dd></dl>
+ <dl><dt><a name="-gen_motif_clustering_data_file"><strong>gen_motif_clustering_data_file</strong></a>(phenotypes: List, motif_name: str) -&gt; None</dt><dd><tt>Generate&nbsp;a&nbsp;CSV&nbsp;file&nbsp;containing&nbsp;motif&nbsp;information&nbsp;associated&nbsp;to&nbsp;each&nbsp;phenotype<br>
+&nbsp;<br>
+:param&nbsp;phenotypes:&nbsp;list&nbsp;of&nbsp;phenotypes&nbsp;<br>
+:param&nbsp;motif_name:&nbsp;name&nbsp;of&nbsp;file&nbsp;containing&nbsp;structural&nbsp;motif&nbsp;count&nbsp;data</tt></dd></dl>
+ <dl><dt><a name="-gen_motifs"><strong>gen_motifs</strong></a>(phenotypes: List) -&gt; Set</dt><dd><tt>Generates&nbsp;all&nbsp;3x3x3&nbsp;structural&nbsp;<br>
+motifs&nbsp;present&nbsp;in&nbsp;xenobots&nbsp;in&nbsp;the&nbsp;GP&nbsp;map.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+:rtype:&nbsp;set<br>
+:return:&nbsp;set&nbsp;of&nbsp;motifs&nbsp;identified&nbsp;in&nbsp;the&nbsp;population&nbsp;of&nbsp;xenobots</tt></dd></dl>
+ <dl><dt><a name="-genotype_evolvability"><strong>genotype_evolvability</strong></a>(gp_map: gp_map.GenotypePhenotypeMap) -&gt; float</dt><dd><tt>taken&nbsp;from&nbsp;https://royalsocietypublishing.org/doi/pdf/10.1098/rspb.2007.1137.&nbsp;<br>
+Number&nbsp;of&nbsp;different&nbsp;phenotypes&nbsp;in&nbsp;the&nbsp;1&nbsp;mutation&nbsp;neighbourhood&nbsp;of&nbsp;a&nbsp;genotype<br>
+&nbsp;<br>
+:param&nbsp;gp_map:&nbsp;genotype-phenotype&nbsp;map<br>
+:rtype:&nbsp;float<br>
+:return:&nbsp;genotypic&nbsp;evolvability</tt></dd></dl>
+ <dl><dt><a name="-load"><strong>load</strong></a>(filename: str) -&gt; None</dt><dd><tt>Method&nbsp;to&nbsp;load&nbsp;a&nbsp;gentype-phenotype&nbsp;map<br>
+&nbsp;<br>
+:param&nbsp;filename:&nbsp;name&nbsp;of&nbsp;the&nbsp;file&nbsp;from&nbsp;which&nbsp;to&nbsp;load&nbsp;gp&nbsp;map</tt></dd></dl>
+ <dl><dt><a name="-log10"><strong>log10</strong></a>(x, /)</dt><dd><tt>Return&nbsp;the&nbsp;base&nbsp;10&nbsp;logarithm&nbsp;of&nbsp;x.</tt></dd></dl>
+ <dl><dt><a name="-phenotype_evolvability"><strong>phenotype_evolvability</strong></a>(gp_map: gp_map.GenotypePhenotypeMap) -&gt; float</dt><dd><tt>Calculates&nbsp;the&nbsp;phenotypic&nbsp;evolvability,&nbsp;defined&nbsp;as&nbsp;the&nbsp;average&nbsp;<br>
+number&nbsp;of&nbsp;phenotypes&nbsp;reachable&nbsp;from&nbsp;every&nbsp;phenotype<br>
+&nbsp;<br>
+:param&nbsp;gp_map:&nbsp;genotype-phenotype&nbsp;map<br>
+:rtype:&nbsp;float<br>
+:return:&nbsp;mean&nbsp;phenotypic&nbsp;evolvability</tt></dd></dl>
+ <dl><dt><a name="-phenotypic_robustness"><strong>phenotypic_robustness</strong></a>(gp_map: gp_map.GenotypePhenotypeMap) -&gt; float</dt><dd><tt>Average&nbsp;of&nbsp;genotypic&nbsp;robustness&nbsp;over&nbsp;genotypes&nbsp;that&nbsp;match&nbsp;to&nbsp;that&nbsp;phenotype<br>
+&nbsp;<br>
+:param&nbsp;gp_map:&nbsp;genotype-phenotype&nbsp;map<br>
+:rtype:&nbsp;float<br>
+:return:&nbsp;phenotypic&nbsp;robustness</tt></dd></dl>
+ <dl><dt><a name="-robustness"><strong>robustness</strong></a>(gp_map: gp_map.GenotypePhenotypeMap) -&gt; float</dt><dd><tt>Calculates&nbsp;the&nbsp;mean&nbsp;genotypic&nbsp;robustness&nbsp;of&nbsp;a&nbsp;genotype-phenotype&nbsp;mapping,<br>
+meaning&nbsp;the&nbsp;mean&nbsp;number&nbsp;of&nbsp;genotype&nbsp;mutations&nbsp;which&nbsp;do&nbsp;not&nbsp;<br>
+alter&nbsp;the&nbsp;resulting&nbsp;phenotype&nbsp;structure.<br>
+&nbsp;<br>
+:param&nbsp;gp_map:&nbsp;genotype-phenotype&nbsp;map<br>
+:rtype:&nbsp;float<br>
+:return:&nbsp;genotypic&nbsp;robustness</tt></dd></dl>
+ <dl><dt><a name="-save"><strong>save</strong></a>(obj, filename: str) -&gt; None</dt><dd><tt>Method&nbsp;to&nbsp;pickle&nbsp;a&nbsp;genotype-phenotype&nbsp;map<br>
+&nbsp;<br>
+:param&nbsp;filename:&nbsp;name&nbsp;of&nbsp;the&nbsp;file&nbsp;to&nbsp;save&nbsp;<a href="builtins.html#object">object</a>&nbsp;to</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>Dict</strong> = typing.Dict<br>
+<strong>List</strong> = typing.List<br>
+<strong>Set</strong> = typing.Set<br>
+<strong>Tuple</strong> = typing.Tuple</td></tr></table>
+</body></html>
