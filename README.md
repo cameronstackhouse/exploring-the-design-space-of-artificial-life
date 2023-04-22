@@ -57,6 +57,7 @@ gp_map.py.
 
 To create a genotype-phenotype map, initilise a GenotypePhenotypeMap object.
 The methods available for genotype-phenotype map analysis contained in the module gp_map.py are described in the gp_map.html documentation file.
+Methods for generating and counting structural motifs, alongside the extraction of xenobot movement path frequency components are contained within this module.
 
 ### results.ipynb
 
