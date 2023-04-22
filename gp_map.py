@@ -137,7 +137,6 @@ class GenotypePhenotypeMap:
         """
         self.gen_genotypes(num_genotypes)
         self.gen_phenotype_info()
-        #self.calculate_fitness()
         
     def gen_genotypes(
         self, 
@@ -262,7 +261,7 @@ class GenotypePhenotypeMap:
     def gen_phenotype_info(self) -> None:
         """ 
         Function to generate information about phenotypes
-        within the genotype_phenotype map
+        within the genotype_phenotype map 
         """
         self.phenotypes = []
         for phenotype in self.map:
@@ -479,7 +478,6 @@ def robustness(gp_map: GenotypePhenotypeMap) -> float:
     :return: genotypic robustness
     """
     
-    # Gets genotype connections
     connections = defaultdict(list)
     
     for connection in gp_map.connections:
@@ -489,8 +487,8 @@ def robustness(gp_map: GenotypePhenotypeMap) -> float:
     counter = 0
     total = 0
     for phenotype in gp_map.map:
+        # Inner loop to calculate the ratio of genotype mutations which leave the phenotype unchanged
         for genotype in gp_map.map[phenotype]:
-            
             if len(connections[genotype]) > 1:
                 counter += 1
                 matching_phenotype = 0
@@ -501,6 +499,7 @@ def robustness(gp_map: GenotypePhenotypeMap) -> float:
                 
                 total += (matching_phenotype/num_neighbours)
     
+    # Mean of the total ratio
     return total / counter
 
 def phenotypic_robustness(gp_map: GenotypePhenotypeMap) -> float:
@@ -728,20 +727,25 @@ if __name__ == "__main__":
     #gp = load("genotype-phenotype_maps/CPPN-NEAT-GP-MAP-1-MIL.pickle")
     #gp = load("genotype-phenotype_maps/ES-HYPERNEAT-GP-MAP-1000000")
     
-    #phenotypes = load("10k-phenotypes.pickle")
+    # Creation of GP map
+    demo_map = GenotypePhenotypeMap("config-gpmap")
+    demo_map.initilise(1000)
     
-    pass
+    hyperneat_demo_map = GenotypePhenotypeMap("config-hyperneat-gpmap", hyperneat=True)
     
-    #save(fitnesses, "10k-phenotypes-fitnesses.pickle")
+    # Robustness and evolvability
+    phenotypic_robustness = phenotypic_robustness(demo_map)
+    genotypic_robustness = robustness(demo_map)
+    genotypic_evolvability = genotype_evolvability(demo_map)
+    phenotypic_evolvability = phenotype_evolvability(demo_map)
     
-    #print("LOADED")
     
-    #components = calculate_frequency_components(phenotypes)
+    print(f"Phenotypic robustness: {phenotypic_robustness}\nGenotypic robustness: {genotypic_robustness}\nPhenotypic Evolvability: {phenotypic_evolvability}\nGenotypic Evolvability: {genotypic_evolvability}")
     
-    #ave(components, "frequency-components-first-10k.pickle")
     
-    #components = load("frequency-components-first-10k.pickle")
+    motifs = gen_motifs(demo_map.phenotypes)
+    frequency_components = calculate_frequency_components(demo_map.phenotypes)
     
-    #gen_behaviour_clustering_data_file(components, "frequency-components.csv")
-        
+    print(motifs)
+    complexity_probability_distribution(demo_map)
 #%%
